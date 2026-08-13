@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OverTheWire Bandit — Level 0 to Level 1 | SSSWriteups</title>
+<link rel="stylesheet" href="../../../style.css">
+</head>
+
+<body>
+
+<header class="hero page-header">
+<nav class="nav container">
+
+<a class="logo" href="../../../index.html">
+    SSS<span>Writeups</span>
+</a>
+
+<div class="nav-links">
+    <a href="../../../index.html">Home</a>
+    <a href="../../../categories/overthewire.html">OverTheWire</a>
+    <a href="index.html">Bandit</a>
+</div>
+
+</nav>
+</header>
+
+
+<main class="writeup-page section container">
+
+<article class="writeup-content">
+
+<p class="eyebrow">
+    OVER THE WIRE • BANDIT
+</p>
+
+<h1>OverTheWire Bandit — Level 0 to Level 1</h1>
+
+
+<h2>Introduction</h2>
+
+<p>
+Bandit Level 0 se Level 1 challenge mein humein SSH ke through
+<code>bandit0</code> user ke account par login karna hai. Login karne
+ke baad home directory mein present <code>readme</code> file ko read
+karna hai.
+</p>
+
+<p>
+<code>readme</code> file ke andar next level, yani <code>bandit1</code>,
+ka password stored hai. Password milne ke baad us password ka use
+karke <code>bandit1</code> user ke through new SSH session start
+karna hota hai.
+</p>
+
+<p>
+Official challenge ka objective bhi yehi hai:
+<code>readme</code> file se password read karke
+<code>bandit1</code> mein login karna.
+</p>
+
+
+<h2>Objective</h2>
+
+<p>Is level mein humein:</p>
+
+<ol>
+    <li><code>bandit0</code> user se SSH ke through login karna hai.</li>
+    <li>Home directory ki files dekhni hain.</li>
+    <li><code>readme</code> file identify karni hai.</li>
+    <li><code>cat</code> command se file read karni hai.</li>
+    <li>File ke andar stored password copy karna hai.</li>
+    <li>
+        <code>bandit1</code> username aur found password se
+        next level par login karna hai.
+    </li>
+</ol>
+
+
+<h2>Given Credentials</h2>
+
+<p>Level 0 par login karne ke liye:</p>
+
+<pre><code class="language-text">Host:     bandit.labs.overthewire.org
+Port:     2220
+Username: bandit0
+Password: bandit0</code></pre>
+
+<blockquote>
+<strong>Important:</strong>
+Username <code>bandit0</code> mein last character zero
+<code>0</code> hai, letter <code>o</code> nahi.
+Kabhi-kabhi terminal font ki wajah se
+<code>bandit0</code> aur <code>bandito</code> similar dikh sakte hain.
+</blockquote>
+
+<p>Next level ke liye:</p>
+
+<pre><code class="language-text">Next Username: bandit1
+Password:      readme file se mila hua password</code></pre>
+
+
+<h2>Important Concepts</h2>
+
+<p>Is level mein hum ye concepts seekhenge:</p>
+
+<ul>
+    <li>SSH</li>
+    <li>Remote server</li>
+    <li>Hostname</li>
+    <li>Port</li>
+    <li>Username</li>
+    <li>Password</li>
+    <li>Authentication</li>
+    <li>Terminal</li>
+    <li>Shell</li>
+    <li>Linux home directory</li>
+    <li>Current working directory</li>
+    <li>Files and directories</li>
+    <li><code>ls</code> command</li>
+    <li><code>cat</code> command</li>
+    <li>Password discovery</li>
+    <li>Next-level login</li>
+    <li>SSH session exit</li>
+</ul>
+
+
+<h1>SSH Basics</h1>
+
+
+<h2>SSH Kya Hota Hai?</h2>
+
+<p>
+SSH ka full form <strong>Secure Shell</strong> hai.
+SSH ka use kisi remote computer ya server par securely
+login karne ke liye hota hai.
+</p>
+
+<p>SSH ke through hum:</p>
+
+<ul>
+    <li>Remote server par login kar sakte hain.</li>
+    <li>Remote commands execute kar sakte hain.</li>
+    <li>Files access kar sakte hain.</li>
+    <li>Server ko terminal se manage kar sakte hain.</li>
+</ul>
+
+<p>SSH command ka general format:</p>
+
+<pre><code class="language-bash">ssh username@hostname -p port</code></pre>
+
+<p>Bandit Level 0 ke liye command:</p>
+
+<pre><code class="language-bash">ssh bandit0@bandit.labs.overthewire.org -p 2220</code></pre>
+
+
+<h2>SSH Command Ko Samajhna</h2>
+
+<pre><code class="language-bash">ssh bandit0@bandit.labs.overthewire.org -p 2220</code></pre>
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+<tr>
+    <th>Part</th>
+    <th>Meaning</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+    <td><code>ssh</code></td>
+    <td>SSH client start karta hai</td>
+</tr>
+
+<tr>
+    <td><code>bandit0</code></td>
+    <td>Remote server ka username</td>
+</tr>
+
+<tr>
+    <td><code>@</code></td>
+    <td>Username aur hostname ko separate karta hai</td>
+</tr>
+
+<tr>
+    <td><code>bandit.labs.overthewire.org</code></td>
+    <td>Bandit server ka hostname</td>
+</tr>
+
+<tr>
+    <td><code>-p</code></td>
+    <td>Custom port specify karta hai</td>
+</tr>
+
+<tr>
+    <td><code>2220</code></td>
+    <td>Bandit SSH service ka port</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+
+<p>
+Normally SSH port <code>22</code> par run karta hai, lekin
+OverTheWire Bandit port <code>2220</code> use karta hai.
+Isliye command mein <code>-p 2220</code> likhna zaroori hai.
+</p>
+
+
+<h2>Hostname Aur Port</h2>
+
+<p>
+<code>bandit.labs.overthewire.org</code> server ka hostname hai.
+Hostname human-readable naam hota hai jise computer DNS ke
+through IP address mein convert karta hai.
+</p>
+
+<p>
+<code>2220</code> port number hai. Port ek specific network service
+tak pahunchne ka endpoint hota hai.
+</p>
+
+<p>Complete destination:</p>
+
+<pre><code class="language-text">bandit.labs.overthewire.org:2220</code></pre>
+
+
+<h2>Username Aur Password</h2>
+
+<p>
+Username batata hai ki hum kis account se login karna chahte hain:
+</p>
+
+<pre><code class="language-text">bandit0</code></pre>
+
+<p>
+Password prove karta hai ki humein is account ko access karne ki
+permission hai:
+</p>
+
+<pre><code class="language-text">bandit0</code></pre>
+
+<p>
+Username aur password milkar authentication process ka part bante hain.
+</p>
+
+
+<h2>Authentication Kya Hota Hai?</h2>
+
+<p>
+Authentication ka matlab hota hai identity verify karna.
+</p>
+
+<p>Server check karta hai:</p>
+
+<pre><code class="language-text">Username: bandit0
+Password: bandit0</code></pre>
+
+<p>
+Agar details correct hoti hain, to server login allow kar deta hai.
+</p>
+
+<p>
+Authentication aur authorization different concepts hain:
+</p>
+
+<ul>
+    <li><strong>Authentication:</strong> Aap kaun ho?</li>
+    <li><strong>Authorization:</strong> Aap login ke baad kya kar sakte ho?</li>
+</ul>
+
+
+<h1>Linux Terminal Basics</h1>
+
+
+<h2>Terminal Kya Hota Hai?</h2>
+
+<p>
+Terminal ek program hai jisme hum commands type karke computer
+ke saath interact karte hain.
+</p>
+
+<p>Aap in tools ka use kar sakte ho:</p>
+
+<ul>
+    <li>Linux Terminal</li>
+    <li>macOS Terminal</li>
+    <li>Windows PowerShell</li>
+    <li>Windows Terminal</li>
+    <li>WSL Terminal</li>
+    <li>Kali Linux Terminal</li>
+</ul>
+
+
+<h2>Shell Kya Hota Hai?</h2>
+
+<p>
+Shell ek command interpreter hota hai. Ye aapki typed commands ko
+read karke execute karta hai.
+</p>
+
+<p>Simple difference:</p>
+
+<pre><code class="language-text">Terminal = Jahan commands type ki jaati hain
+Shell    = Jo commands ko interpret karke execute karta hai</code></pre>
+
+<p>
+SSH ke baad humein Bandit server par remote Linux shell milti hai.
+</p>
+
+
+<h2>Prompt Ko Samajhna</h2>
+
+<p>
+Login ke baad prompt kuch is tarah dikh sakta hai:
+</p>
+
+<pre><code class="language-text">bandit0@bandit:~$</code></pre>
+
+<p>Prompt ke parts:</p>
+
+<pre><code class="language-text">bandit0  → Current username
+@        → Username aur machine name separator
+bandit   → Remote machine ka hostname
+:~       → Current user ki home directory
+$        → Normal user shell prompt</code></pre>
+
+
+<h2><code>bandit0</code> Aur <code>bandito</code> Mein Difference</h2>
+
+<p>Correct username hai:</p>
+
+<pre><code class="language-text">bandit0</code></pre>
+
+<p>
+Yahan last character number zero <code>0</code> hai.
+</p>
+
+<p>Ye incorrect username hai:</p>
+
+<pre><code class="language-text">bandito</code></pre>
+
+<p>
+Yahan last character lowercase letter <code>o</code> hai.
+</p>
+
+<p>Correct SSH command:</p>
+
+<pre><code class="language-bash">ssh bandit0@bandit.labs.overthewire.org -p 2220</code></pre>
+
+<p>
+Agar aap <code>bandito</code> type karoge, to SSH wrong user ke
+account mein login karne ki try karega aur authentication fail
+ho sakti hai.
+</p>
+
+
+<h1>Linux File System Basics</h1>
+
+
+<h2>File Kya Hoti Hai?</h2>
+
+<p>
+File ek container hoti hai jisme information store hoti hai.
+</p>
+
+<p>Examples:</p>
+
+<pre><code class="language-text">readme
+password.txt
+notes.md
+config.conf</code></pre>
+
+<p>
+Is level mein password <code>readme</code> naam ki file ke andar stored hai.
+</p>
+
+
+<h2>Directory Kya Hoti Hai?</h2>
+
+<p>
+Directory ko commonly folder bhi kaha jata hai.
+Directory ke andar files aur doosri directories store hoti hain.
+</p>
+
+<p>Example:</p>
+
+<pre><code class="language-text">/home
+└── bandit0
+    └── readme</code></pre>
+
+<p>Yahan:</p>
+
+<ul>
+    <li><code>/home</code> ek directory hai.</li>
+    <li><code>/home/bandit0</code> user ki home directory hai.</li>
+    <li><code>readme</code> ek file hai.</li>
+</ul>
+
+
+<h2>Home Directory Kya Hoti Hai?</h2>
+
+<p>
+Har Linux user ki ek personal home directory hoti hai.
+</p>
+
+<p>
+<code>bandit0</code> user ki home directory generally hoti hai:
+</p>
+
+<pre><code class="language-text">/home/bandit0</code></pre>
+
+<p>
+SSH login ke baad user normally apni home directory se start karta hai.
+Prompt mein <code>~</code> current user ki home directory ko represent karta hai.
+</p>
+
+<p>Example:</p>
+
+<pre><code class="language-text">bandit0@bandit:~$</code></pre>
+
+
+<h2>Current Working Directory</h2>
+
+<p>
+Current working directory woh directory hoti hai jahan aap is waqt kaam kar rahe ho.
+</p>
+
+<p>Current directory check karne ke liye:</p>
+
+<pre><code class="language-bash">pwd</code></pre>
+
+<p>Expected output:</p>
+
+<pre><code class="language-text">/home/bandit0</code></pre>
+
+
+<h1>Linux Commands</h1>
+
+
+<h2><code>whoami</code> Command</h2>
+
+<p>
+<code>whoami</code> command current logged-in username display karti hai.
+</p>
+
+<pre><code class="language-bash">whoami</code></pre>
+
+<p>Expected output:</p>
+
+<pre><code class="language-text">bandit0</code></pre>
+
+<p>
+Agar output <code>bandit0</code> hai, to aap correct user ke account mein login ho.
+</p>
+
+
+<h2><code>pwd</code> Command</h2>
+
+<p>
+<code>pwd</code> ka full form <strong>Print Working Directory</strong> hai.
+</p>
+
+<pre><code class="language-bash">pwd</code></pre>
+
+<p>Expected output:</p>
+
+<pre><code class="language-text">/home/bandit0</code></pre>
+
+<p>
+Ye confirm karta hai ki aap <code>bandit0</code> ki home directory mein ho.
+</p>
+
+
+<h2><code>ls</code> Command</h2>
+
+<p>
+<code>ls</code> command current directory ke andar available files
+aur directories ki list display karti hai.
+</p>
+
+<pre><code class="language-bash">ls</code></pre>
+
+<p>Expected output:</p>
+
+<pre><code class="language-text">readme</code></pre>
+
+<p>
+Is output ka matlab hai ki current directory mein
+<code>readme</code> naam ki file available hai.
+</p>
+
+
+<h3>Detailed List</h3>
+
+<pre><code class="language-bash">ls -l</code></pre>
+
+<p>
+Ye file permissions, owner, group, size aur modification time
+ki information show karta hai.
+</p>
+
+
+<h3>Hidden Files</h3>
+
+<pre><code class="language-bash">ls -a</code></pre>
+
+<p>
+Ye hidden files bhi display karta hai.
+</p>
+
+<p>
+Level 0 se Level 1 ke liye simple command enough hai:
+</p>
+
+<pre><code class="language-bash">ls</code></pre>
+
+
+<h2><code>cat</code> Command</h2>
+
+<p>
+<code>cat</code> command file ka content terminal par display karti hai.
+</p>
+
+<p>Basic format:</p>
+
+<pre><code class="language-bash">cat filename</code></pre>
+
+<p>
+<code>readme</code> file read karne ke liye:
+</p>
+
+<pre><code class="language-bash">cat readme</code></pre>
+
+<p>
+Is command ke baad file ke andar stored password terminal par print hoga.
+</p>
+
+<p>
+<code>cat</code> command ka naam <strong>concatenate</strong> se aaya hai.
+Single file ka content display karne ke liye bhi iska commonly use hota hai.
+</p>
+
+
+<h2><code>exit</code> Command</h2>
+
+<p>
+<code>exit</code> command current shell ya SSH session close karti hai.
+</p>
+
+<pre><code class="language-bash">exit</code></pre>
+
+<p>
+Iske baad remote server se logout ho jayega aur aap local terminal par wapas aa jaoge.
+</p>
+
+<p>Alternative:</p>
+
+<pre><code class="language-text">Ctrl + D</code></pre>
+
+
+<h1>Complete Walkthrough</h1>
+
+
+<h2>Step 1: Terminal Open Karein</h2>
+
+<p>
+Apne operating system ka terminal open karein.
+</p>
+
+
+<h2>Step 2: <code>bandit0</code> Par Login Karein</h2>
+
+<pre><code class="language-bash">ssh bandit0@bandit.labs.overthewire.org -p 2220</code></pre>
+
+<p>Password enter karein:</p>
+
+<pre><code class="language-text">bandit0</code></pre>
+
+<p>
+Pehli baar connection par SSH host verification ke liye pooch sakta hai:
+</p>
+
+<pre><code class="language-text">Are you sure you want to continue connecting (yes/no/[fingerprint])?</code></pre>
+
+<p>Type karein:</p>
+
+<pre><code class="language-text">yes</code></pre>
+
+<p>
+Password type karte waqt screen par characters ya asterisks display nahi honge.
+Ye normal behavior hai.
+</p>
+
+
+<h2>Step 3: Current User Check Karein</h2>
+
+<pre><code class="language-bash">whoami</code></pre>
+
+<p>Output:</p>
+
+<pre><code class="language-text">bandit0</code></pre>
+
+
+<h2>Step 4: Current Directory Check Karein</h2>
+
+<pre><code class="language-bash">pwd</code></pre>
+
+<p>Output:</p>
+
+<pre><code class="language-text">/home/bandit0</code></pre>
+
+
+<h2>Step 5: Files Ki List Dekhein</h2>
+
+<pre><code class="language-bash">ls</code></pre>
+
+<p>Output:</p>
+
+<pre><code class="language-text">readme</code></pre>
+
+
+<h2>Step 6: <code>readme</code> File Read Karein</h2>
+
+<pre><code class="language-bash">cat readme</code></pre>
+
+<p>Output:</p>
+
+<pre><code class="language-text">NH2SXQwcBdpmTEzi3bvBHMM9H66vVXjL</code></pre>
+
+<p>
+Yahi <code>bandit1</code> user ka password hai.
+</p>
+
+
+<h2>Step 7: Password Save Ya Copy Karein</h2>
+
+<p>Found password:</p>
+
+<pre><code class="language-text">NH2SXQwcBdpmTEzi3bvBHMM9H66vVXjL</code></pre>
+
+<p>Password copy karte waqt dhyan rakhein:</p>
+
+<ul>
+    <li>Start mein extra space na ho.</li>
+    <li>End mein extra space na ho.</li>
+    <li>Uppercase aur lowercase characters same rahen.</li>
+    <li>Similar characters carefully check karein.</li>
+</ul>
+
+
+<h2>Step 8: Current SSH Session Se Exit Karein</h2>
+
+<pre><code class="language-bash">exit</code></pre>
+
+<p>Expected message kuch is tarah ho sakta hai:</p>
+
+<pre><code class="language-text">logout
+Connection to bandit.labs.overthewire.org closed.</code></pre>
+
+
+<h2>Step 9: <code>bandit1</code> Par Login Karein</h2>
+
+<p>Ab username change hoga:</p>
+
+<pre><code class="language-text">bandit0 → bandit1</code></pre>
+
+<p>Command:</p>
+
+<pre><code class="language-bash">ssh bandit1@bandit.labs.overthewire.org -p 2220</code></pre>
+
+<p>Password:</p>
+
+<pre><code class="language-text">NH2SXQwcBdpmTEzi3bvBHMM9H66vVXjL</code></pre>
+
+
+<h2>Actual Terminal Session</h2>
+
+<p>
+Aapka terminal session roughly is tarah dikh sakta hai:
+</p>
+
+<pre><code class="language-text">bandit0@bandit:~$ ls
+readme
+bandit0@bandit:~$ cat readme
+NH2SXQwcBdpmTEzi3bvBHMM9H66vVXjL
+bandit0@bandit:~$ exit
+logout</code></pre>
+
+<p>Uske baad next level par login karein:</p>
+
+<pre><code class="language-bash">ssh bandit1@bandit.labs.overthewire.org -p 2220</code></pre>
+
+
+<h2>Complete Command Sequence</h2>
+
+<pre><code class="language-bash">ssh bandit0@bandit.labs.overthewire.org -p 2220</code></pre>
+
+<pre><code class="language-bash">whoami</code></pre>
+
+<pre><code class="language-bash">pwd</code></pre>
+
+<pre><code class="language-bash">ls</code></pre>
+
+<pre><code class="language-bash">cat readme</code></pre>
+
+<pre><code class="language-bash">exit</code></pre>
+
+<pre><code class="language-bash">ssh bandit1@bandit.labs.overthewire.org -p 2220</code></pre>
+
+
+<h1>Credential Flow</h1>
+
+<p>
+Bandit mein har level ka password next level mein login karne ke liye use hota hai.
+</p>
+
+<p>Level 0 se Level 1 ka flow:</p>
+
+<pre><code class="language-text">Current User:  bandit0
+Current File:  readme
+Command:       cat readme
+Found Password: NH2SXQwcBdpmTEzi3bvBHMM9H66vVXjL
+Next User:     bandit1</code></pre>
+
+<p>General SSH format:</p>
+
+<pre><code class="language-bash">ssh NEXT_USERNAME@bandit.labs.overthewire.org -p 2220</code></pre>
+
+<p>Is level ke liye:</p>
+
+<pre><code class="language-bash">ssh bandit1@bandit.labs.overthewire.org -p 2220</code></pre>
+
+
+<h1>Common Errors</h1>
+
+
+<h2><code>Permission denied</code></h2>
+
+<p>Error:</p>
+
+<pre><code class="language-text">Permission denied, please try again.</code></pre>
+
+<p>Possible reasons:</p>
+
+<ul>
+    <li>Username galat hai.</li>
+    <li>
+        <code>bandit0</code> mein zero ke badle letter
+        <code>o</code> type kiya gaya hai.
+    </li>
+    <li>Password galat hai.</li>
+    <li>Password copy karte waqt extra space aa gaya hai.</li>
+    <li>Port <code>2220</code> specify nahi kiya gaya.</li>
+</ul>
+
+<p>Correct command:</p>
+
+<pre><code class="language-bash">ssh bandit0@bandit.labs.overthewire.org -p 2220</code></pre>
+
+
+<h2><code>No such file or directory</code></h2>
+
+<p>Error:</p>
+
+<pre><code class="language-text">cat: readme: No such file or directory</code></pre>
+
+<p>Possible reasons:</p>
+
+<ul>
+    <li>Aap wrong directory mein ho.</li>
+    <li>File name galat type hua hai.</li>
+    <li>Uppercase/lowercase mistake hai.</li>
+</ul>
+
+<p>Check karein:</p>
+
+<pre><code class="language-bash">pwd
+ls</code></pre>
+
+<p>Correct command:</p>
+
+<pre><code class="language-bash">cat readme</code></pre>
+
+
+<h2>Password Show Nahi Ho Raha</h2>
+
+<p>
+Linux terminal password type karte waqt kuch display nahi karta.
+Na characters dikhte hain aur na hi asterisks.
+</p>
+
+<p>
+Password normally type karein aur <code>Enter</code> press karein.
+</p>
+
+
+<h2>Wrong Username: <code>bandito</code></h2>
+
+<p>Agar aap ye command type karte hain:</p>
+
+<pre><code class="language-bash">ssh bandito@bandit.labs.overthewire.org -p 2220</code></pre>
+
+<p>
+To username wrong hoga, kyunki <code>bandito</code> mein last character
+letter <code>o</code> hai.
+</p>
+
+<p>Correct username:</p>
+
+<pre><code class="language-text">bandit0</code></pre>
+
+<p>Correct command:</p>
+
+<pre><code class="language-bash">ssh bandit0@bandit.labs.overthewire.org -p 2220</code></pre>
+
+
+<h2>Wrong Port</h2>
+
+<p>
+Agar aap <code>-p 2220</code> nahi likhte, to SSH default port
+<code>22</code> use karega.
+</p>
+
+<p>Incorrect:</p>
+
+<pre><code class="language-bash">ssh bandit0@bandit.labs.overthewire.org</code></pre>
+
+<p>Correct:</p>
+
+<pre><code class="language-bash">ssh bandit0@bandit.labs.overthewire.org -p 2220</code></pre>
+
+
+<h1>Security Lessons</h1>
+
+<p>
+Is level se humein ye important lessons milte hain:
+</p>
+
+<ul>
+    <li>Remote systems ko SSH ke through access kiya ja sakta hai.</li>
+    <li>Hostname aur port dono connection ke liye important hote hain.</li>
+    <li>Username mein ek character ki mistake login fail kar sakti hai.</li>
+    <li>Linux terminal commands exact syntax follow karti hain.</li>
+    <li><code>ls</code> files discover karne ke liye use hota hai.</li>
+    <li><code>cat</code> file contents read karne ke liye use hota hai.</li>
+    <li>Sensitive passwords files ke andar stored ho sakte hain.</li>
+    <li>Passwords ko carefully copy aur handle karna chahiye.</li>
+    <li>Authentication identity verify karta hai.</li>
+    <li>Har level ke liye alag username aur password ho sakta hai.</li>
+    <li>Linux file names aur commands case-sensitive hote hain.</li>
+</ul>
+
+
+<h1>Commands Summary</h1>
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+<tr>
+    <th>Command</th>
+    <th>Purpose</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+    <td><code>ssh user@host -p 2220</code></td>
+    <td>Remote server par SSH login karta hai</td>
+</tr>
+
+<tr>
+    <td><code>whoami</code></td>
+    <td>Current username show karta hai</td>
+</tr>
+
+<tr>
+    <td><code>pwd</code></td>
+    <td>Current working directory show karta hai</td>
+</tr>
+
+<tr>
+    <td><code>ls</code></td>
+    <td>Current directory ki files list karta hai</td>
+</tr>
+
+<tr>
+    <td><code>ls -l</code></td>
+    <td>Files ki detailed information show karta hai</td>
+</tr>
+
+<tr>
+    <td><code>ls -a</code></td>
+    <td>Hidden files bhi show karta hai</td>
+</tr>
+
+<tr>
+    <td><code>cat readme</code></td>
+    <td><code>readme</code> file ka content display karta hai</td>
+</tr>
+
+<tr>
+    <td><code>exit</code></td>
+    <td>SSH session close karta hai</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+
+<h1>Final Solution</h1>
+
+<p>Bandit Level 0 par login karein:</p>
+
+<pre><code class="language-bash">ssh bandit0@bandit.labs.overthewire.org -p 2220</code></pre>
+
+<p>Current directory ki files dekhein:</p>
+
+<pre><code class="language-bash">ls</code></pre>
+
+<p>Expected output:</p>
+
+<pre><code class="language-text">readme</code></pre>
+
+<p>Password read karein:</p>
+
+<pre><code class="language-bash">cat readme</code></pre>
+
+<p>Password:</p>
+
+<pre><code class="language-text">NH2SXQwcBdpmTEzi3bvBHMM9H66vVXjL</code></pre>
+
+<p>Ab Level 1 par login karein:</p>
+
+<pre><code class="language-bash">ssh bandit1@bandit.labs.overthewire.org -p 2220</code></pre>
+
+<p>Password enter karein:</p>
+
+<pre><code class="language-text">NH2SXQwcBdpmTEzi3bvBHMM9H66vVXjL</code></pre>
+
+
+<h1>Conclusion</h1>
+
+<p>
+Bandit Level 0 se Level 1 mein humne SSH ke through remote Linux
+server par login karna, current directory check karna, files list
+karna aur <code>cat</code> command se file ka password read karna seekha.
+</p>
+
+<p>Complete workflow:</p>
+
+<pre><code class="language-text">SSH Login as bandit0
+        ↓
+Home Directory Open
+        ↓
+ls Command
+        ↓
+readme File Identify
+        ↓
+cat readme
+        ↓
+Password Find
+        ↓
+SSH Login as bandit1</code></pre>
+
+<p>
+Is level ka sabse important command hai:
+</p>
+
+<pre><code class="language-bash">cat readme</code></pre>
+
+<blockquote>
+<strong>Security Note:</strong>
+SSH ka use sirf un systems par karein jahan aapke paas permission ho.
+OverTheWire Bandit ek authorized cybersecurity learning environment hai.
+</blockquote>
+
+</article>
+
+</main>
+
+
+<footer>
+
+<div class="container footer-inner">
+
+<span>
+© 2026 SSSWriteups
+</span>
+
+<span>
+Built with HTML & CSS
+</span>
+
+</div>
+
+</footer>
+
+</body>
+</html>
