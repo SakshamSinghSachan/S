@@ -1,0 +1,420 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OverTheWire Bandit - Level 10 to Level 11 | SSSWriteups</title>
+  <link rel="stylesheet" href="../../../style.css">
+</head>
+<body>
+  <header class="hero page-header">
+    <nav class="nav container">
+      <a class="logo" href="../../../../index.html">
+        SSS<span>Writeups</span>
+      </a>
+      <div class="nav-links">
+        <a href="../../../../index.html">
+          Home
+        </a>
+
+        <a href="../../../../categories/overthewire.html">
+          OverTheWire
+        </a>
+
+        <a href="index.html">
+          Bandit
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="writeup-page section container">
+    <article class="writeup-content">
+      <h1>OverTheWire Bandit — Level 10 to Level 11</h1>
+
+      <h2>Introduction</h2>
+      <p>Is writeup ka heading <strong>Level 10 → Level 11</strong> hai.</p>
+      <p>Is level mein next level ka password <code>data.txt</code> file ke andar stored hai, lekin password directly readable form mein nahi hai. File mein <strong>Base64 encoded data</strong> stored hai.</p>
+      <p>File ka content:</p>
+      <pre><code class="language-text">VGhlIHBhc3N3b3JkIGlzIDZ6UGV6aUxkUjJSS05kTllGTmI2blZDS3pwaGxYSEJNCg==</code></pre>
+      <p>Is encoded text ko decode karne ke liye <code>base64</code> command ka use karenge:</p>
+      <pre><code class="language-bash">cat data.txt | base64 --decode</code></pre>
+      <p>Decoded output:</p>
+      <pre><code class="language-text">The password is 6zPeziLdR2RKNdNYFNb6nVCKzphlXHBM</code></pre>
+      <p>Found password:</p>
+      <pre><code class="language-text">6zPeziLdR2RKNdNYFNb6nVCKzphlXHBM</code></pre>
+
+      <h2>Objective</h2>
+      <p>Is level mein humein:</p>
+      <ul>
+        <li><code>bandit10</code> user se SSH ke through login karna hai.</li>
+        <li><code>data.txt</code> file read karni hai.</li>
+        <li>Base64 encoded content identify karna hai.</li>
+        <li>Encoded data ko decode karna hai.</li>
+        <li>Password copy karna hai.</li>
+        <li><code>bandit11</code> user se next SSH login karna hai.</li>
+      </ul>
+
+      <h2>Given Information</h2>
+      <p>Current level par login karne ke liye:</p>
+      <pre><code class="language-text">Host:     bandit.labs.overthewire.org
+Port:     2220
+Username: bandit10
+Password: Previous level se mila password</code></pre>
+      <p>File:</p>
+      <pre><code class="language-text">data.txt</code></pre>
+      <p>Data format:</p>
+      <pre><code class="language-text">Base64 encoded data</code></pre>
+      <p>Next level ka username:</p>
+      <pre><code class="language-text">bandit11</code></pre>
+      <p>Found password:</p>
+      <pre><code class="language-text">6zPeziLdR2RKNdNYFNb6nVCKzphlXHBM</code></pre>
+
+      <h1>Base64 Kya Hota Hai?</h1>
+
+      <h2>Base64 Encoding</h2>
+      <p>Base64 ek encoding technique hai jo binary ya text data ko printable ASCII characters mein convert karti hai.</p>
+      <p>Base64 output mein commonly ye characters use hote hain:</p>
+      <pre><code class="language-text">A-Z
+a-z
+0-9
++
+/
+=</code></pre>
+      <p><code>=</code> character padding ke liye use ho sakta hai.</p>
+      <p>Example:</p>
+      <pre><code class="language-text">Original text: Hello
+Base64 text:  SGVsbG8=</code></pre>
+
+      <h2>Encoding Aur Decoding</h2>
+
+      <h3>Encoding</h3>
+      <p>Readable data ko encoded format mein convert karna:</p>
+      <pre><code class="language-text">Readable data → Base64 encoded data</code></pre>
+
+      <h3>Decoding</h3>
+      <p>Encoded data ko original readable form mein convert karna:</p>
+      <pre><code class="language-text">Base64 encoded data → Original readable data</code></pre>
+      <p>Is level mein humein decoding karni hai.</p>
+
+      <h2>Base64 Encryption Nahi Hai</h2>
+      <p>Base64 encryption nahi hai.</p>
+      <p>Base64 data ko koi bhi easily decode kar sakta hai agar usse pata ho ki data Base64 format mein hai.</p>
+      <p>Difference:</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Concept</th>
+              <th>Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Encoding</td>
+              <td>Data representation change karna</td>
+            </tr>
+            <tr>
+              <td>Decoding</td>
+              <td>Encoded data ko original form mein lana</td>
+            </tr>
+            <tr>
+              <td>Encryption</td>
+              <td>Secret key ke through data protect karna</td>
+            </tr>
+            <tr>
+              <td>Decryption</td>
+              <td>Key ke through encrypted data recover karna</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Base64 security protection provide nahi karta. Password ko Base64 mein store karna secure password storage nahi hai.</p>
+
+      <h1><code>cat</code> Command</h1>
+
+      <h2><code>cat data.txt</code></h2>
+      <pre><code class="language-bash">cat data.txt</code></pre>
+      <p>Ye file ka content terminal par display karti hai.</p>
+      <p>Output:</p>
+      <pre><code class="language-text">VGhlIHBhc3N3b3JkIGlzIDZ6UGV6aUxkUjJSS05kTllGTmI2blZDS3pwaGxYSEJNCg==</code></pre>
+      <p>Ye output directly readable password nahi hai. Isliye ise Base64 decoder ke input ke roop mein dena hoga.</p>
+
+      <h1><code>base64</code> Command</h1>
+
+      <h2>Decode Karna</h2>
+      <p>Base64 data decode karne ka command:</p>
+      <pre><code class="language-bash">base64 --decode</code></pre>
+      <p>Short option:</p>
+      <pre><code class="language-bash">base64 -d</code></pre>
+      <p>Dono commands same kaam karti hain.</p>
+
+      <h2>File Directly Decode Karna</h2>
+      <p>Aap file ko directly decode bhi kar sakte hain:</p>
+      <pre><code class="language-bash">base64 --decode data.txt</code></pre>
+      <p>Ya:</p>
+      <pre><code class="language-bash">base64 -d data.txt</code></pre>
+
+      <h2>Pipe Ke Through Decode Karna</h2>
+      <p>Aapke solution mein:</p>
+      <pre><code class="language-bash">cat data.txt | base64 --decode</code></pre>
+      <p>Process:</p>
+      <pre><code class="language-text">cat data.txt
+      ↓
+Base64 encoded content
+      ↓
+      |
+      ↓
+base64 --decode
+      ↓
+Original readable text</code></pre>
+
+      <h2><code>--decode</code> Aur <code>-d</code></h2>
+      <p>Long form:</p>
+      <pre><code class="language-bash">base64 --decode</code></pre>
+      <p>Short form:</p>
+      <pre><code class="language-bash">base64 -d</code></pre>
+      <p>Beginner-friendly command:</p>
+      <pre><code class="language-bash">cat data.txt | base64 --decode</code></pre>
+      <p>Short command:</p>
+      <pre><code class="language-bash">base64 -d data.txt</code></pre>
+
+      <h1>Pipe <code>|</code></h1>
+      <p>Pipe first command ke output ko second command ke input mein send karta hai.</p>
+      <pre><code class="language-bash">cat data.txt | base64 --decode</code></pre>
+      <p>Yahan:</p>
+      <pre><code class="language-text">cat data.txt       → Encoded data output karta hai
+|                  → Output ko next command ko bhejta hai
+base64 --decode    → Encoded data decode karta hai</code></pre>
+      <p>Direct method pipe ke bina:</p>
+      <pre><code class="language-bash">base64 --decode data.txt</code></pre>
+      <p>Dono methods valid hain.</p>
+
+      <h1>Newline Aur Padding</h1>
+      <p>Base64 output ke end mein <code>=</code> characters padding represent kar sakte hain:</p>
+      <pre><code class="language-text">Cg==</code></pre>
+      <p>File ke decoded output ke end mein newline bhi ho sakti hai. Terminal par output ke baad cursor next line par aa sakta hai. Newline password ka part nahi hoti.</p>
+
+      <h1>Complete Walkthrough</h1>
+
+      <h2>Step 1: <code>bandit10</code> Par Login Karein</h2>
+      <pre><code class="language-powershell">ssh bandit10@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password prompt par previous level se mila password enter karein.</p>
+      <p>Successful login ke baad prompt roughly is tarah dikh sakta hai:</p>
+      <pre><code class="language-text">bandit10@bandit:~$</code></pre>
+
+      <h2>Step 2: Current User Verify Karein</h2>
+      <pre><code class="language-bash">whoami</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">bandit10</code></pre>
+
+      <h2>Step 3: Current Directory Check Karein</h2>
+      <pre><code class="language-bash">pwd</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">/home/bandit10</code></pre>
+
+      <h2>Step 4: Files Ki List Dekhein</h2>
+      <pre><code class="language-bash">ls</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">data.txt</code></pre>
+
+      <h2>Step 5: Encoded Data Dekhein</h2>
+      <pre><code class="language-bash">cat data.txt</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">VGhlIHBhc3N3b3JkIGlzIDZ6UGV6aUxkUjJSS05kTllGTmI2blZDS3pwaGxYSEJNCg==</code></pre>
+
+      <h2>Step 6: Base64 Decode Karein</h2>
+      <p>Pipe method:</p>
+      <pre><code class="language-bash">cat data.txt | base64 --decode</code></pre>
+      <p>Direct method:</p>
+      <pre><code class="language-bash">base64 --decode data.txt</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">The password is 6zPeziLdR2RKNdNYFNb6nVCKzphlXHBM</code></pre>
+
+      <h2>Step 7: Password Copy Karein</h2>
+      <pre><code class="language-text">6zPeziLdR2RKNdNYFNb6nVCKzphlXHBM</code></pre>
+      <p><code>The password is</code> text ko password ka part na samjhein. Sirf actual password copy karein.</p>
+
+      <h2>Step 8: SSH Session Close Karein</h2>
+      <pre><code class="language-bash">exit</code></pre>
+
+      <h2>Step 9: <code>bandit11</code> Par Login Karein</h2>
+      <pre><code class="language-bash">ssh bandit11@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password enter karein:</p>
+      <pre><code class="language-text">6zPeziLdR2RKNdNYFNb6nVCKzphlXHBM</code></pre>
+
+      <h1>Actual Terminal Session</h1>
+      <pre><code class="language-text">bandit10@bandit:~$ ls
+data.txt
+bandit10@bandit:~$ cat data.txt
+VGhlIHBhc3N3b3JkIGlzIDZ6UGV6aUxkUjJSS05kTllGTmI2blZDS3pwaGxYSEJNCg==
+bandit10@bandit:~$ cat data.txt | base64 --decode
+The password is 6zPeziLdR2RKNdNYFNb6nVCKzphlXHBM
+bandit10@bandit:~$ exit
+logout</code></pre>
+      <p>Uske baad next level par login karein:</p>
+      <pre><code class="language-bash">ssh bandit11@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Complete Command Sequence</h1>
+      <pre><code class="language-powershell">ssh bandit10@bandit.labs.overthewire.org -p 2220</code></pre>
+      <pre><code class="language-bash">whoami</code></pre>
+      <pre><code class="language-bash">pwd</code></pre>
+      <pre><code class="language-bash">ls</code></pre>
+      <pre><code class="language-bash">cat data.txt</code></pre>
+      <pre><code class="language-bash">cat data.txt | base64 --decode</code></pre>
+      <pre><code class="language-bash">exit</code></pre>
+      <pre><code class="language-bash">ssh bandit11@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Common Errors</h1>
+
+      <h2><code>Invalid Input</code></h2>
+      <p>Agar file Base64 format mein nahi hai ya content incorrectly copied hai, to error aa sakta hai:</p>
+      <pre><code class="language-text">base64: invalid input</code></pre>
+      <p>Check karein:</p>
+      <pre><code class="language-bash">cat data.txt</code></pre>
+      <p>File ke complete content ko modify kiye bina decode karein:</p>
+      <pre><code class="language-bash">base64 --decode data.txt</code></pre>
+
+      <h2><code>base64: command not found</code></h2>
+      <p>Agar command available nahi hai, to system mein Base64 utility installed nahi ho sakti. Bandit server par ye command normally available hoti hai.</p>
+
+      <h2>Password Mein Extra Text Copy Karna</h2>
+      <p>Decoded output:</p>
+      <pre><code class="language-text">The password is 6zPeziLdR2RKNdNYFNb6nVCKzphlXHBM</code></pre>
+      <p>Actual password sirf ye hai:</p>
+      <pre><code class="language-text">6zPeziLdR2RKNdNYFNb6nVCKzphlXHBM</code></pre>
+      <p><code>The password is</code> phrase ko include na karein.</p>
+
+      <h2>Password Copy Error</h2>
+      <p>Password:</p>
+      <pre><code class="language-text">6zPeziLdR2RKNdNYFNb6nVCKzphlXHBM</code></pre>
+      <p>Check karein:</p>
+      <ul>
+        <li>Uppercase aur lowercase characters same hain.</li>
+        <li><code>0</code> aur <code>O</code> ko carefully distinguish karein.</li>
+        <li>Password ke start ya end mein extra space nahi hai.</li>
+      </ul>
+
+      <h2>SSH Permission Denied</h2>
+      <p>Next level par login karte waqt check karein:</p>
+      <ul>
+        <li>Username <code>bandit11</code> hai.</li>
+        <li>Port <code>2220</code> use ho raha hai.</li>
+        <li>Sirf decoded password enter kiya gaya hai.</li>
+      </ul>
+      <p>Correct command:</p>
+      <pre><code class="language-bash">ssh bandit11@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Security Lessons</h1>
+      <p>Is level se humein ye important lessons milte hain:</p>
+      <ul>
+        <li>Base64 encoding encryption nahi hoti.</li>
+        <li>Encoded data ko correct decoder se original form mein convert kiya ja sakta hai.</li>
+        <li><code>base64 --decode</code> Base64 content decode karta hai.</li>
+        <li>Pipe commands ko combine karne ke liye useful hai.</li>
+        <li>File extension ya content ko inspect karke data format identify karna important hai.</li>
+        <li>Password ko decode karne ke baad output mein surrounding text ko ignore karna chahiye.</li>
+        <li>Base64 passwords ko secure storage method nahi samajhna chahiye.</li>
+        <li>Encoding aur encryption ka difference cybersecurity mein important hai.</li>
+      </ul>
+
+      <h1>Commands Summary</h1>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>ssh user@host -p 2220</code></td>
+              <td>Remote server par SSH login karta hai</td>
+            </tr>
+            <tr>
+              <td><code>whoami</code></td>
+              <td>Current username show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>pwd</code></td>
+              <td>Current directory show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>ls</code></td>
+              <td>Files aur directories list karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cat data.txt</code></td>
+              <td>Encoded file content display karta hai</td>
+            </tr>
+            <tr>
+              <td><code>base64 --decode data.txt</code></td>
+              <td>File ko Base64 se decode karta hai</td>
+            </tr>
+            <tr>
+              <td><code>base64 -d data.txt</code></td>
+              <td>Decode command ka short form</td>
+            </tr>
+            <tr>
+              <td><code>cat data.txt | base64 --decode</code></td>
+              <td>Pipe ke through Base64 decode karta hai</td>
+            </tr>
+            <tr>
+              <td><code>exit</code></td>
+              <td>SSH session close karta hai</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h1>Final Solution</h1>
+      <p><code>bandit10</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit10@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Files dekhein:</p>
+      <pre><code class="language-bash">ls</code></pre>
+      <p>Base64 encoded content read karein:</p>
+      <pre><code class="language-bash">cat data.txt</code></pre>
+      <p>Content decode karein:</p>
+      <pre><code class="language-bash">cat data.txt | base64 --decode</code></pre>
+      <p>Decoded output:</p>
+      <pre><code class="language-text">The password is 6zPeziLdR2RKNdNYFNb6nVCKzphlXHBM</code></pre>
+      <p>Password:</p>
+      <pre><code class="language-text">6zPeziLdR2RKNdNYFNb6nVCKzphlXHBM</code></pre>
+      <p>Ab <code>bandit11</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit11@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Conclusion</h1>
+      <p>Bandit Level 10 → Level 11 mein humne Base64 encoded data ko decode karke password find karna seekha.</p>
+      <p>Complete workflow:</p>
+      <pre><code class="language-text">SSH Login as bandit10
+        ↓
+data.txt Identify
+        ↓
+Base64 Content Read
+        ↓
+base64 --decode
+        ↓
+Original Password Extract
+        ↓
+SSH Login as bandit11</code></pre>
+      <p>Is level ka most important command hai:</p>
+      <pre><code class="language-bash">cat data.txt | base64 --decode</code></pre>
+      <p>Direct alternative:</p>
+      <pre><code class="language-bash">base64 --decode data.txt</code></pre>
+      <blockquote>
+        <p><strong>Security Note:</strong> SSH ka use sirf un systems par karein jahan aapke paas permission ho. OverTheWire Bandit ek authorized cybersecurity learning environment hai.</p>
+      </blockquote>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <span> © 2026 SSSWriteups </span>
+      
+    </div>
+  </footer>
+</body>
+</html>
+```
