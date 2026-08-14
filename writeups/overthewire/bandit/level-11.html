@@ -1,0 +1,403 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OverTheWire Bandit - Level 11 to Level 12 | SSSWriteups</title>
+  <link rel="stylesheet" href="../../../style.css">
+</head>
+<body>
+  <header class="hero page-header">
+    <nav class="nav container">
+      <a class="logo" href="../../../../index.html">
+        SSS<span>Writeups</span>
+      </a>
+      <div class="nav-links">
+        <a href="../../../../index.html">
+          Home
+        </a>
+
+        <a href="../../../../categories/overthewire.html">
+          OverTheWire
+        </a>
+
+        <a href="index.html">
+          Bandit
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="writeup-page section container">
+    <article class="writeup-content">
+      <h1>OverTheWire Bandit — Level 11 to Level 12</h1>
+
+      <h2>Introduction</h2>
+      <p>Is writeup ka heading <strong>Level 11 → Level 12</strong> hai.</p>
+      <p>Is level mein <code>data.txt</code> file ka text ROT13 transformation se encoded hai. ROT13 mein alphabet ke har letter ko 13 positions rotate kiya jata hai.</p>
+      <p>File ka original encoded content:</p>
+      <pre><code class="language-text">Gur cnffjbeq vf WIAOOSFzMjXXBC@KOSKBbJ8puQm5lIEi</code></pre>
+      <p>Is data ko decode karne ke liye <code>tr</code> command ka use kiya gaya:</p>
+      <pre><code class="language-bash">cat data.txt | tr '[A-Za-z]' '[N-ZA-Mn-za-m]'</code></pre>
+      <p>Decoded output:</p>
+      <pre><code class="language-text">The password is JVNBBFSmZwKKOPOXbFX0oW8chDz5yVRv</code></pre>
+      <p>Found password:</p>
+      <pre><code class="language-text">JVNBBFSmZwKKOPOXbFX0oW8chDz5yVRv</code></pre>
+
+      <h2>Objective</h2>
+      <p>Is level mein humein:</p>
+      <ul>
+        <li><code>bandit11</code> user se SSH ke through login karna hai.</li>
+        <li><code>data.txt</code> file read karni hai.</li>
+        <li>ROT13 encoded text identify karna hai.</li>
+        <li><code>tr</code> command se uppercase aur lowercase letters rotate karne hain.</li>
+        <li>Decoded password copy karna hai.</li>
+        <li><code>bandit12</code> user se next SSH login karna hai.</li>
+      </ul>
+
+      <h2>Given Information</h2>
+      <p>Current level par login karne ke liye:</p>
+      <pre><code class="language-text">Host:     bandit.labs.overthewire.org
+Port:     2220
+Username: bandit11
+Password: Previous level se mila password</code></pre>
+      <p>File:</p>
+      <pre><code class="language-text">data.txt</code></pre>
+      <p>Encoding:</p>
+      <pre><code class="language-text">ROT13</code></pre>
+      <p>Next level ka username:</p>
+      <pre><code class="language-text">bandit12</code></pre>
+      <p>Found password:</p>
+      <pre><code class="language-text">JVNBBFSmZwKKOPOXbFX0oW8chDz5yVRv</code></pre>
+
+      <h1>ROT13 Kya Hota Hai?</h1>
+
+      <h2>ROT13 Meaning</h2>
+      <p>ROT13 ka full meaning hai <strong>Rotate by 13 positions</strong>.</p>
+      <p>Is transformation mein:</p>
+      <ul>
+        <li><code>A</code> ko <code>N</code> se replace kiya jata hai.</li>
+        <li><code>B</code> ko <code>O</code> se replace kiya jata hai.</li>
+        <li><code>C</code> ko <code>P</code> se replace kiya jata hai.</li>
+        <li>Isi tarah har letter 13 positions rotate hota hai.</li>
+      </ul>
+      <p>Alphabet mapping:</p>
+      <pre><code class="language-text">Original: ABCDEFGHIJKLM NOPQRSTUVWXYZ
+ROT13:    NOPQRSTUVWXYZ ABCDEFGHIJKLM</code></pre>
+      <p>Spaces, numbers aur punctuation normally unchanged rehte hain.</p>
+      <p>Example:</p>
+      <pre><code class="language-text">Original: Hello World!
+ROT13:    Uryyb Jbeyq!</code></pre>
+
+      <h2>ROT13 Reversible Kyon Hai?</h2>
+      <p>Alphabet mein 26 letters hote hain. ROT13 do baar apply karne par original text wapas mil jata hai:</p>
+      <pre><code class="language-text">ROT13(ROT13(text)) = original text</code></pre>
+      <p>Example:</p>
+      <pre><code class="language-text">Hello
+  ↓ ROT13
+Uryyb
+  ↓ ROT13
+Hello</code></pre>
+      <p>Isliye ROT13 ke liye separate encryption key ki zaroorat nahi hoti.</p>
+
+      <h2>ROT13 Encryption Nahi Hai</h2>
+      <p>ROT13 strong encryption nahi hai. Ye sirf simple character substitution hai.</p>
+      <p>Koi bhi person ROT13 ko easily identify aur reverse kar sakta hai. Iska use commonly:</p>
+      <ul>
+        <li>Puzzles</li>
+        <li>Spoiler hiding</li>
+        <li>Beginner CTF challenges</li>
+        <li>Simple text obfuscation</li>
+      </ul>
+      <p>mein hota hai.</p>
+
+      <h1><code>tr</code> Command</h1>
+
+      <h2><code>tr</code> Kya Karti Hai?</h2>
+      <p><code>tr</code> ka meaning <strong>translate</strong> ya <strong>transform</strong> hota hai.</p>
+      <p>Ye command input ke characters ko doosre characters se replace karti hai.</p>
+      <p>Basic format:</p>
+      <pre><code class="language-bash">tr SET1 SET2</code></pre>
+      <p>Meaning:</p>
+      <pre><code class="language-text">SET1 ke characters ko SET2 ke corresponding characters se replace karo.</code></pre>
+
+      <h2>Simple Example</h2>
+      <pre><code class="language-bash">echo hello | tr 'a-z' 'A-Z'</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">HELLO</code></pre>
+      <p>Ye lowercase letters ko uppercase letters mein convert karta hai.</p>
+
+      <h1>ROT13 Command Breakdown</h1>
+      <p>Command:</p>
+      <pre><code class="language-bash">tr '[A-Za-z]' '[N-ZA-Mn-za-m]'</code></pre>
+
+      <h2><code>[A-Za-z]</code></h2>
+      <pre><code class="language-text">[A-Za-z]</code></pre>
+      <p>Ye uppercase aur lowercase English letters ko represent karta hai:</p>
+      <pre><code class="language-text">A-Z → Uppercase letters
+a-z → Lowercase letters</code></pre>
+
+      <h2><code>[N-ZA-Mn-za-m]</code></h2>
+      <pre><code class="language-text">[N-ZA-Mn-za-m]</code></pre>
+      <p>Ye rotated character mapping hai:</p>
+      <pre><code class="language-text">A-M → N-Z
+N-Z → A-M
+
+a-m → n-z
+n-z → a-m</code></pre>
+      <p>Complete mapping:</p>
+      <pre><code class="language-text">A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+N O P Q R S T U V W X Y Z A B C D E F G H I J K L M</code></pre>
+      <p>Lowercase mapping:</p>
+      <pre><code class="language-text">a b c d e f g h i j k l m n o p q r s t u v w x y z
+n o p q r s t u v w x y z a b c d e f g h i j k l m</code></pre>
+
+      <h2>Special Characters Unchanged</h2>
+      <p>ROT13 command sirf letters transform karti hai.</p>
+      <p>Ye characters unchanged rehte hain:</p>
+      <pre><code class="language-text">Spaces
+Numbers
+Punctuation
+Special characters</code></pre>
+      <p>Example:</p>
+      <pre><code class="language-text">@  → @
+8  → 8
+!  → !</code></pre>
+
+      <h1>Pipe <code>|</code></h1>
+      <p>Pipe first command ke output ko second command ke input mein send karta hai.</p>
+      <pre><code class="language-bash">cat data.txt | tr '[A-Za-z]' '[N-ZA-Mn-za-m]'</code></pre>
+      <p>Process:</p>
+      <pre><code class="language-text">cat data.txt
+      ↓
+ROT13 encoded text
+      ↓
+      |
+      ↓
+tr character transformation
+      ↓
+Decoded text</code></pre>
+
+      <h1>Complete Walkthrough</h1>
+
+      <h2>Step 1: <code>bandit11</code> Par Login Karein</h2>
+      <pre><code class="language-powershell">ssh bandit11@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password prompt par previous level se mila password enter karein.</p>
+      <p>Successful login ke baad prompt roughly is tarah dikh sakta hai:</p>
+      <pre><code class="language-text">bandit11@bandit:~$</code></pre>
+
+      <h2>Step 2: Current User Verify Karein</h2>
+      <pre><code class="language-bash">whoami</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">bandit11</code></pre>
+
+      <h2>Step 3: Current Directory Check Karein</h2>
+      <pre><code class="language-bash">pwd</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">/home/bandit11</code></pre>
+
+      <h2>Step 4: Files Ki List Dekhein</h2>
+      <pre><code class="language-bash">ls</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">data.txt</code></pre>
+
+      <h2>Step 5: Encoded Data Read Karein</h2>
+      <pre><code class="language-bash">cat data.txt</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">Gur cnffjbeq vf WIAOOSFzMjXXBC@KOSKBbJ8puQm5lIEi</code></pre>
+
+      <h2>Step 6: ROT13 Decode Karein</h2>
+      <pre><code class="language-bash">cat data.txt | tr '[A-Za-z]' '[N-ZA-Mn-za-m]'</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">The password is JVNBBFSmZwKKOPOXbFX0oW8chDz5yVRv</code></pre>
+
+      <h2>Step 7: Password Copy Karein</h2>
+      <pre><code class="language-text">JVNBBFSmZwKKOPOXbFX0oW8chDz5yVRv</code></pre>
+      <p><code>The password is</code> phrase ko password ka part na samjhein. Sirf actual password copy karein.</p>
+
+      <h2>Step 8: SSH Session Close Karein</h2>
+      <pre><code class="language-bash">exit</code></pre>
+
+      <h2>Step 9: <code>bandit12</code> Par Login Karein</h2>
+      <pre><code class="language-bash">ssh bandit12@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password enter karein:</p>
+      <pre><code class="language-text">JVNBBFSmZwKKOPOXbFX0oW8chDz5yVRv</code></pre>
+
+      <h1>Actual Terminal Session</h1>
+      <pre><code class="language-text">bandit11@bandit:~$ ls
+data.txt
+bandit11@bandit:~$ cat data.txt
+Gur cnffjbeq vf WIAOOSFzMjXXBC@KOSKBbJ8puQm5lIEi
+bandit11@bandit:~$ cat data.txt | tr '[A-Za-z]' '[N-ZA-Mn-za-m]'
+The password is JVNBBFSmZwKKOPOXbFX0oW8chDz5yVRv
+bandit11@bandit:~$ exit
+logout</code></pre>
+      <p>Uske baad next level par login karein:</p>
+      <pre><code class="language-bash">ssh bandit12@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Complete Command Sequence</h1>
+      <pre><code class="language-powershell">ssh bandit11@bandit.labs.overthewire.org -p 2220</code></pre>
+      <pre><code class="language-bash">whoami</code></pre>
+      <pre><code class="language-bash">pwd</code></pre>
+      <pre><code class="language-bash">ls</code></pre>
+      <pre><code class="language-bash">cat data.txt</code></pre>
+      <pre><code class="language-bash">cat data.txt | tr '[A-Za-z]' '[N-ZA-Mn-za-m]'</code></pre>
+      <pre><code class="language-bash">exit</code></pre>
+      <pre><code class="language-bash">ssh bandit12@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Alternative ROT13 Methods</h1>
+
+      <h2><code>tr</code> Without Pipe</h2>
+      <p><code>tr</code> standard input se data read karta hai. Aap input redirect bhi kar sakte hain:</p>
+      <pre><code class="language-bash">tr '[A-Za-z]' '[N-ZA-Mn-za-m]' &lt; data.txt</code></pre>
+
+      <h2>Python Method</h2>
+      <p>Python ke through ROT13 decode karna ho to:</p>
+      <pre><code class="language-bash">python3 -c "import sys, codecs; print(codecs.decode(open('data.txt').read(), 'rot_13'))"</code></pre>
+      <p>Bandit Level 11 ke liye simple Linux command sufficient hai:</p>
+      <pre><code class="language-bash">cat data.txt | tr '[A-Za-z]' '[N-ZA-Mn-za-m]'</code></pre>
+
+      <h1>Common Errors</h1>
+
+      <h2><code>tr: misaligned arrays</code></h2>
+      <p>Agar source aur destination character sets ki length match nahi karti, to mapping problem aa sakti hai.</p>
+      <p>Correct command:</p>
+      <pre><code class="language-bash">tr '[A-Za-z]' '[N-ZA-Mn-za-m]'</code></pre>
+
+      <h2>Password Mein Extra Text Copy Karna</h2>
+      <p>Decoded output:</p>
+      <pre><code class="language-text">The password is JVNBBFSmZwKKOPOXbFX0oW8chDz5yVRv</code></pre>
+      <p>Actual password sirf ye hai:</p>
+      <pre><code class="language-text">JVNBBFSmZwKKOPOXbFX0oW8chDz5yVRv</code></pre>
+
+      <h2>Password Copy Error</h2>
+      <p>Password:</p>
+      <pre><code class="language-text">JVNBBFSmZwKKOPOXbFX0oW8chDz5yVRv</code></pre>
+      <p>Check karein:</p>
+      <ul>
+        <li>Uppercase aur lowercase characters same hain.</li>
+        <li><code>0</code> aur <code>O</code> ko carefully distinguish karein.</li>
+        <li>Password ke start ya end mein extra space nahi hai.</li>
+      </ul>
+
+      <h2>SSH Permission Denied</h2>
+      <p>Next level par login karte waqt check karein:</p>
+      <ul>
+        <li>Username <code>bandit12</code> hai.</li>
+        <li>Port <code>2220</code> use ho raha hai.</li>
+        <li>Sirf decoded password enter kiya gaya hai.</li>
+      </ul>
+      <p>Correct command:</p>
+      <pre><code class="language-bash">ssh bandit12@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Security Lessons</h1>
+      <p>Is level se humein ye important lessons milte hain:</p>
+      <ul>
+        <li>ROT13 ek simple substitution transformation hai.</li>
+        <li>ROT13 encryption nahi hoti.</li>
+        <li><code>tr</code> characters ko translate ya replace kar sakti hai.</li>
+        <li>Character ranges se uppercase aur lowercase letters select kiye ja sakte hain.</li>
+        <li>Spaces, numbers aur punctuation unchanged reh sakte hain.</li>
+        <li>Pipe commands ko combine karne ke liye useful hai.</li>
+        <li>Reversible encodings ko identify karna CTFs mein important skill hai.</li>
+        <li>Obfuscation aur encryption ke beech difference samajhna zaroori hai.</li>
+      </ul>
+
+      <h1>Commands Summary</h1>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>ssh user@host -p 2220</code></td>
+              <td>Remote server par SSH login karta hai</td>
+            </tr>
+            <tr>
+              <td><code>whoami</code></td>
+              <td>Current username show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>pwd</code></td>
+              <td>Current directory show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>ls</code></td>
+              <td>Files aur directories list karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cat data.txt</code></td>
+              <td>Encoded file content display karta hai</td>
+            </tr>
+            <tr>
+              <td><code>tr '[A-Za-z]' '[N-ZA-Mn-za-m]'</code></td>
+              <td>Letters ko ROT13 mapping se transform karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cat data.txt | tr '[A-Za-z]' '[N-ZA-Mn-za-m]'</code></td>
+              <td>File ko pipe ke through ROT13 decode karta hai</td>
+            </tr>
+            <tr>
+              <td><code>tr ... &lt; data.txt</code></td>
+              <td>Input redirection ke through transform karta hai</td>
+            </tr>
+            <tr>
+              <td><code>exit</code></td>
+              <td>SSH session close karta hai</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h1>Final Solution</h1>
+      <p><code>bandit11</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit11@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Files dekhein:</p>
+      <pre><code class="language-bash">ls</code></pre>
+      <p>Encoded content read karein:</p>
+      <pre><code class="language-bash">cat data.txt</code></pre>
+      <p>ROT13 decode karein:</p>
+      <pre><code class="language-bash">cat data.txt | tr '[A-Za-z]' '[N-ZA-Mn-za-m]'</code></pre>
+      <p>Decoded output:</p>
+      <pre><code class="language-text">The password is JVNBBFSmZwKKOPOXbFX0oW8chDz5yVRv</code></pre>
+      <p>Password:</p>
+      <pre><code class="language-text">JVNBBFSmZwKKOPOXbFX0oW8chDz5yVRv</code></pre>
+      <p>Ab <code>bandit12</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit12@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Conclusion</h1>
+      <p>Bandit Level 11 → Level 12 mein humne ROT13 encoded text ko <code>tr</code> command ke through decode karke password find karna seekha.</p>
+      <p>Complete workflow:</p>
+      <pre><code class="language-text">SSH Login as bandit11
+        ↓
+data.txt Identify
+        ↓
+ROT13 Encoded Text Read
+        ↓
+tr Command Se Letters Rotate
+        ↓
+Decoded Password Extract
+        ↓
+SSH Login as bandit12</code></pre>
+      <p>Is level ka most important command hai:</p>
+      <pre><code class="language-bash">cat data.txt | tr '[A-Za-z]' '[N-ZA-Mn-za-m]'</code></pre>
+      <blockquote>
+        <p><strong>Security Note:</strong> SSH ka use sirf un systems par karein jahan aapke paas permission ho. OverTheWire Bandit ek authorized cybersecurity learning environment hai.</p>
+      </blockquote>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <span> © 2026 SSSWriteups </span>
+     
+    </div>
+  </footer>
+</body>
+</html>
+```
