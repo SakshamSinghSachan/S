@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OverTheWire Bandit - Level 12 to Level 13 | SSSWriteups</title>
+  <link rel="stylesheet" href="../../../style.css">
+</head>
+<body>
+  <header class="hero page-header">
+    <nav class="nav container">
+      <a class="logo" href="../../../../index.html">
+        SSS<span>Writeups</span>
+      </a>
+      <div class="nav-links">
+    <a href="../../../index.html">Home</a>
+    <a href="../../../categories/overthewire.html">OverTheWire</a>
+</div>
+    </nav>
+  </header>
+
+  <main class="writeup-page section container">
+    <article class="writeup-content">
+      <h1>OverTheWire Bandit — Level 12 to Level 13</h1>
+
+      <h2>Introduction</h2>
+      <p>Is writeup ka heading <strong>Level 12 → Level 13</strong> hai.</p>
+      <p>Is level mein <code>data.txt</code> ek normal text file nahi hai. Ye kisi repeatedly compressed file ka <strong>hexdump</strong> hai. Humein pehle hexdump ko original binary file mein convert karna hoga, phir file type identify karke repeatedly decompress karna hoga.</p>
+      <p>Is process mein different formats aa sakte hain:</p>
+      <ul>
+        <li>Gzip</li>
+        <li>Bzip2</li>
+        <li>Tar archive</li>
+        <li>ASCII text</li>
+      </ul>
+      <p>Isliye har step par <code>file</code> command se current file ka type check karna zaroori hai.</p>
+
+      <h2>Objective</h2>
+      <p>Is level mein humein:</p>
+      <ul>
+        <li><code>bandit12</code> user se SSH ke through login karna hai.</li>
+        <li>Temporary directory create karni hai.</li>
+        <li><code>data.txt</code> ko temporary directory mein copy karna hai.</li>
+        <li>Hexdump ko binary file mein reverse karna hai.</li>
+        <li><code>file</code> command se file type identify karna hai.</li>
+        <li>Gzip, Bzip2 aur Tar formats ko correct commands se extract karna hai.</li>
+        <li>Har extraction ke baad dobara file type check karni hai.</li>
+        <li>Final ASCII text file read karke password find karna hai.</li>
+        <li><code>bandit13</code> user se next SSH login karna hai.</li>
+      </ul>
+
+      <h2>Given Information</h2>
+      <p>Current level par login karne ke liye:</p>
+      <pre><code class="language-text">Host:     bandit.labs.overthewire.org
+Port:     2220
+Username: bandit12
+Password: Previous level se mila password</code></pre>
+      <p>Original file:</p>
+      <pre><code class="language-text">data.txt</code></pre>
+      <p>File format:</p>
+      <pre><code class="language-text">Hexdump of a repeatedly compressed file</code></pre>
+      <p>Next level ka username:</p>
+      <pre><code class="language-text">bandit13</code></pre>
+      <blockquote>
+        <p><strong>Password Note:</strong> Aapke provided transcript ke final password mein kuch characters corrupted ya mixed-language form mein dikh rahe hain. Website par publish karne se pehle final terminal output se password exactly verify karein. Neeche provided output ko as-is reference ke liye rakha gaya hai.</p>
+      </blockquote>
+      <p>Provided final output:</p>
+      <pre><code class="language-text">The password is abwdiBxEir4CAEBLAPћацибобрейнгом</code></pre>
+
+      <h1>Temporary Directory</h1>
+
+      <h2><code>/tmp</code> Directory Kya Hoti Hai?</h2>
+      <p>Linux mein <code>/tmp</code> temporary files aur temporary working directories ke liye use hoti hai.</p>
+      <p>Bandit challenge ke liye <code>/tmp</code> useful hai kyunki:</p>
+      <ul>
+        <li>Aap apne working files rakh sakte ho.</li>
+        <li>Original <code>data.txt</code> ko modify nahi karna padta.</li>
+        <li>Intermediate compressed files ko organize kar sakte ho.</li>
+        <li>Different users ke home directories ko disturb nahi karte.</li>
+      </ul>
+
+      <h2><code>mkdir</code> Command</h2>
+      <p><code>mkdir</code> ka full form <strong>make directory</strong> hai.</p>
+      <p>Directory create karne ke liye:</p>
+      <pre><code class="language-bash">mkdir /tmp/dbs</code></pre>
+      <p>Yahan:</p>
+      <pre><code class="language-text">mkdir       → Directory create karta hai
+/tmp/dbs    → New directory ka complete path</code></pre>
+
+      <h2>Unique Temporary Directory</h2>
+      <p>Shared system par unique directory name use karna better hota hai:</p>
+      <pre><code class="language-bash">mkdir /tmp/myname123</code></pre>
+      <p>Ya:</p>
+      <pre><code class="language-bash">mkdir /tmp/bandit12-work</code></pre>
+      <p>Aapke solution mein directory hai:</p>
+      <pre><code class="language-bash">/tmp/dbs</code></pre>
+
+      <h2>Directory Mein Jaana</h2>
+      <pre><code class="language-bash">cd /tmp/dbs</code></pre>
+      <p>Current location check karein:</p>
+      <pre><code class="language-bash">pwd</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">/tmp/dbs</code></pre>
+
+      <h1><code>cp</code> Command</h1>
+
+      <h2><code>cp</code> Kya Karti Hai?</h2>
+      <p><code>cp</code> ka full form <strong>copy</strong> hai. Ye file ki duplicate copy create karti hai.</p>
+      <p><code>data.txt</code> ko temporary directory mein copy karne ke liye:</p>
+      <pre><code class="language-bash">cp data.txt /tmp/dbs</code></pre>
+      <p>Agar aap already <code>/tmp/dbs</code> mein ho aur original file home directory mein hai:</p>
+      <pre><code class="language-bash">cp ~/data.txt .</code></pre>
+      <p>Yahan:</p>
+      <pre><code class="language-text">~/data.txt → Home directory ki data.txt file
+.          → Current directory</code></pre>
+
+      <h2>Copy Verify Karna</h2>
+      <pre><code class="language-bash">ls</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">data.txt</code></pre>
+
+      <h1><code>xxd</code> Aur Hexdump</h1>
+
+      <h2>Hexdump Kya Hota Hai?</h2>
+      <p>Hexdump kisi file ke raw bytes ko hexadecimal representation mein display karta hai.</p>
+      <p>Example:</p>
+      <pre><code class="language-text">00000000: 1f8b 0808 7a3c 6565 0203 6461 7461 2e62  ....z&lt;ee..data.b</code></pre>
+      <p>Hexadecimal values machine-level bytes ko represent karti hain. Humans ke liye raw binary data ko directly understand karna difficult hota hai.</p>
+
+      <h2><code>xxd</code> Command</h2>
+      <p><code>xxd</code> file ka hexadecimal dump create kar sakti hai aur hexdump ko reverse karke original binary file bhi bana sakti hai.</p>
+      <p>Hexdump display karne ke liye:</p>
+      <pre><code class="language-bash">xxd data.txt</code></pre>
+      <p>Hexdump ko original binary file mein convert karne ke liye:</p>
+      <pre><code class="language-bash">xxd -r data.txt data</code></pre>
+      <p>Yahan:</p>
+      <pre><code class="language-text">xxd    → Hexdump utility
+-r     → Reverse operation
+ data.txt → Hexdump input
+ data   → Reconstructed binary output</code></pre>
+
+      <h2><code>xxd -r</code> Ka Meaning</h2>
+      <pre><code class="language-bash">xxd -r data.txt data</code></pre>
+      <p>ka meaning hai:</p>
+      <pre><code class="language-text">data.txt ke hexadecimal bytes ko reverse karke data naam ki binary file banao.</code></pre>
+      <p>Important:</p>
+      <pre><code class="language-text">data.txt → Hexdump text
+ data    → Reconstructed binary file</code></pre>
+
+      <h2>Filename Rename Karna</h2>
+      <p>Agar output file ka naam <code>data</code> hai, to uska type extension ke basis par nahi, content ke basis par identify hoga.</p>
+      <pre><code class="language-bash">file data</code></pre>
+
+      <h1><code>file</code> Command</h1>
+
+      <h2>File Type Identify Karna</h2>
+      <pre><code class="language-bash">file data</code></pre>
+      <p><code>file</code> command actual file content ke signatures aur structure ko inspect karke type identify karti hai.</p>
+      <p>Possible outputs:</p>
+      <pre><code class="language-text">data: gzip compressed data</code></pre>
+      <pre><code class="language-text">data: bzip2 compressed data</code></pre>
+      <pre><code class="language-text">data: POSIX tar archive (GNU)</code></pre>
+      <pre><code class="language-text">data: ASCII text</code></pre>
+
+      <h2>Har Step Par <code>file</code> Run Karna</h2>
+      <p>Repeated compression challenge ka main technique hai:</p>
+      <pre><code class="language-bash">file current_file</code></pre>
+      <p>Phir output ke according correct extraction command choose karein.</p>
+      <p>Workflow:</p>
+      <pre><code class="language-text">file → Correct decompression command → file → Next command</code></pre>
+
+      <h1>Compression Formats</h1>
+
+      <h2>Gzip</h2>
+      <p>Gzip files commonly <code>.gz</code> extension ke saath hoti hain.</p>
+      <p>File ko gzip ke through decompress karne ke liye:</p>
+      <pre><code class="language-bash">gzip -d file.gz</code></pre>
+      <p>Short form:</p>
+      <pre><code class="language-bash">gunzip file.gz</code></pre>
+      <p>Agar current file ka naam <code>data</code> hai aur <code>file data</code> output gzip show karta hai, to pehle rename karein:</p>
+      <pre><code class="language-bash">mv data file.gz</code></pre>
+      <p>Phir decompress karein:</p>
+      <pre><code class="language-bash">gzip -d file.gz</code></pre>
+
+      <h2>Bzip2</h2>
+      <p>Bzip2 files commonly <code>.bz2</code> extension ke saath hoti hain.</p>
+      <p>Decompress command:</p>
+      <pre><code class="language-bash">bzip2 -d file.bz2</code></pre>
+      <p>Short form:</p>
+      <pre><code class="language-bash">bunzip2 file.bz2</code></pre>
+      <p>Agar <code>file file</code> output bzip2 show karta hai:</p>
+      <pre><code class="language-bash">mv file file.bz2
+bzip2 -d file.bz2</code></pre>
+
+      <h2>Tar Archive</h2>
+      <p>Tar archive multiple files ko ek archive mein store karta hai. Tar khud compression nahi hota, lekin gzip ya bzip2 ke saath combine ho sakta hai.</p>
+      <p>Tar archive extract karne ke liye:</p>
+      <pre><code class="language-bash">tar xf file.tar</code></pre>
+      <p>Yahan:</p>
+      <pre><code class="language-text">x → Extract
+f → Archive file specify karna</code></pre>
+      <p>Tar list dekhne ke liye:</p>
+      <pre><code class="language-bash">tar tf file.tar</code></pre>
+      <p>Tar archive create karne ke liye generally <code>-c</code> use hota hai, lekin is level mein humein extraction karni hai.</p>
+
+      <h1><code>mv</code> Command</h1>
+
+      <h2><code>mv</code> Kya Karti Hai?</h2>
+      <p><code>mv</code> ka full form <strong>move</strong> hai. Iska use file move ya rename karne ke liye hota hai.</p>
+      <p>Example:</p>
+      <pre><code class="language-bash">mv data file.gz</code></pre>
+      <p>Yahan file location same hai, isliye <code>mv</code> rename ka kaam karegi.</p>
+      <pre><code class="language-text">data → file.gz</code></pre>
+
+      <h2>Rename Kyun Zaroori Hai?</h2>
+      <p>Compression commands usually extension ke basis par nahi, content ke basis par kaam kar sakti hain, lekin correct extension use karna clarity aur tool compatibility ke liye useful hai.</p>
+      <p>Example:</p>
+      <pre><code class="language-bash">mv data file.gz
+gzip -d file.gz</code></pre>
+
+      <h1>Repeated Decompression Workflow</h1>
+      <p>Har iteration mein ye steps follow karein:</p>
+      <pre><code class="language-text">1. file current_file
+2. Output format identify karo
+3. Zaroorat ho to mv se correct extension do
+4. Correct decompression command run karo
+5. ls se new file dekho
+6. New file par file command run karo
+7. Repeat karo</code></pre>
+      <p>Example workflow:</p>
+      <pre><code class="language-bash">file data
+mv data file.gz
+gzip -d file.gz
+file file</code></pre>
+      <p>Agar output bzip2 aaye:</p>
+      <pre><code class="language-bash">mv file file.bz2
+bzip2 -d file.bz2
+file file</code></pre>
+      <p>Agar output tar aaye:</p>
+      <pre><code class="language-bash">mv file file.tar
+tar xf file.tar
+ls</code></pre>
+
+      <h1>Complete Walkthrough</h1>
+
+      <h2>Step 1: <code>bandit12</code> Par Login Karein</h2>
+      <pre><code class="language-powershell">ssh bandit12@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password prompt par previous level se mila password enter karein.</p>
+      <p>Successful login ke baad prompt roughly is tarah dikh sakta hai:</p>
+      <pre><code class="language-text">bandit12@bandit:~$</code></pre>
+
+      <h2>Step 2: Temporary Directory Create Karein</h2>
+      <pre><code class="language-bash">mkdir /tmp/dbs</code></pre>
+      <p>Agar directory already exist kare, to different name use karein:</p>
+      <pre><code class="language-bash">mkdir /tmp/dbs2</code></pre>
+
+      <h2>Step 3: Temporary Directory Mein Jaayein</h2>
+      <pre><code class="language-bash">cd /tmp/dbs</code></pre>
+      <p>Verify:</p>
+      <pre><code class="language-bash">pwd</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">/tmp/dbs</code></pre>
+
+      <h2>Step 4: <code>data.txt</code> Copy Karein</h2>
+      <pre><code class="language-bash">cp ~/data.txt /tmp/dbs</code></pre>
+      <p>Ya agar aap <code>/tmp/dbs</code> ke andar ho:</p>
+      <pre><code class="language-bash">cp ~/data.txt .</code></pre>
+      <p>Verify:</p>
+      <pre><code class="language-bash">ls</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">data.txt</code></pre>
+
+      <h2>Step 5: Hexdump Reverse Karein</h2>
+      <pre><code class="language-bash">xxd -r data.txt data</code></pre>
+      <p>Ab files check karein:</p>
+      <pre><code class="language-bash">ls</code></pre>
+      <p>Expected files:</p>
+      <pre><code class="language-text">data
+data.txt</code></pre>
+
+      <h2>Step 6: First File Type Check Karein</h2>
+      <pre><code class="language-bash">file data</code></pre>
+      <p>Aapke output ke according:</p>
+      <pre><code class="language-text">data: gzip compressed data</code></pre>
+
+      <h2>Step 7: Gzip File Rename Aur Decompress Karein</h2>
+      <pre><code class="language-bash">mv data file.gz</code></pre>
+      <pre><code class="language-bash">gzip -d file.gz</code></pre>
+      <p>Ab file type check karein:</p>
+      <pre><code class="language-bash">file file</code></pre>
+
+      <h2>Step 8: Bzip2 File Decompress Karein</h2>
+      <p>Agar output aaye:</p>
+      <pre><code class="language-text">file: bzip2 compressed data</code></pre>
+      <p>To rename karein:</p>
+      <pre><code class="language-bash">mv file file.bz2</code></pre>
+      <p>Decompress karein:</p>
+      <pre><code class="language-bash">bzip2 -d file.bz2</code></pre>
+      <p>Phir check karein:</p>
+      <pre><code class="language-bash">file file</code></pre>
+
+      <h2>Step 9: Tar Archive Extract Karein</h2>
+      <p>Agar output aaye:</p>
+      <pre><code class="language-text">file: POSIX tar archive (GNU)</code></pre>
+      <p>To rename karein:</p>
+      <pre><code class="language-bash">mv file file.tar</code></pre>
+      <p>Extract karein:</p>
+      <pre><code class="language-bash">tar xf file.tar</code></pre>
+      <p>Files list karein:</p>
+      <pre><code class="language-bash">ls</code></pre>
+      <p>Extracted file par <code>file</code> run karein:</p>
+      <pre><code class="language-bash">file extracted-file</code></pre>
+
+      <h2>Step 10: Repeatedly Continue Karein</h2>
+      <p>Har baar:</p>
+      <pre><code class="language-bash">file filename</code></pre>
+      <p>Output ke according:</p>
+      <pre><code class="language-bash">gzip -d filename.gz</code></pre>
+      <p>Ya:</p>
+      <pre><code class="language-bash">bzip2 -d filename.bz2</code></pre>
+      <p>Ya:</p>
+      <pre><code class="language-bash">tar xf filename.tar</code></pre>
+      <p>Last mein output aayega:</p>
+      <pre><code class="language-text">ASCII text</code></pre>
+
+      <h2>Step 11: Final Text File Read Karein</h2>
+      <p>Jab <code>file</code> command output de:</p>
+      <pre><code class="language-text">ASCII text</code></pre>
+      <p>Tab file read karein:</p>
+      <pre><code class="language-bash">cat final-file</code></pre>
+      <p>Output format:</p>
+      <pre><code class="language-text">The password is YOUR_PASSWORD</code></pre>
+      <p>Sirf actual password copy karein.</p>
+
+      <h2>Step 12: SSH Session Close Karein</h2>
+      <pre><code class="language-bash">exit</code></pre>
+
+      <h2>Step 13: <code>bandit13</code> Par Login Karein</h2>
+      <pre><code class="language-bash">ssh bandit13@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password ke liye final text file se mila exact password enter karein.</p>
+
+      <h1>Example Command Flow</h1>
+      <p>Aapka provided workflow conceptually is tarah hai:</p>
+      <pre><code class="language-bash">mkdir /tmp/dbs</code></pre>
+      <pre><code class="language-bash">cp ~/data.txt /tmp/dbs</code></pre>
+      <pre><code class="language-bash">cd /tmp/dbs</code></pre>
+      <pre><code class="language-bash">xxd -r data.txt data</code></pre>
+      <pre><code class="language-bash">file data</code></pre>
+      <pre><code class="language-bash">mv data file.gz</code></pre>
+      <pre><code class="language-bash">gzip -d file.gz</code></pre>
+      <pre><code class="language-bash">file file</code></pre>
+      <pre><code class="language-bash">mv file file.bz2</code></pre>
+      <pre><code class="language-bash">bzip2 -d file.bz2</code></pre>
+      <pre><code class="language-bash">file file</code></pre>
+      <pre><code class="language-bash">mv file file.tar</code></pre>
+      <pre><code class="language-bash">tar xf file.tar</code></pre>
+      <p>Har extraction ke baad new file ka naam aur type check karte rahein.</p>
+
+      <h1>Common Errors</h1>
+
+      <h2><code>xxd: command not found</code></h2>
+      <p>Bandit environment mein <code>xxd</code> normally available hota hai. Command verify karein:</p>
+      <pre><code class="language-bash">which xxd</code></pre>
+
+      <h2><code>gzip: file.gz: unknown suffix</code></h2>
+      <p>Correct extension ke saath rename karein:</p>
+      <pre><code class="language-bash">mv data file.gz
+gzip -d file.gz</code></pre>
+
+      <h2><code>bzip2: not a bzip2 file</code></h2>
+      <p>Decompress karne se pehle type check karein:</p>
+      <pre><code class="language-bash">file file</code></pre>
+      <p>Agar output bzip2 nahi hai, to <code>bzip2</code> command use na karein.</p>
+
+      <h2><code>tar: This does not look like a tar archive</code></h2>
+      <p>Archive ka type verify karein:</p>
+      <pre><code class="language-bash">file file</code></pre>
+      <p>Tar archive hone par:</p>
+      <pre><code class="language-bash">mv file file.tar
+tar xf file.tar</code></pre>
+
+      <h2><code>File exists</code></h2>
+      <p>Agar <code>/tmp/dbs</code> already exist karta hai, to new directory banayein:</p>
+      <pre><code class="language-bash">mkdir /tmp/dbs2</code></pre>
+
+      <h2>Wrong Directory</h2>
+      <p>Current directory check karein:</p>
+      <pre><code class="language-bash">pwd</code></pre>
+      <p>Expected working directory:</p>
+      <pre><code class="language-text">/tmp/dbs</code></pre>
+
+      <h2>Final Password Corrupted Lag Raha Hai</h2>
+      <p>Aapke pasted transcript mein final line ka kuch part corrupted dikh raha hai:</p>
+      <pre><code class="language-text">The password is abwdiBxEir4CAEBLAPћацибобрейнгом</code></pre>
+      <p>Is password ko website par publish karne se pehle terminal mein final command dobara run karke exact output copy karein:</p>
+      <pre><code class="language-bash">cat final-file</code></pre>
+
+      <h1>Security Lessons</h1>
+      <p>Is level se humein ye important lessons milte hain:</p>
+      <ul>
+        <li>Hexdump raw binary data ka textual representation hota hai.</li>
+        <li><code>xxd -r</code> hexdump ko original binary file mein convert karta hai.</li>
+        <li>File extension ke bajay <code>file</code> command se actual type identify karna chahiye.</li>
+        <li>Gzip, Bzip2 aur Tar different formats hain.</li>
+        <li>Har compression format ke liye different extraction command ho sakti hai.</li>
+        <li>Repeated compression ko step by step reverse karna hota hai.</li>
+        <li><code>/tmp</code> safe temporary workspace ke liye useful hota hai.</li>
+        <li>Original challenge file ki copy par work karna better practice hai.</li>
+        <li><code>file</code> command har extraction ke baad next action decide karne mein help karti hai.</li>
+        <li>Unknown files ko blindly execute ya open nahi karna chahiye.</li>
+      </ul>
+
+      <h1>Commands Summary</h1>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>mkdir /tmp/dbs</code></td>
+              <td>Temporary directory create karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cd /tmp/dbs</code></td>
+              <td>Temporary directory mein enter karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cp ~/data.txt .</code></td>
+              <td>Original file ki copy banata hai</td>
+            </tr>
+            <tr>
+              <td><code>mv data file.gz</code></td>
+              <td>File ko rename karta hai</td>
+            </tr>
+            <tr>
+              <td><code>xxd -r data.txt data</code></td>
+              <td>Hexdump ko binary file mein convert karta hai</td>
+            </tr>
+            <tr>
+              <td><code>file filename</code></td>
+              <td>File type identify karta hai</td>
+            </tr>
+            <tr>
+              <td><code>gzip -d file.gz</code></td>
+              <td>Gzip file decompress karta hai</td>
+            </tr>
+            <tr>
+              <td><code>bzip2 -d file.bz2</code></td>
+              <td>Bzip2 file decompress karta hai</td>
+            </tr>
+            <tr>
+              <td><code>tar xf file.tar</code></td>
+              <td>Tar archive extract karta hai</td>
+            </tr>
+            <tr>
+              <td><code>ls</code></td>
+              <td>Files list karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cat filename</code></td>
+              <td>Final text file read karta hai</td>
+            </tr>
+            <tr>
+              <td><code>exit</code></td>
+              <td>SSH session close karta hai</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h1>Final Solution</h1>
+      <p><code>bandit12</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit12@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Temporary directory create karein:</p>
+      <pre><code class="language-bash">mkdir /tmp/dbs
+cd /tmp/dbs</code></pre>
+      <p>File copy karein:</p>
+      <pre><code class="language-bash">cp ~/data.txt .</code></pre>
+      <p>Hexdump reverse karein:</p>
+      <pre><code class="language-bash">xxd -r data.txt data</code></pre>
+      <p>Type check karein:</p>
+      <pre><code class="language-bash">file data</code></pre>
+      <p>Har stage par ye pattern follow karein:</p>
+      <pre><code class="language-bash">file filename</code></pre>
+      <p>Phir output ke according:</p>
+      <pre><code class="language-bash">gzip -d filename.gz</code></pre>
+      <pre><code class="language-bash">bzip2 -d filename.bz2</code></pre>
+      <pre><code class="language-bash">tar xf filename.tar</code></pre>
+      <p>Jab final file <code>ASCII text</code> ho jaye:</p>
+      <pre><code class="language-bash">cat final-file</code></pre>
+      <p>Provided transcript ke according password output:</p>
+      <pre><code class="language-text">abwdiBxEir4CAEBLAPћацибобрейнгом</code></pre>
+      <blockquote>
+        <p><strong>Important:</strong> Is final password ko apne actual terminal output se verify zaroor karein, kyunki pasted transcript mein characters corrupted dikh rahe hain.</p>
+      </blockquote>
+      <p>Ab <code>bandit13</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit13@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Conclusion</h1>
+      <p>Bandit Level 12 → Level 13 mein humne hexdump ko reverse karke repeatedly compressed file ko step by step extract karna seekha.</p>
+      <p>Complete workflow:</p>
+      <pre><code class="language-text">SSH Login as bandit12
+        ↓
+Temporary Directory Create
+        ↓
+data.txt Copy
+        ↓
+xxd -r Se Binary File Recover
+        ↓
+file Se Type Identify
+        ↓
+Gzip/Bzip2/Tar Extract
+        ↓
+Har Step Par file Check
+        ↓
+Final ASCII Text Read
+        ↓
+Password Find
+        ↓
+SSH Login as bandit13</code></pre>
+      <p>Is level ka sabse important rule hai:</p>
+      <pre><code class="language-bash">file filename</code></pre>
+      <p>Har extraction ke baad file type check karein aur usi ke according next command choose karein.</p>
+      <blockquote>
+        <p><strong>Security Note:</strong> SSH ka use sirf un systems par karein jahan aapke paas permission ho. OverTheWire Bandit ek authorized cybersecurity learning environment hai.</p>
+      </blockquote>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <span> © 2026 SSSWriteups </span>
+      
+    </div>
+  </footer>
+</body>
+</html>
+```
