@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OverTheWire Bandit - Level 13 to Level 14 | SSSWriteups</title>
+  <link rel="stylesheet" href="../../../style.css">
+</head>
+<body>
+  <header class="hero page-header">
+    <nav class="nav container">
+      <a class="logo" href="../../../../index.html">
+        SSS<span>Writeups</span>
+      </a>
+      <div class="nav-links">
+    <a href="../../../index.html">Home</a>
+    <a href="../../../categories/overthewire.html">OverTheWire</a>
+</div>
+    </nav>
+  </header>
+
+  <main class="writeup-page section container">
+    <article class="writeup-content">
+      <h1>OverTheWire Bandit — Level 13 to Level 14</h1>
+
+      <h2>Introduction</h2>
+      <p>Is writeup ka heading <strong>Level 13 → Level 14</strong> hai.</p>
+      <p>Is level mein humein direct password nahi diya jata. Humein ek private SSH key di jaati hai:</p>
+      <pre><code class="language-text">sshkey.private</code></pre>
+      <p>Is private key ka use karke <code>bandit14</code> user ke account par SSH login karna hai. Login ke baad hum <code>/etc/bandit_pass/bandit14</code> file read kar sakte hain.</p>
+      <p>Challenge ka main concept hai:</p>
+      <pre><code class="language-text">Password authentication ke bajay SSH private-key authentication</code></pre>
+
+      <h2>Objective</h2>
+      <p>Is level mein humein:</p>
+      <ul>
+        <li><code>bandit13</code> user se SSH ke through login karna hai.</li>
+        <li><code>sshkey.private</code> private key identify karni hai.</li>
+        <li><code>-i</code> option se private key specify karni hai.</li>
+        <li><code>localhost</code> ka meaning samajhna hai.</li>
+        <li><code>bandit14</code> user ke account par login karna hai.</li>
+        <li><code>/etc/bandit_pass/bandit14</code> file read karni hai.</li>
+        <li>Next password copy karna hai.</li>
+      </ul>
+
+      <h2>Given Information</h2>
+      <p>Current level par login karne ke liye:</p>
+      <pre><code class="language-text">Host:     bandit.labs.overthewire.org
+Port:     2220
+Username: bandit13
+Password: Previous level se mila password</code></pre>
+      <p>Private key file:</p>
+      <pre><code class="language-text">sshkey.private</code></pre>
+      <p>Next user:</p>
+      <pre><code class="language-text">bandit14</code></pre>
+      <p>Password file:</p>
+      <pre><code class="language-text">/etc/bandit_pass/bandit14</code></pre>
+      <p>Found password:</p>
+      <pre><code class="language-text">fGrHPx482xGC7U7rXKDaxiWFTOiFBENG</code></pre>
+
+      <h1>Private SSH Key</h1>
+
+      <h2>SSH Authentication Methods</h2>
+      <p>SSH login ke do common methods hain:</p>
+
+      <h3>Password Authentication</h3>
+      <pre><code class="language-bash">ssh username@host -p port</code></pre>
+      <p>Is method mein server password prompt karta hai.</p>
+
+      <h3>Private-Key Authentication</h3>
+      <pre><code class="language-bash">ssh -i private_key username@host -p port</code></pre>
+      <p>Is method mein SSH private key ka use karke identity prove ki jaati hai.</p>
+      <p>Bandit Level 13 mein private-key authentication use hoti hai.</p>
+
+      <h2>Private Key Kya Hota Hai?</h2>
+      <p>Private key ek secret cryptographic key hoti hai jo SSH authentication ke liye use hoti hai.</p>
+      <p>SSH key pair mein do keys hoti hain:</p>
+      <pre><code class="language-text">Private key → User ke paas secret rehti hai
+Public key  → Server par stored hoti hai</code></pre>
+      <p>Private key ko kabhi publicly share nahi karna chahiye.</p>
+
+      <h2>Key-Based Authentication Kaise Kaam Karti Hai?</h2>
+      <p>Simplified process:</p>
+      <pre><code class="language-text">Client ke paas private key
+          ↓
+Server ke paas matching public key
+          ↓
+SSH challenge-response verification
+          ↓
+User authenticated</code></pre>
+      <p>Server private key ko directly receive nahi karta. Client private key se prove karta hai ki uske paas matching secret hai.</p>
+
+      <h1><code>-i</code> Option</h1>
+
+      <h2><code>-i</code> Ka Meaning</h2>
+      <p>SSH command mein <code>-i</code> option identity file specify karta hai.</p>
+      <p>Command:</p>
+      <pre><code class="language-bash">ssh -i sshkey.private bandit14@localhost -p 2220</code></pre>
+      <p>Yahan:</p>
+      <pre><code class="language-text">-i sshkey.private → Is private key ko authentication ke liye use karo</code></pre>
+      <p>Agar <code>-i</code> option nahi lagayenge, to SSH default key locations search karega. Is challenge mein correct private key explicitly specify karni hoti hai.</p>
+
+      <h2>Identity File Kya Hoti Hai?</h2>
+      <p>Identity file woh file hoti hai jisme SSH private key stored hoti hai.</p>
+      <p>Is level mein identity file hai:</p>
+      <pre><code class="language-text">sshkey.private</code></pre>
+
+      <h1><code>localhost</code> Kya Hota Hai?</h1>
+
+      <h2>Localhost Meaning</h2>
+      <p><code>localhost</code> ek hostname hai jo current machine ko refer karta hai.</p>
+      <p>Common localhost addresses:</p>
+      <pre><code class="language-text">127.0.0.1  → IPv4 localhost
+::1        → IPv6 localhost</code></pre>
+      <p>Jab hum ye command run karte hain:</p>
+      <pre><code class="language-bash">ssh -i sshkey.private bandit14@localhost -p 2220</code></pre>
+      <p>To hum remote internet server par nahi, balki current Bandit machine par SSH service se connect kar rahe hote hain.</p>
+
+      <h2>Bandit Mein Localhost</h2>
+      <p>Pehle hum external Bandit server par login karte hain:</p>
+      <pre><code class="language-text">bandit13@bandit.labs.overthewire.org</code></pre>
+      <p>Uske baad <code>bandit13</code> machine ke andar se same machine par <code>bandit14</code> user ke account mein SSH login karte hain:</p>
+      <pre><code class="language-text">bandit14@localhost</code></pre>
+      <p>Simple diagram:</p>
+      <pre><code class="language-text">Your Computer
+      ↓ SSH
+Bandit Server as bandit13
+      ↓ SSH to localhost
+Same Bandit Server as bandit14</code></pre>
+
+      <h1>Port <code>2220</code></h1>
+
+      <h2><code>-p</code> Option</h2>
+      <p>SSH mein <code>-p</code> option connection port specify karta hai:</p>
+      <pre><code class="language-bash">-p 2220</code></pre>
+      <p>Complete command:</p>
+      <pre><code class="language-bash">ssh -i sshkey.private bandit14@localhost -p 2220</code></pre>
+      <p>Yahan:</p>
+      <pre><code class="language-text">-p 2220 → Port 2220 par SSH service se connect karo</code></pre>
+
+      <h2><code>-p</code> Aur <code>-i</code> Mein Difference</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Option</th>
+              <th>Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>-i</code></td>
+              <td>Identity/private key file specify karta hai</td>
+            </tr>
+            <tr>
+              <td><code>-p</code></td>
+              <td>SSH connection port specify karta hai</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Correct command mein dono options use ho rahe hain:</p>
+      <pre><code class="language-bash">ssh -i sshkey.private bandit14@localhost -p 2220</code></pre>
+
+      <h1>Host Key Verification</h1>
+
+      <h2>First-Time Connection Warning</h2>
+      <p>Pehli baar <code>localhost:2220</code> se connect karte waqt SSH warning show kar sakta hai:</p>
+      <pre><code class="language-text">The authenticity of host '[localhost]:2220' can't be established.
+Are you sure you want to continue connecting (yes/no/[fingerprint])?</code></pre>
+      <p>Ye warning isliye aati hai kyunki SSH client ne is host aur port combination ko pehle <code>known_hosts</code> file mein save nahi kiya.</p>
+      <p>Learning environment mein type karein:</p>
+      <pre><code class="language-text">yes</code></pre>
+
+      <h2>Host Key Kya Hoti Hai?</h2>
+      <p>Host key server ki identity verify karne ke liye use hoti hai.</p>
+      <p>SSH future connections par saved host key ko current host key se compare karta hai. Agar key change ho jaye, to SSH security warning display kar sakta hai.</p>
+
+      <h2>Known Hosts Warning</h2>
+      <p>Aapke output mein ye warning aa sakti hai:</p>
+      <pre><code class="language-text">Could not create directory '/home/bandit13/.ssh' (Permission denied).
+Failed to add the host to the list of known hosts (/home/bandit13/.ssh/known_hosts).</code></pre>
+      <p>Iska matlab hai ki SSH host key ko <code>known_hosts</code> file mein save nahi kar paya.</p>
+      <p>Is warning ke baad bhi connection successful ho sakta hai, agar key authentication correct ho.</p>
+
+      <h1>User Permissions</h1>
+
+      <h2><code>bandit13</code> Ki Limitation</h2>
+      <p><code>bandit13</code> user ko ye file directly read karne ki permission nahi ho sakti:</p>
+      <pre><code class="language-text">/etc/bandit_pass/bandit14</code></pre>
+      <p>Har user ko system ki har file access karne ki permission nahi hoti.</p>
+
+      <h2><code>bandit14</code> Ke Through Access</h2>
+      <p>Private key se <code>bandit14</code> user ke account par login karne ke baad hum command run karte hain:</p>
+      <pre><code class="language-bash">cat /etc/bandit_pass/bandit14</code></pre>
+      <p>Ab file access allow hota hai kyunki current user <code>bandit14</code> hai.</p>
+      <p>Authentication change hone ke baad permissions change nahi hoti; sirf current user identity change hoti hai.</p>
+
+      <h1><code>/etc/bandit_pass</code> Directory</h1>
+
+      <h2>Directory Kya Hai?</h2>
+      <p><code>/etc/bandit_pass</code> directory mein Bandit levels ke passwords stored hote hain.</p>
+      <p>Example entries:</p>
+      <pre><code class="language-text">bandit13
+bandit14
+bandit15
+bandit16</code></pre>
+      <p>Har file ka access permissions ke according controlled hota hai.</p>
+
+      <h2>Directory Mein Jaana</h2>
+      <pre><code class="language-bash">cd /etc/bandit_pass</code></pre>
+      <p>Files list karne ke liye:</p>
+      <pre><code class="language-bash">ls</code></pre>
+      <p>Specific password file read karne ke liye:</p>
+      <pre><code class="language-bash">cat bandit14</code></pre>
+      <p>Direct path se bhi read kar sakte hain:</p>
+      <pre><code class="language-bash">cat /etc/bandit_pass/bandit14</code></pre>
+      <p>Direct path method recommended hai kyunki isse directory change karne ki zaroorat nahi padti.</p>
+
+      <h1>Complete Walkthrough</h1>
+
+      <h2>Step 1: <code>bandit13</code> Par Login Karein</h2>
+      <pre><code class="language-powershell">ssh bandit13@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password prompt par previous level se mila password enter karein.</p>
+      <p>Successful login ke baad prompt roughly is tarah dikh sakta hai:</p>
+      <pre><code class="language-text">bandit13@bandit:~$</code></pre>
+
+      <h2>Step 2: Private Key Check Karein</h2>
+      <pre><code class="language-bash">ls</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">sshkey.private</code></pre>
+      <p>Private key file ko inspect karne ke liye:</p>
+      <pre><code class="language-bash">head sshkey.private</code></pre>
+      <p>Private key ko terminal par unnecessarily print na karein.</p>
+
+      <h2>Step 3: <code>bandit14</code> Par Localhost Login Karein</h2>
+      <pre><code class="language-bash">ssh -i sshkey.private bandit14@localhost -p 2220</code></pre>
+      <p>Alternative order bhi valid hai:</p>
+      <pre><code class="language-bash">ssh -p 2220 -i sshkey.private bandit14@localhost</code></pre>
+      <p>Pehli baar host key prompt aaye to:</p>
+      <pre><code class="language-text">yes</code></pre>
+
+      <h2>Step 4: Current User Verify Karein</h2>
+      <pre><code class="language-bash">whoami</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">bandit14</code></pre>
+      <p>Ye confirm karta hai ki aap <code>bandit14</code> account mein login ho.</p>
+
+      <h2>Step 5: Password Directory Open Karein</h2>
+      <pre><code class="language-bash">cd /etc/bandit_pass</code></pre>
+
+      <h2>Step 6: Files List Karein</h2>
+      <pre><code class="language-bash">ls</code></pre>
+      <p>Directory mein multiple Bandit password files dikhengi.</p>
+
+      <h2>Step 7: <code>bandit14</code> File Read Karein</h2>
+      <pre><code class="language-bash">cat bandit14</code></pre>
+      <p>Ya direct path:</p>
+      <pre><code class="language-bash">cat /etc/bandit_pass/bandit14</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">fGrHPx482xGC7U7rXKDaxiWFTOiFBENG</code></pre>
+
+      <h2>Step 8: Password Copy Karein</h2>
+      <pre><code class="language-text">fGrHPx482xGC7U7rXKDaxiWFTOiFBENG</code></pre>
+      <p>Password ke start ya end mein extra space copy na karein.</p>
+
+      <h1>Actual Terminal Session</h1>
+      <pre><code class="language-text">bandit13@bandit:~$ ls
+sshkey.private
+bandit13@bandit:~$ ssh -i sshkey.private bandit14@localhost -p 2220
+The authenticity of host '[localhost]:2220' can't be established.
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+bandit14@bandit:~$ whoami
+bandit14
+bandit14@bandit:~$ cd /etc/bandit_pass
+bandit14@bandit:/etc/bandit_pass$ cat bandit14
+fGrHPx482xGC7U7rXKDaxiWFTOiFBENG</code></pre>
+
+      <h1>Complete Command Sequence</h1>
+      <pre><code class="language-powershell">ssh bandit13@bandit.labs.overthewire.org -p 2220</code></pre>
+      <pre><code class="language-bash">ls</code></pre>
+      <pre><code class="language-bash">ssh -i sshkey.private bandit14@localhost -p 2220</code></pre>
+      <pre><code class="language-bash">whoami</code></pre>
+      <pre><code class="language-bash">cat /etc/bandit_pass/bandit14</code></pre>
+
+      <h1>Common Errors</h1>
+
+      <h2><code>Permission denied (publickey)</code></h2>
+      <p>Possible reasons:</p>
+      <ul>
+        <li>Private key ka path wrong hai.</li>
+        <li><code>-i sshkey.private</code> option missing hai.</li>
+        <li>Username <code>bandit14</code> galat type hua hai.</li>
+        <li>Aap <code>bandit13</code> home directory mein nahi ho.</li>
+      </ul>
+      <p>Check karein:</p>
+      <pre><code class="language-bash">ls -l sshkey.private</code></pre>
+      <p>Correct command:</p>
+      <pre><code class="language-bash">ssh -i ./sshkey.private bandit14@localhost -p 2220</code></pre>
+
+      <h2>Private Key File Not Found</h2>
+      <p>Error:</p>
+      <pre><code class="language-text">Identity file sshkey.private not accessible</code></pre>
+      <p>Current directory check karein:</p>
+      <pre><code class="language-bash">pwd
+ls</code></pre>
+      <p>Agar key current directory mein nahi hai, to complete path use karein:</p>
+      <pre><code class="language-bash">ssh -i /home/bandit13/sshkey.private bandit14@localhost -p 2220</code></pre>
+
+      <h2><code>Could Not Create Directory .ssh</code></h2>
+      <p>Error:</p>
+      <pre><code class="language-text">Could not create directory '/home/bandit13/.ssh' (Permission denied).</code></pre>
+      <p>Ye known hosts file save na hone ki warning hai. Iska matlab private key necessarily wrong nahi hai.</p>
+      <p>Agar connection successful ho jaye aur prompt <code>bandit14@bandit</code> show kare, to aap login kar chuke ho.</p>
+
+      <h2><code>Permission denied</code> While Reading Password</h2>
+      <p>Agar <code>bandit13</code> ke account mein rehkar run karein:</p>
+      <pre><code class="language-bash">cat /etc/bandit_pass/bandit14</code></pre>
+      <p>To permission denied aa sakta hai.</p>
+      <p>Pehle <code>bandit14</code> ke account mein login karein:</p>
+      <pre><code class="language-bash">ssh -i sshkey.private bandit14@localhost -p 2220</code></pre>
+      <p>Phir run karein:</p>
+      <pre><code class="language-bash">cat /etc/bandit_pass/bandit14</code></pre>
+
+      <h2>Wrong Port</h2>
+      <p>Correct port <code>2220</code> hai:</p>
+      <pre><code class="language-bash">ssh -i sshkey.private bandit14@localhost -p 2220</code></pre>
+
+      <h2>Wrong Username</h2>
+      <p>Correct username:</p>
+      <pre><code class="language-text">bandit14</code></pre>
+      <p>Correct command:</p>
+      <pre><code class="language-bash">ssh -i sshkey.private bandit14@localhost -p 2220</code></pre>
+
+      <h1>Security Lessons</h1>
+      <p>Is level se humein ye important lessons milte hain:</p>
+      <ul>
+        <li>SSH password ke alawa private key se bhi authentication kar sakta hai.</li>
+        <li>Private key secret credential hoti hai.</li>
+        <li>Public key server par aur private key client ke paas hoti hai.</li>
+        <li><code>-i</code> SSH identity file specify karta hai.</li>
+        <li><code>localhost</code> current machine ko represent karta hai.</li>
+        <li><code>127.0.0.1</code> IPv4 localhost address hai.</li>
+        <li>User change karne se file permissions change nahi hoti, lekin current access rights change ho sakti hain.</li>
+        <li><code>/etc/bandit_pass</code> sensitive password files contain karta hai.</li>
+        <li>Host key verification SSH server identity verify karne mein help karti hai.</li>
+        <li>Known hosts warning aur authentication failure alag problems hain.</li>
+        <li>File permissions Linux security ka important part hain.</li>
+      </ul>
+
+      <h1>Commands Summary</h1>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>ssh user@host -p 2220</code></td>
+              <td>Password-based SSH login karta hai</td>
+            </tr>
+            <tr>
+              <td><code>ssh -i key user@host -p 2220</code></td>
+              <td>Private key ke through SSH login karta hai</td>
+            </tr>
+            <tr>
+              <td><code>ls</code></td>
+              <td>Files list karta hai</td>
+            </tr>
+            <tr>
+              <td><code>head sshkey.private</code></td>
+              <td>Private key ki starting lines show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>whoami</code></td>
+              <td>Current user show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>hostname</code></td>
+              <td>Current machine ka hostname show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cd /etc/bandit_pass</code></td>
+              <td>Password directory mein enter karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cat /etc/bandit_pass/bandit14</code></td>
+              <td><code>bandit14</code> password file read karta hai</td>
+            </tr>
+            <tr>
+              <td><code>exit</code></td>
+              <td>SSH session close karta hai</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h1>Final Solution</h1>
+      <p><code>bandit13</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit13@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Private key se <code>bandit14</code> ke account par localhost login karein:</p>
+      <pre><code class="language-bash">ssh -i sshkey.private bandit14@localhost -p 2220</code></pre>
+      <p>Current user verify karein:</p>
+      <pre><code class="language-bash">whoami</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">bandit14</code></pre>
+      <p>Password file read karein:</p>
+      <pre><code class="language-bash">cat /etc/bandit_pass/bandit14</code></pre>
+      <p>Password:</p>
+      <pre><code class="language-text">fGrHPx482xGC7U7rXKDaxiWFTOiFBENG</code></pre>
+
+      <h1>Conclusion</h1>
+      <p>Bandit Level 13 → Level 14 mein humne private SSH key ka use karke <code>bandit14</code> user ke account par login karna seekha.</p>
+      <p>Complete workflow:</p>
+      <pre><code class="language-text">SSH Login as bandit13
+        ↓
+Private Key Identify
+        ↓
+-i Option Se Identity File Specify
+        ↓
+localhost Par bandit14 Login
+        ↓
+User Permissions Change
+        ↓
+/etc/bandit_pass/bandit14 Read
+        ↓
+Password Find</code></pre>
+      <p>Is level ka most important command hai:</p>
+      <pre><code class="language-bash">ssh -i sshkey.private bandit14@localhost -p 2220</code></pre>
+      <blockquote>
+        <p><strong>Security Note:</strong> Private SSH keys ko kabhi public ya unauthorized person ke saath share na karein. SSH ka use sirf un systems par karein jahan aapke paas permission ho. OverTheWire Bandit ek authorized cybersecurity learning environment hai.</p>
+      </blockquote>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <span> © 2026 SSSWriteups </span>
+      
+    </div>
+  </footer>
+</body>
+</html>
+```
