@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OverTheWire Bandit - Level 19 to Level 20 | SSSWriteups</title>
+  <link rel="stylesheet" href="../../../style.css">
+</head>
+<body>
+  <header class="hero page-header">
+    <nav class="nav container">
+      <a class="logo" href="../../../../index.html">
+        SSS<span>Writeups</span>
+      </a>
+      <div class="nav-links">
+    <a href="../../../index.html">Home</a>
+    <a href="../../../categories/overthewire.html">OverTheWire</a>
+</div>
+    </nav>
+  </header>
+
+  <main class="writeup-page section container">
+    <article class="writeup-content">
+      <h1>OverTheWire Bandit — Level 19 to Level 20</h1>
+
+      <h2>Introduction</h2>
+      <p>Is writeup ka heading <strong>Level 19 → Level 20</strong> hai.</p>
+      <p>Is level mein home directory ke andar ek special binary file di gayi hai:</p>
+      <pre><code class="language-text">bandit20-do</code></pre>
+      <p>Ye ek <strong>setuid binary</strong> hai. Iska purpose hai kisi command ko doosre user ke privileges ke saath execute karna.</p>
+      <p>Normal <code>bandit19</code> user directly ye file read nahi kar sakta:</p>
+      <pre><code class="language-text">/etc/bandit_pass/bandit20</code></pre>
+      <p>Lekin <code>bandit20-do</code> binary command ko <code>bandit20</code> user ke effective privileges ke saath run karti hai. Isliye hum is binary ka use karke password file read kar sakte hain.</p>
+      <p>Main command:</p>
+      <pre><code class="language-bash">./bandit20-do cat /etc/bandit_pass/bandit20</code></pre>
+      <p>Found password:</p>
+      <pre><code class="language-text">VxCazJaVykI6W36BkBU9mJTCM8rR95XT</code></pre>
+
+      <h2>Objective</h2>
+      <p>Is level mein humein:</p>
+      <ul>
+        <li><code>bandit19</code> user se SSH ke through login karna hai.</li>
+        <li><code>bandit20-do</code> binary identify karni hai.</li>
+        <li>Binary ko bina arguments ke execute karke usage samajhna hai.</li>
+        <li><code>setuid</code> behavior samajhna hai.</li>
+        <li><code>id</code> command se effective user ID verify karni hai.</li>
+        <li><code>bandit20-do</code> ke through password file read karni hai.</li>
+        <li><code>bandit20</code> user se next SSH login karna hai.</li>
+      </ul>
+
+      <h2>Given Information</h2>
+      <p>Current level:</p>
+      <pre><code class="language-text">Username: bandit19
+Password: Previous level se mila password</code></pre>
+      <p>Binary:</p>
+      <pre><code class="language-text">bandit20-do</code></pre>
+      <p>Protected file:</p>
+      <pre><code class="language-text">/etc/bandit_pass/bandit20</code></pre>
+      <p>Next username:</p>
+      <pre><code class="language-text">bandit20</code></pre>
+      <p>Found password:</p>
+      <pre><code class="language-text">VxCazJaVykI6W36BkBU9mJTCM8rR95XT</code></pre>
+
+      <h1>Setuid Kya Hota Hai?</h1>
+
+      <h2>UID Kya Hota Hai?</h2>
+      <p>UID ka full form <strong>User ID</strong> hai. Linux internally users ko numeric IDs ke through identify karta hai.</p>
+      <p>Example:</p>
+      <pre><code class="language-text">uid=11019(bandit19)</code></pre>
+      <p>Iska meaning:</p>
+      <pre><code class="language-text">UID number: 11019
+Username:   bandit19</code></pre>
+
+      <h2>EUID Kya Hota Hai?</h2>
+      <p>EUID ka full form <strong>Effective User ID</strong> hai.</p>
+      <p>EUID determine karta hai ki process ko currently kis user ke permissions mil rahe hain.</p>
+      <p>Normally real UID aur effective UID same hote hain:</p>
+      <pre><code class="language-text">uid=11019(bandit19) euid=11019(bandit19)</code></pre>
+      <p>Setuid program ke case mein dono different ho sakte hain:</p>
+      <pre><code class="language-text">uid=11019(bandit19) euid=11020(bandit20)</code></pre>
+      <p>Yahan process start <code>bandit19</code> ne kiya, lekin effective permissions <code>bandit20</code> ki hain.</p>
+
+      <h2>Setuid Bit</h2>
+      <p>Setuid ka full form <strong>Set User ID upon execution</strong> hai.</p>
+      <p>Agar kisi executable file par setuid bit enabled ho, to file execute karne wala program file owner ke privileges ke saath run ho sakta hai.</p>
+      <p>Is level mein:</p>
+      <pre><code class="language-text">Binary owner: bandit20
+Current user: bandit19
+Effective user: bandit20</code></pre>
+
+      <h2>Setuid Permission Format</h2>
+      <p>Setuid file permissions mein owner execute position par <code>s</code> character dikh sakta hai.</p>
+      <p>Example:</p>
+      <pre><code class="language-text">-rwsr-x---</code></pre>
+      <p>Yahan <code>s</code> setuid bit ko represent karta hai.</p>
+      <p>File permissions check karne ke liye:</p>
+      <pre><code class="language-bash">ls -l bandit20-do</code></pre>
+
+      <h2>Setuid Ka Security Risk</h2>
+      <p>Setuid programs powerful hote hain kyunki low-privileged user higher-privileged operation perform kar sakta hai.</p>
+      <p>Agar setuid program user input ko safely handle na kare, to security vulnerability create ho sakti hai.</p>
+      <p>Real systems par setuid binaries ko carefully audit kiya jata hai.</p>
+
+      <h1><code>bandit20-do</code> Binary</h1>
+
+      <h2>Binary Ka Purpose</h2>
+      <p><code>bandit20-do</code> ek wrapper program hai jo command ko <code>bandit20</code> ke effective user privileges ke saath run karti hai.</p>
+      <p>Bina arguments ke execute karein:</p>
+      <pre><code class="language-bash">./bandit20-do</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">Run a command as another user.
+Example: /bandit20-do id</code></pre>
+      <p>Is output se humein binary ka expected usage samajh aata hai:</p>
+      <pre><code class="language-bash">./bandit20-do command</code></pre>
+
+      <h2><code>./</code> Ka Meaning</h2>
+      <pre><code class="language-text">.   → Current directory</code></pre>
+      <p>Isliye:</p>
+      <pre><code class="language-bash">./bandit20-do</code></pre>
+      <p>ka meaning hai:</p>
+      <pre><code class="language-text">Current directory ke andar bandit20-do executable run karo.</code></pre>
+      <p>Linux security reasons ki wajah se current directory automatically command search path mein include nahi hoti. Isliye binary run karne ke liye <code>./</code> likhna padta hai.</p>
+
+      <h1><code>id</code> Command</h1>
+
+      <h2><code>id</code> Kya Karti Hai?</h2>
+      <p><code>id</code> command current user ki identity aur group information display karti hai.</p>
+      <pre><code class="language-bash">id</code></pre>
+      <p>Setuid binary ke through:</p>
+      <pre><code class="language-bash">./bandit20-do id</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">uid=11019(bandit19) gid=11019(bandit19) euid=11020(bandit20) groups=11019(bandit19)</code></pre>
+
+      <h2>Output Breakdown</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Part</th>
+              <th>Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>uid=11019(bandit19)</code></td>
+              <td>Original user jisne process start kiya</td>
+            </tr>
+            <tr>
+              <td><code>gid=11019(bandit19)</code></td>
+              <td>Original primary group</td>
+            </tr>
+            <tr>
+              <td><code>euid=11020(bandit20)</code></td>
+              <td>Effective user permissions</td>
+            </tr>
+            <tr>
+              <td><code>groups=11019(bandit19)</code></td>
+              <td>User ke groups</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Important observation:</p>
+      <pre><code class="language-text">Real user:      bandit19
+Effective user: bandit20</code></pre>
+      <p>Yahi setuid behavior ka proof hai.</p>
+
+      <h1>Password File Read Karna</h1>
+
+      <h2>Direct Access Problem</h2>
+      <p><code>bandit19</code> user ke roop mein direct command:</p>
+      <pre><code class="language-bash">cat /etc/bandit_pass/bandit20</code></pre>
+      <p>permission denied de sakti hai, kyunki file <code>bandit20</code> user ke liye protected hai.</p>
+
+      <h2>Setuid Binary Ke Through Access</h2>
+      <p>Correct command:</p>
+      <pre><code class="language-bash">./bandit20-do cat /etc/bandit_pass/bandit20</code></pre>
+      <p>Command ke parts:</p>
+      <pre><code class="language-text">./bandit20-do              → Setuid wrapper
+cat                        → Execute hone wali command
+/etc/bandit_pass/bandit20  → Protected password file</code></pre>
+      <p>Binary <code>cat</code> ko <code>bandit20</code> ke effective privileges ke saath execute karwati hai.</p>
+      <p>Output:</p>
+      <pre><code class="language-text">VxCazJaVykI6W36BkBU9mJTCM8rR95XT</code></pre>
+
+      <h1>Complete Walkthrough</h1>
+
+      <h2>Step 1: <code>bandit19</code> Par Login Karein</h2>
+      <pre><code class="language-powershell">ssh bandit19@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password prompt par previous level se mila password enter karein.</p>
+      <p>Successful login ke baad prompt roughly is tarah dikh sakta hai:</p>
+      <pre><code class="language-text">bandit19@bandit:~$</code></pre>
+
+      <h2>Step 2: Files Ki List Dekhein</h2>
+      <pre><code class="language-bash">ls</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">bandit20-do</code></pre>
+
+      <h2>Step 3: Binary Ko Bina Arguments Ke Run Karein</h2>
+      <pre><code class="language-bash">./bandit20-do</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">Run a command as another user.
+Example: /bandit20-do id</code></pre>
+
+      <h2>Step 4: Effective User Verify Karein</h2>
+      <pre><code class="language-bash">./bandit20-do id</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">uid=11019(bandit19) gid=11019(bandit19) euid=11020(bandit20) groups=11019(bandit19)</code></pre>
+      <p><code>euid=11020(bandit20)</code> confirm karta hai ki command <code>bandit20</code> ke effective privileges ke saath run hui.</p>
+
+      <h2>Step 5: Password File Read Karein</h2>
+      <pre><code class="language-bash">./bandit20-do cat /etc/bandit_pass/bandit20</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">VxCazJaVykI6W36BkBU9mJTCM8rR95XT</code></pre>
+
+      <h2>Step 6: Password Copy Karein</h2>
+      <pre><code class="language-text">VxCazJaVykI6W36BkBU9mJTCM8rR95XT</code></pre>
+      <p>Password ke start ya end mein extra space copy na karein.</p>
+
+      <h2>Step 7: <code>bandit20</code> Par Login Karein</h2>
+      <pre><code class="language-bash">ssh bandit20@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password enter karein:</p>
+      <pre><code class="language-text">VxCazJaVykI6W36BkBU9mJTCM8rR95XT</code></pre>
+
+      <h1>Actual Terminal Session</h1>
+      <pre><code class="language-text">bandit19@bandit:~$ ls
+bandit20-do
+bandit19@bandit:~$ ./bandit20-do
+Run a command as another user.
+Example: /bandit20-do id
+bandit19@bandit:~$ ./bandit20-do id
+uid=11019(bandit19) gid=11019(bandit19) euid=11020(bandit20) groups=11019(bandit19)
+bandit19@bandit:~$ ./bandit20-do cat /etc/bandit_pass/bandit20
+VxCazJaVykI6W36BkBU9mJTCM8rR95XT</code></pre>
+      <p>Next level login:</p>
+      <pre><code class="language-bash">ssh bandit20@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>File Permissions Inspect Karna</h1>
+      <p>Binary ki permissions check karne ke liye:</p>
+      <pre><code class="language-bash">ls -l bandit20-do</code></pre>
+      <p>Possible output format:</p>
+      <pre><code class="language-text">-rwsr-x--- 1 bandit20 bandit19 ... bandit20-do</code></pre>
+      <p>Starting permissions mein <code>s</code> setuid bit ko indicate karta hai.</p>
+      <p>Detailed metadata:</p>
+      <pre><code class="language-bash">stat bandit20-do</code></pre>
+      <p><code>stat</code> command file ka owner, group, permissions aur timestamps display karti hai.</p>
+
+      <h1>Common Errors</h1>
+
+      <h2><code>No Such File or Directory</code></h2>
+      <p>Error:</p>
+      <pre><code class="language-text">./bandit20-do: No such file or directory</code></pre>
+      <p>Check karein:</p>
+      <pre><code class="language-bash">pwd
+ls</code></pre>
+      <p>Aapko <code>bandit20-do</code> file home directory mein honi chahiye.</p>
+
+      <h2><code>Permission Denied</code></h2>
+      <p>Agar direct file read karein:</p>
+      <pre><code class="language-bash">cat /etc/bandit_pass/bandit20</code></pre>
+      <p>To permission denied aa sakta hai. Correct method:</p>
+      <pre><code class="language-bash">./bandit20-do cat /etc/bandit_pass/bandit20</code></pre>
+
+      <h2>Wrong Binary Name</h2>
+      <p>Aapke pasted text mein ek jagah <code>bandit26-do</code> dikh raha hai. Correct binary hai:</p>
+      <pre><code class="language-text">bandit20-do</code></pre>
+      <p>Correct command:</p>
+      <pre><code class="language-bash">./bandit20-do cat /etc/bandit_pass/bandit20</code></pre>
+
+      <h2><code>euid</code> Bandit20 Nahi Aa Raha</h2>
+      <p>Agar output mein ye nahi dikh raha:</p>
+      <pre><code class="language-text">euid=11020(bandit20)</code></pre>
+      <p>To shayad aapne binary correctly execute nahi ki ya wrong file use ki hai.</p>
+      <p>Run karein:</p>
+      <pre><code class="language-bash">./bandit20-do id</code></pre>
+
+      <h2>Password Copy Error</h2>
+      <p>Password:</p>
+      <pre><code class="language-text">VxCazJaVykI6W36BkBU9mJTCM8rR95XT</code></pre>
+      <p>Check karein:</p>
+      <ul>
+        <li>Uppercase aur lowercase characters same hain.</li>
+        <li><code>0</code> aur <code>O</code> ko carefully distinguish karein.</li>
+        <li>Password ke start ya end mein extra space nahi hai.</li>
+      </ul>
+
+      <h2>SSH Permission Denied</h2>
+      <p>Next level par login karte waqt check karein:</p>
+      <ul>
+        <li>Username <code>bandit20</code> hai.</li>
+        <li>Port <code>2220</code> use ho raha hai.</li>
+        <li><code>bandit20-do</code> se mila exact password use ho raha hai.</li>
+      </ul>
+      <p>Correct command:</p>
+      <pre><code class="language-bash">ssh bandit20@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Security Lessons</h1>
+      <p>Is level se humein ye important lessons milte hain:</p>
+      <ul>
+        <li>Setuid binaries doosre user ke effective privileges mein run ho sakti hain.</li>
+        <li>Real UID aur effective UID alag ho sakte hain.</li>
+        <li><code>id</code> command identity aur privilege context verify karne ke liye useful hai.</li>
+        <li>Protected files ko access karne ke liye user permissions important hoti hain.</li>
+        <li>Setuid programs security-sensitive hote hain.</li>
+        <li>Untrusted input ko setuid programs mein safely handle karna zaroori hai.</li>
+        <li><code>ls -l</code> permissions aur ownership inspect karne ke liye useful hai.</li>
+        <li>Binary wrapper ka behavior execute karke samjha ja sakta hai.</li>
+        <li>Privilege escalation concepts ko authorized labs mein hi practice karna chahiye.</li>
+      </ul>
+
+      <h1>Commands Summary</h1>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>ssh user@host -p 2220</code></td>
+              <td>Remote server par SSH login karta hai</td>
+            </tr>
+            <tr>
+              <td><code>ls</code></td>
+              <td>Files list karta hai</td>
+            </tr>
+            <tr>
+              <td><code>./bandit20-do</code></td>
+              <td>Setuid binary ka usage display karta hai</td>
+            </tr>
+            <tr>
+              <td><code>./bandit20-do id</code></td>
+              <td>Effective user ID verify karta hai</td>
+            </tr>
+            <tr>
+              <td><code>./bandit20-do cat /etc/bandit_pass/bandit20</code></td>
+              <td>Protected password file read karta hai</td>
+            </tr>
+            <tr>
+              <td><code>ls -l bandit20-do</code></td>
+              <td>Permissions aur ownership show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>stat bandit20-do</code></td>
+              <td>Detailed file metadata show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>exit</code></td>
+              <td>SSH session close karta hai</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h1>Final Solution</h1>
+      <p><code>bandit19</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit19@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Binary list karein:</p>
+      <pre><code class="language-bash">ls</code></pre>
+      <p>Usage dekhein:</p>
+      <pre><code class="language-bash">./bandit20-do</code></pre>
+      <p>Effective user verify karein:</p>
+      <pre><code class="language-bash">./bandit20-do id</code></pre>
+      <p>Password file read karein:</p>
+      <pre><code class="language-bash">./bandit20-do cat /etc/bandit_pass/bandit20</code></pre>
+      <p>Password:</p>
+      <pre><code class="language-text">VxCazJaVykI6W36BkBU9mJTCM8rR95XT</code></pre>
+      <p>Ab <code>bandit20</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit20@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Conclusion</h1>
+      <p>Bandit Level 19 → Level 20 mein humne setuid binary ka use karke command ko <code>bandit20</code> ke effective privileges ke saath execute karna seekha.</p>
+      <p>Complete workflow:</p>
+      <pre><code class="language-text">SSH Login as bandit19
+        ↓
+bandit20-do Identify
+        ↓
+Setuid Behavior Check
+        ↓
+Effective UID Verify
+        ↓
+Protected Password File Read
+        ↓
+Password Find
+        ↓
+SSH Login as bandit20</code></pre>
+      <p>Is level ke most important commands hain:</p>
+      <pre><code class="language-bash">./bandit20-do id</code></pre>
+      <pre><code class="language-bash">./bandit20-do cat /etc/bandit_pass/bandit20</code></pre>
+      <blockquote>
+        <p><strong>Security Note:</strong> Setuid binaries privilege-sensitive hoti hain. Inka testing sirf authorized labs jaise OverTheWire Bandit mein karein.</p>
+      </blockquote>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <span> © 2026 SSSWriteups </span>
+      
+    </div>
+  </footer>
+</body>
+</html>
+```
