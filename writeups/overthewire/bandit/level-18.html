@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OverTheWire Bandit - Level 18 to Level 19 | SSSWriteups</title>
+  <link rel="stylesheet" href="../../../style.css">
+</head>
+<body>
+  <header class="hero page-header">
+    <nav class="nav container">
+      <a class="logo" href="../../../../index.html">
+        SSS<span>Writeups</span>
+      </a>
+      <div class="nav-links">
+    <a href="../../../index.html">Home</a>
+    <a href="../../../categories/overthewire.html">OverTheWire</a>
+</div>
+    </nav>
+  </header>
+
+  <main class="writeup-page section container">
+    <article class="writeup-content">
+      <h1>OverTheWire Bandit — Level 18 to Level 19</h1>
+
+      <h2>Introduction</h2>
+      <p>Is writeup ka heading <strong>Level 18 → Level 19</strong> hai.</p>
+      <p>Is level mein next level ka password home directory mein stored <code>readme</code> file ke andar hai.</p>
+      <p>Problem ye hai ki <code>bandit18</code> ke <code>.bashrc</code> file ko modify kiya gaya hai. Jab hum normal SSH login karte hain, to <code>.bashrc</code> automatically execute hoti hai aur humein logout kar deti hai.</p>
+      <p>Isliye normal command:</p>
+      <pre><code class="language-bash">ssh bandit18@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>se login karte hi connection close ho jata hai.</p>
+      <p>Is problem ko solve karne ke liye SSH ka <code>-T</code> option use karenge:</p>
+      <pre><code class="language-bash">ssh -T bandit18@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Phir remote command directly execute kar sakte hain:</p>
+      <pre><code class="language-bash">ssh -T bandit18@bandit.labs.overthewire.org -p 2220 cat readme</code></pre>
+      <p>Found password:</p>
+      <pre><code class="language-text">awhqfNnAbc1naukrpqDYcF95h7HoMTrC</code></pre>
+
+      <h2>Objective</h2>
+      <p>Is level mein humein:</p>
+      <ul>
+        <li><code>bandit18</code> user se SSH connection establish karna hai.</li>
+        <li>Modified <code>.bashrc</code> ke logout behavior ko bypass karna hai.</li>
+        <li>Pseudo-terminal allocation disable karni hai.</li>
+        <li>Remote command execute karni hai.</li>
+        <li><code>readme</code> file ka content read karna hai.</li>
+        <li>Password copy karna hai.</li>
+        <li><code>bandit19</code> user se next SSH login karna hai.</li>
+      </ul>
+
+      <h2>Given Information</h2>
+      <p>Current level:</p>
+      <pre><code class="language-text">Username: bandit18
+Password: Previous level se mila password</code></pre>
+      <p>File:</p>
+      <pre><code class="language-text">readme</code></pre>
+      <p>Next username:</p>
+      <pre><code class="language-text">bandit19</code></pre>
+      <p>Found password:</p>
+      <pre><code class="language-text">awhqfNnAbc1naukrpqDYcF95h7HoMTrC</code></pre>
+
+      <h1><code>.bashrc</code> Kya Hoti Hai?</h1>
+
+      <h2><code>.bashrc</code> File</h2>
+      <p><code>.bashrc</code> ek shell configuration file hoti hai jo Bash interactive shell start hone par load ho sakti hai.</p>
+      <p>Is file mein commonly ye settings hoti hain:</p>
+      <ul>
+        <li>Aliases</li>
+        <li>Environment variables</li>
+        <li>Shell prompt configuration</li>
+        <li>Functions</li>
+        <li>Startup commands</li>
+        <li>Custom shell behavior</li>
+      </ul>
+      <p>File ka common location:</p>
+      <pre><code class="language-text">~/.bashrc</code></pre>
+      <p>Yahan <code>~</code> current user ki home directory ko represent karta hai.</p>
+
+      <h2>Modified <code>.bashrc</code></h2>
+      <p>Is challenge mein <code>.bashrc</code> ko intentionally modify kiya gaya hai. Iska purpose ye hai ki normal SSH login par shell user ko logout kar de.</p>
+      <p>Normal flow:</p>
+      <pre><code class="language-text">SSH Login
+    ↓
+Bash Shell Start
+    ↓
+.bashrc Execute
+    ↓
+Logout Command
+    ↓
+Connection Close</code></pre>
+
+      <h2>Logout Kyon Hota Hai?</h2>
+      <p>Jab SSH interactive shell start karta hai, Bash startup configuration read kar sakti hai. Agar <code>.bashrc</code> mein logout ya exit command ho, to shell immediately close ho sakti hai.</p>
+      <p>Isliye prompt nahi milta:</p>
+      <pre><code class="language-text">bandit18@bandit:~$</code></pre>
+
+      <h1>Pseudo-Terminal Kya Hota Hai?</h1>
+
+      <h2>Terminal</h2>
+      <p>Terminal ek interface hai jisme user commands type karta hai aur output dekhta hai.</p>
+
+      <h2>Pseudo-Terminal</h2>
+      <p>Pseudo-terminal, ya PTY, ek software-based terminal interface hota hai jo remote shell ko interactive terminal jaisa behavior provide karta hai.</p>
+      <p>SSH normally interactive login ke waqt pseudo-terminal allocate kar sakta hai.</p>
+
+      <h2>Pseudo-Terminal Allocation Disable Karna</h2>
+      <p>SSH ka <code>-T</code> option pseudo-terminal allocation disable karta hai.</p>
+      <pre><code class="language-bash">ssh -T user@host</code></pre>
+      <p>Iska meaning:</p>
+      <pre><code class="language-text">Remote session ke liye pseudo-terminal allocate mat karo.</code></pre>
+      <p>Is level mein <code>-T</code> use karne se normal interactive shell behavior avoid hota hai aur hum remote command execute kar sakte hain.</p>
+
+      <h1>SSH <code>-T</code> Option</h1>
+
+      <h2>Correct Command</h2>
+      <pre><code class="language-bash">ssh -T bandit18@bandit.labs.overthewire.org -p 2220</code></pre>
+      <blockquote>
+        <p><strong>Important:</strong> Aapke pasted command mein <code>ssh - bandit18...</code> dikh raha hai. Correct option <code>-T</code> hai, sirf <code>-</code> nahi.</p>
+      </blockquote>
+
+      <h2><code>-T</code> Ka Benefit</h2>
+      <p><code>-T</code> ke saath SSH pseudo-terminal allocate nahi karta. Isse humein interactive prompt ke bina remote command run karne ka option milta hai.</p>
+      <p>Example:</p>
+      <pre><code class="language-bash">ssh -T bandit18@bandit.labs.overthewire.org -p 2220 cat readme</code></pre>
+
+      <h1>Remote Command Execution</h1>
+
+      <h2>SSH Command Ke Baad Remote Command</h2>
+      <p>SSH syntax:</p>
+      <pre><code class="language-bash">ssh [options] user@host [remote-command]</code></pre>
+      <p>Example:</p>
+      <pre><code class="language-bash">ssh -T bandit18@bandit.labs.overthewire.org -p 2220 cat readme</code></pre>
+      <p>Is command mein:</p>
+      <pre><code class="language-text">ssh -T ... → Remote server se non-interactive connection
+cat readme → Remote server par execute hone wali command</code></pre>
+
+      <h2>Command Ka Flow</h2>
+      <pre><code class="language-text">Local terminal
+      ↓
+SSH connection
+      ↓
+Remote bandit18 account
+      ↓
+cat readme execute
+      ↓
+Password output local terminal par</code></pre>
+
+      <h2>Quotes Ke Saath Remote Command</h2>
+      <p>Remote command ko quotes mein bhi likh sakte hain:</p>
+      <pre><code class="language-bash">ssh -T bandit18@bandit.labs.overthewire.org -p 2220 'cat readme'</code></pre>
+      <p>Quotes command ko ek complete remote command ke roop mein preserve karti hain.</p>
+
+      <h1>Interactive Aur Non-Interactive Shell</h1>
+
+      <h2>Interactive Shell</h2>
+      <p>Interactive shell mein user ko prompt milta hai aur commands manually type kar sakta hai.</p>
+      <p>Example:</p>
+      <pre><code class="language-text">bandit18@bandit:~$</code></pre>
+
+      <h2>Non-Interactive Shell</h2>
+      <p>Non-interactive shell mein command pehle se provide hoti hai aur output return hone ke baad session close ho sakta hai.</p>
+      <p>Example:</p>
+      <pre><code class="language-bash">ssh -T bandit18@bandit.labs.overthewire.org -p 2220 cat readme</code></pre>
+      <p>Is level mein non-interactive command execution useful hai kyunki interactive shell <code>.bashrc</code> ke logout behavior se affected hoti hai.</p>
+
+      <h1><code>cat</code> Command</h1>
+
+      <h2><code>cat readme</code></h2>
+      <p><code>cat</code> command file ka content terminal par display karti hai.</p>
+      <p>Remote server par:</p>
+      <pre><code class="language-bash">cat readme</code></pre>
+      <p>File ka output:</p>
+      <pre><code class="language-text">awhqfNnAbc1naukrpqDYcF95h7HoMTrC</code></pre>
+
+      <h2>Remote <code>cat</code> Command</h2>
+      <p>Local machine par <code>cat readme</code> run karne ke bajay SSH command ke through remote machine par run karna hai:</p>
+      <pre><code class="language-bash">ssh -T bandit18@bandit.labs.overthewire.org -p 2220 cat readme</code></pre>
+
+      <h1>Complete Walkthrough</h1>
+
+      <h2>Step 1: Normal Login Try Karein</h2>
+      <p>Normal command:</p>
+      <pre><code class="language-bash">ssh bandit18@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password enter karne ke baad connection close ho sakta hai:</p>
+      <pre><code class="language-text">Connection to bandit.labs.overthewire.org closed.</code></pre>
+      <p>Ye <code>.bashrc</code> ke modified logout behavior ki wajah se hota hai.</p>
+
+      <h2>Step 2: <code>-T</code> Option Samjhein</h2>
+      <p>SSH manual mein <code>-T</code> option pseudo-terminal allocation disable karta hai.</p>
+      <pre><code class="language-bash">ssh -T bandit18@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Lekin sirf <code>-T</code> ke saath shell prompt milna zaroori nahi hai. Isliye remote command directly provide karna best hai.</p>
+
+      <h2>Step 3: <code>readme</code> File Directly Read Karein</h2>
+      <pre><code class="language-bash">ssh -T bandit18@bandit.labs.overthewire.org -p 2220 cat readme</code></pre>
+      <p>Password prompt par previous level ka password enter karein.</p>
+      <p>Output:</p>
+      <pre><code class="language-text">awhqfNnAbc1naukrpqDYcF95h7HoMTrC</code></pre>
+
+      <h2>Step 4: Password Copy Karein</h2>
+      <pre><code class="language-text">awhqfNnAbc1naukrpqDYcF95h7HoMTrC</code></pre>
+      <p>Password ke start ya end mein extra space copy na karein.</p>
+
+      <h2>Step 5: <code>bandit19</code> Par Login Karein</h2>
+      <pre><code class="language-bash">ssh bandit19@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password enter karein:</p>
+      <pre><code class="language-text">awhqfNnAbc1naukrpqDYcF95h7HoMTrC</code></pre>
+
+      <h1>Actual Terminal Session</h1>
+      <pre><code class="language-text">PS C:\Users\dolla> ssh -T bandit18@bandit.labs.overthewire.org -p 2220 cat readme
+bandit18@bandit.labs.overthewire.org's password:
+awhqfNnAbc1naukrpqDYcF95h7HoMTrC</code></pre>
+      <p>Is command mein interactive prompt nahi milta, kyunki remote command directly execute ho rahi hai.</p>
+
+      <h1>Alternative Commands</h1>
+
+      <h2>Quotes Ke Saath</h2>
+      <pre><code class="language-bash">ssh -T bandit18@bandit.labs.overthewire.org -p 2220 'cat readme'</code></pre>
+
+      <h2>Shell Explicitly Use Karna</h2>
+      <pre><code class="language-bash">ssh -T bandit18@bandit.labs.overthewire.org -p 2220 'bash -c "cat readme"'</code></pre>
+      <p>Basic solution ke liye first command sufficient hai:</p>
+      <pre><code class="language-bash">ssh -T bandit18@bandit.labs.overthewire.org -p 2220 cat readme</code></pre>
+
+      <h1>Common Errors</h1>
+
+      <h2><code>ssh -</code> Aur <code>ssh -T</code> Mein Difference</h2>
+      <p>Incorrect ya incomplete:</p>
+      <pre><code class="language-bash">ssh - bandit18@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Correct:</p>
+      <pre><code class="language-bash">ssh -T bandit18@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p><code>-T</code> ek complete SSH option hai.</p>
+
+      <h2>Connection Immediately Close Ho Raha Hai</h2>
+      <p>Normal login mein connection close hona expected hai:</p>
+      <pre><code class="language-bash">ssh bandit18@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Remote command ke saath <code>-T</code> use karein:</p>
+      <pre><code class="language-bash">ssh -T bandit18@bandit.labs.overthewire.org -p 2220 cat readme</code></pre>
+
+      <h2><code>cat: readme: No Such File</code></h2>
+      <p>Command remote home directory mein execute honi chahiye. Correct command check karein:</p>
+      <pre><code class="language-bash">ssh -T bandit18@bandit.labs.overthewire.org -p 2220 cat readme</code></pre>
+
+      <h2>Password Copy Error</h2>
+      <p>Password:</p>
+      <pre><code class="language-text">awhqfNnAbc1naukrpqDYcF95h7HoMTrC</code></pre>
+      <p>Check karein:</p>
+      <ul>
+        <li>Uppercase aur lowercase characters same hain.</li>
+        <li>Password ke start ya end mein extra space nahi hai.</li>
+        <li><code>0</code> aur <code>O</code> jaise similar characters carefully check kiye gaye hain.</li>
+      </ul>
+
+      <h2>SSH Permission Denied</h2>
+      <p>Next level par login karte waqt check karein:</p>
+      <ul>
+        <li>Username <code>bandit19</code> hai.</li>
+        <li>Port <code>2220</code> use ho raha hai.</li>
+        <li>Password <code>readme</code> se exact copy hua hai.</li>
+      </ul>
+      <p>Correct command:</p>
+      <pre><code class="language-bash">ssh bandit19@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Security Lessons</h1>
+      <p>Is level se humein ye important lessons milte hain:</p>
+      <ul>
+        <li>SSH interactive aur non-interactive sessions support karta hai.</li>
+        <li><code>.bashrc</code> shell startup behavior control kar sakti hai.</li>
+        <li>Malicious ya modified startup files login behavior change kar sakti hain.</li>
+        <li><code>-T</code> pseudo-terminal allocation disable karta hai.</li>
+        <li>SSH ke through remote command directly execute ki ja sakti hai.</li>
+        <li>Har login ke liye interactive shell zaroori nahi hoti.</li>
+        <li>Remote command execution troubleshooting mein useful hoti hai.</li>
+        <li>Shell startup files ko security analysis mein inspect karna important hai.</li>
+      </ul>
+
+      <h1>Commands Summary</h1>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>ssh user@host -p 2220</code></td>
+              <td>Normal SSH login karta hai</td>
+            </tr>
+            <tr>
+              <td><code>ssh -T user@host -p 2220</code></td>
+              <td>Pseudo-terminal allocation disable karta hai</td>
+            </tr>
+            <tr>
+              <td><code>ssh -T user@host -p 2220 cat readme</code></td>
+              <td>Remote <code>cat readme</code> command execute karta hai</td>
+            </tr>
+            <tr>
+              <td><code>ssh -T user@host -p 2220 'cat readme'</code></td>
+              <td>Quotes ke saath remote command execute karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cat readme</code></td>
+              <td>File content display karta hai</td>
+            </tr>
+            <tr>
+              <td><code>man ssh</code></td>
+              <td>SSH manual open karta hai</td>
+            </tr>
+            <tr>
+              <td><code>exit</code></td>
+              <td>SSH session close karta hai</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h1>Final Solution</h1>
+      <p>Normal login try karne par logout ho sakta hai:</p>
+      <pre><code class="language-bash">ssh bandit18@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Isliye pseudo-terminal disable karke remote command run karein:</p>
+      <pre><code class="language-bash">ssh -T bandit18@bandit.labs.overthewire.org -p 2220 cat readme</code></pre>
+      <p>Password prompt par previous level ka password enter karein.</p>
+      <p>Output:</p>
+      <pre><code class="language-text">awhqfNnAbc1naukrpqDYcF95h7HoMTrC</code></pre>
+      <p>Ab <code>bandit19</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit19@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password:</p>
+      <pre><code class="language-text">awhqfNnAbc1naukrpqDYcF95h7HoMTrC</code></pre>
+
+      <h1>Conclusion</h1>
+      <p>Bandit Level 18 → Level 19 mein humne modified <code>.bashrc</code> ke logout behavior ko bypass karke SSH ke through remote command execute karna seekha.</p>
+      <p>Complete workflow:</p>
+      <pre><code class="language-text">SSH Login Attempt
+        ↓
+.bashrc Logout Behavior
+        ↓
+-T Se Pseudo-Terminal Disable
+        ↓
+Remote cat readme Command
+        ↓
+Password Receive
+        ↓
+SSH Login as bandit19</code></pre>
+      <p>Is level ka most important command hai:</p>
+      <pre><code class="language-bash">ssh -T bandit18@bandit.labs.overthewire.org -p 2220 cat readme</code></pre>
+      <blockquote>
+        <p><strong>Security Note:</strong> SSH remote commands sirf authorized systems par execute karein. OverTheWire Bandit ek authorized cybersecurity learning environment hai.</p>
+      </blockquote>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <span> © 2026 SSSWriteups </span>
+      
+    </div>
+  </footer>
+</body>
+</html>
+```
