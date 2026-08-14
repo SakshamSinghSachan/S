@@ -1,0 +1,490 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OverTheWire Bandit - Level 3 to Level 4 | SSSWriteups</title>
+  <link rel="stylesheet" href="../../../style.css">
+</head>
+<body>
+  <header class="hero page-header">
+    <nav class="nav container">
+      <a class="logo" href="../../../../index.html">
+        SSS<span>Writeups</span>
+      </a>
+      <div class="nav-links">
+        <a href="../../../../index.html">
+          Home
+        </a>
+
+        <a href="../../../../categories/overthewire.html">
+          OverTheWire
+        </a>
+
+        <a href="index.html">
+          Bandit
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="writeup-page section container">
+    <article class="writeup-content">
+      <h1>OverTheWire Bandit — Level 3 to Level 4</h1>
+
+      <h2>Introduction</h2>
+      <p>Is writeup ka heading <strong>Level 3 → Level 4</strong> hai.</p>
+      <p>Is level mein next level ka password ek hidden file ke andar stored hai. Ye hidden file <code>inhere</code> directory ke andar located hai.</p>
+      <p>Linux mein dot <code>.</code> se start hone wali files normally hidden hoti hain. Isliye normal <code>ls</code> command run karne par file दिखाई nahi deti. Hidden files dekhne ke liye <code>ls -la</code> ya <code>ls -a</code> command ka use karna padta hai.</p>
+      <p>Is challenge mein hidden file ka exact naam hai:</p>
+      <pre><code class="language-text">.hidden</code></pre>
+      <p>File read karne ke liye command:</p>
+      <pre><code class="language-bash">cat ./.hidden</code></pre>
+
+      <h2>Objective</h2>
+      <p>Is level mein humein:</p>
+      <ul>
+        <li><code>bandit3</code> user se SSH ke through login karna hai.</li>
+        <li>Home directory mein <code>inhere</code> directory identify karni hai.</li>
+        <li><code>inhere</code> directory ke andar jaana hai.</li>
+        <li>Hidden file ko discover karna hai.</li>
+        <li><code>.hidden</code> file ka content read karna hai.</li>
+        <li>Password copy karna hai.</li>
+        <li><code>bandit4</code> user se next SSH login karna hai.</li>
+      </ul>
+
+      <h2>Given Information</h2>
+      <p>Current level par login karne ke liye:</p>
+      <pre><code class="language-text">Host:     bandit.labs.overthewire.org
+Port:     2220
+Username: bandit3
+Password: Previous level se mila password</code></pre>
+      <p>Directory:</p>
+      <pre><code class="language-text">inhere</code></pre>
+      <p>Hidden file:</p>
+      <pre><code class="language-text">.hidden</code></pre>
+      <p>Next level ka username:</p>
+      <pre><code class="language-text">bandit4</code></pre>
+      <p>Found password:</p>
+      <pre><code class="language-text">2EW7BBsr6aMMoJ2HjW067dm8EgX26xNe</code></pre>
+
+      <h1>Hidden Files Kya Hoti Hain?</h1>
+      <p>Linux mein jo files dot <code>.</code> se start hoti hain, unhe hidden files ya dotfiles kaha jata hai.</p>
+      <p>Examples:</p>
+      <pre><code class="language-text">.hidden
+.bashrc
+.profile
+.config</code></pre>
+      <p>Hidden ka matlab ye nahi hota ki file completely inaccessible hai. Iska matlab sirf itna hai ki normal <code>ls</code> command unhe default output mein show nahi karti.</p>
+      <p>Hidden files ko dekhne ke liye:</p>
+      <pre><code class="language-bash">ls -a</code></pre>
+      <p>Ya:</p>
+      <pre><code class="language-bash">ls -la</code></pre>
+
+      <h2><code>.hidden</code> Filename Ko Samajhna</h2>
+      <p>Is challenge mein file ka naam hai:</p>
+      <pre><code class="language-text">.hidden</code></pre>
+      <p>Filename ka first character dot hai:</p>
+      <pre><code class="language-text">.</code></pre>
+      <p>Isliye normal command:</p>
+      <pre><code class="language-bash">ls</code></pre>
+      <p>file ko hide kar deti hai.</p>
+      <p>Lekin ye command file show karegi:</p>
+      <pre><code class="language-bash">ls -la</code></pre>
+
+      <h1><code>inhere</code> Directory</h1>
+
+      <h2>Directory Kya Hoti Hai?</h2>
+      <p>Directory ko commonly folder bhi kaha jata hai. Directory ke andar files aur doosri directories store hoti hain.</p>
+      <p>Bandit Level 3 mein home directory ka structure roughly is tarah hai:</p>
+      <pre><code class="language-text">/home/bandit3
+└── inhere
+    └── .hidden</code></pre>
+      <p>Yahan:</p>
+      <ul>
+        <li><code>/home/bandit3</code> user ki home directory hai.</li>
+        <li><code>inhere</code> ek directory hai.</li>
+        <li><code>.hidden</code> ek hidden file hai.</li>
+      </ul>
+
+      <h2><code>inhere</code> Naam Ka Meaning</h2>
+      <p><code>inhere</code> ka meaning roughly <code>in here</code> hai, yani challenge ki required file isi directory ke andar present hai.</p>
+      <p>Pehle home directory mein <code>inhere</code> directory ko identify karna hai, phir uske andar hidden file search karni hai.</p>
+
+      <h1>Linux Commands</h1>
+
+      <h2><code>pwd</code> Command</h2>
+      <p><code>pwd</code> ka full form <strong>Print Working Directory</strong> hai.</p>
+      <pre><code class="language-bash">pwd</code></pre>
+      <p>Ye current directory ka complete path display karta hai.</p>
+      <p>Expected output:</p>
+      <pre><code class="language-text">/home/bandit3</code></pre>
+
+      <h2><code>ls</code> Command</h2>
+      <p><code>ls</code> command current directory ki visible files aur directories display karti hai.</p>
+      <pre><code class="language-bash">ls</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">inhere</code></pre>
+
+      <h2><code>ls -a</code> Command</h2>
+      <p><code>-a</code> ka meaning <strong>all</strong> hota hai. Ye hidden files ke saath visible files bhi show karta hai.</p>
+      <pre><code class="language-bash">ls -a</code></pre>
+      <p>Is output mein special entries bhi dikh sakti hain:</p>
+      <pre><code class="language-text">.
+..
+.hidden</code></pre>
+      <p>Meaning:</p>
+      <pre><code class="language-text">.   → Current directory
+..  → Parent directory</code></pre>
+
+      <h2><code>ls -la</code> Command</h2>
+      <pre><code class="language-bash">ls -la</code></pre>
+      <p>Yahan:</p>
+      <pre><code class="language-text">-l  → Long or detailed listing
+-a  → All files, including hidden files</code></pre>
+      <p><code>ls -la</code> file ki detailed information show karta hai:</p>
+      <ul>
+        <li>File permissions</li>
+        <li>File owner</li>
+        <li>File group</li>
+        <li>File size</li>
+        <li>Modification time</li>
+        <li>File name</li>
+      </ul>
+      <p>Example:</p>
+      <pre><code class="language-text">-rw-r----- 1 bandit4 bandit3 33 Oct 5 06:19 .hidden</code></pre>
+      <p>Last column mein actual filename hai:</p>
+      <pre><code class="language-text">.hidden</code></pre>
+
+      <h2><code>cd</code> Command</h2>
+      <p><code>cd</code> ka full form <strong>Change Directory</strong> hai.</p>
+      <p>Directory ke andar jaane ke liye:</p>
+      <pre><code class="language-bash">cd inhere</code></pre>
+      <p>Trailing slash ke saath bhi likh sakte hain:</p>
+      <pre><code class="language-bash">cd inhere/</code></pre>
+      <p>Dono commands same kaam karti hain.</p>
+
+      <h2>Home Directory Par Wapas Jaana</h2>
+      <p>Home directory par wapas jaane ke liye:</p>
+      <pre><code class="language-bash">cd</code></pre>
+      <p>Ya:</p>
+      <pre><code class="language-bash">cd ~</code></pre>
+      <p>Parent directory mein jaane ke liye:</p>
+      <pre><code class="language-bash">cd ..</code></pre>
+
+      <h2><code>cat</code> Command</h2>
+      <p><code>cat</code> command file ka content terminal par display karti hai.</p>
+      <p>Hidden file ko read karne ke liye:</p>
+      <pre><code class="language-bash">cat .hidden</code></pre>
+      <p>Agar current directory <code>inhere</code> hai, to ye command kaam karegi.</p>
+      <p>Explicit relative path ke saath:</p>
+      <pre><code class="language-bash">cat ./.hidden</code></pre>
+      <p>Dono commands same file ko read karti hain.</p>
+
+      <h1>Path Concepts</h1>
+
+      <h2>Current Directory</h2>
+      <p>Current directory woh location hai jahan aap is waqt kaam kar rahe ho.</p>
+      <p>Agar prompt ye hai:</p>
+      <pre><code class="language-text">bandit3@bandit:~/inhere$</code></pre>
+      <p>To aap <code>inhere</code> directory ke andar ho.</p>
+
+      <h2>Relative Path</h2>
+      <p>Relative path current directory ke according file ka location batata hai.</p>
+      <p>Agar aap <code>inhere</code> directory mein ho:</p>
+      <pre><code class="language-bash">cat .hidden</code></pre>
+      <p>Aur:</p>
+      <pre><code class="language-bash">cat ./.hidden</code></pre>
+      <p>Dono relative paths hain.</p>
+
+      <h2>Absolute Path</h2>
+      <p>Absolute path file ka complete location batata hai:</p>
+      <pre><code class="language-bash">cat /home/bandit3/inhere/.hidden</code></pre>
+      <p>Ye command kisi bhi directory se run ki ja sakti hai, agar permissions available hon.</p>
+
+      <h2><code>./</code> Ka Meaning</h2>
+      <p>Linux mein:</p>
+      <pre><code class="language-text">.   → Current directory
+..  → Parent directory</code></pre>
+      <p>Isliye:</p>
+      <pre><code class="language-bash">cat ./.hidden</code></pre>
+      <p>ka meaning hai:</p>
+      <pre><code class="language-text">Current directory ke andar `.hidden` file read karo.</code></pre>
+
+      <h1>Complete Walkthrough</h1>
+
+      <h2>Step 1: Terminal Open Karein</h2>
+      <p>Linux Terminal, macOS Terminal, Windows PowerShell, Windows Terminal ya WSL open karein.</p>
+
+      <h2>Step 2: <code>bandit3</code> Par Login Karein</h2>
+      <p>Windows PowerShell se command:</p>
+      <pre><code class="language-powershell">ssh bandit3@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password prompt par previous level se mila password enter karein.</p>
+      <p>Successful login ke baad prompt kuch is tarah dikh sakta hai:</p>
+      <pre><code class="language-text">bandit3@bandit:~$</code></pre>
+
+      <h2>Step 3: Current User Verify Karein</h2>
+      <pre><code class="language-bash">whoami</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">bandit3</code></pre>
+
+      <h2>Step 4: Current Directory Check Karein</h2>
+      <pre><code class="language-bash">pwd</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">/home/bandit3</code></pre>
+
+      <h2>Step 5: Visible Files Dekhein</h2>
+      <pre><code class="language-bash">ls</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">inhere</code></pre>
+
+      <h2>Step 6: <code>inhere</code> Directory Mein Jaayein</h2>
+      <pre><code class="language-bash">cd inhere</code></pre>
+      <p>Ab current prompt kuch is tarah ho sakta hai:</p>
+      <pre><code class="language-text">bandit3@bandit:~/inhere$</code></pre>
+
+      <h2>Step 7: Normal Listing Check Karein</h2>
+      <pre><code class="language-bash">ls</code></pre>
+      <p>Is command ka output blank ho sakta hai, kyunki directory ke andar sirf hidden file hai.</p>
+
+      <h2>Step 8: Hidden Files Dekhein</h2>
+      <pre><code class="language-bash">ls -la</code></pre>
+      <p>Output mein <code>.hidden</code> file dikhni chahiye:</p>
+      <pre><code class="language-text">.hidden</code></pre>
+
+      <h2>Step 9: Hidden File Read Karein</h2>
+      <p>Recommended command:</p>
+      <pre><code class="language-bash">cat ./.hidden</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">2EW7BBsr6aMMoJ2HjW067dm8EgX26xNe</code></pre>
+
+      <h2>Step 10: Password Copy Karein</h2>
+      <p>Found password:</p>
+      <pre><code class="language-text">2EW7BBsr6aMMoJ2HjW067dm8EgX26xNe</code></pre>
+      <p>Password ke start ya end mein extra space copy na karein.</p>
+
+      <h2>Step 11: SSH Session Close Karein</h2>
+      <pre><code class="language-bash">exit</code></pre>
+      <p>Aap <code>Ctrl + D</code> bhi press kar sakte hain.</p>
+
+      <h2>Step 12: <code>bandit4</code> Par Login Karein</h2>
+      <pre><code class="language-bash">ssh bandit4@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password enter karein:</p>
+      <pre><code class="language-text">2EW7BBsr6aMMoJ2HjW067dm8EgX26xNe</code></pre>
+
+      <h1>Actual Terminal Session</h1>
+      <p>Aapka terminal session roughly is tarah dikh sakta hai:</p>
+      <pre><code class="language-text">PS C:\Users\dolla> ssh bandit3@bandit.labs.overthewire.org -p 2220
+bandit3@bandit.labs.overthewire.org's password:
+bandit3@bandit:~$ pwd
+/home/bandit3
+bandit3@bandit:~$ ls
+inhere
+bandit3@bandit:~$ cd inhere/
+bandit3@bandit:~/inhere$ ls
+bandit3@bandit:~/inhere$ ls -la
+total 12
+drwxr-xr-x 2 root    root    4096 Oct  5 06:19 .
+drwxr-xr-x 3 root    root    4096 Oct  5 06:19 ..
+-rw-r----- 1 bandit4 bandit3   33 Oct  5 06:19 .hidden
+bandit3@bandit:~/inhere$ cat ./.hidden
+2EW7BBsr6aMMoJ2HjW067dm8EgX26xNe
+bandit3@bandit:~/inhere$ exit
+logout</code></pre>
+      <p>Uske baad next level par login karein:</p>
+      <pre><code class="language-bash">ssh bandit4@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Complete Command Sequence</h1>
+      <pre><code class="language-powershell">ssh bandit3@bandit.labs.overthewire.org -p 2220</code></pre>
+      <pre><code class="language-bash">whoami</code></pre>
+      <pre><code class="language-bash">pwd</code></pre>
+      <pre><code class="language-bash">ls</code></pre>
+      <pre><code class="language-bash">cd inhere</code></pre>
+      <pre><code class="language-bash">ls</code></pre>
+      <pre><code class="language-bash">ls -la</code></pre>
+      <pre><code class="language-bash">cat ./.hidden</code></pre>
+      <pre><code class="language-bash">exit</code></pre>
+      <pre><code class="language-bash">ssh bandit4@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Common Errors</h1>
+
+      <h2>Hidden File <code>ls</code> Mein Nahi Dikh Rahi</h2>
+      <p>Agar aap sirf ye command run karte hain:</p>
+      <pre><code class="language-bash">ls</code></pre>
+      <p>To dot se start hone wali hidden files display nahi hongi.</p>
+      <p>Correct command:</p>
+      <pre><code class="language-bash">ls -la</code></pre>
+      <p>Ya:</p>
+      <pre><code class="language-bash">ls -a</code></pre>
+
+      <h2><code>No Such File or Directory</code></h2>
+      <p>Error:</p>
+      <pre><code class="language-text">cat: ./.hidden: No such file or directory</code></pre>
+      <p>Possible reasons:</p>
+      <ul>
+        <li>Aap <code>inhere</code> directory ke andar nahi ho.</li>
+        <li>Filename galat type hua hai.</li>
+        <li>Dot <code>.</code> miss ho gaya hai.</li>
+      </ul>
+      <p>Check karein:</p>
+      <pre><code class="language-bash">pwd
+ls -la</code></pre>
+      <p>Agar aap home directory mein ho, to direct absolute path use kar sakte hain:</p>
+      <pre><code class="language-bash">cat /home/bandit3/inhere/.hidden</code></pre>
+
+      <h2>Wrong Directory</h2>
+      <p>Agar prompt ye hai:</p>
+      <pre><code class="language-text">bandit3@bandit:~$</code></pre>
+      <p>To aap home directory mein ho.</p>
+      <p>Pehle <code>inhere</code> directory mein jaayein:</p>
+      <pre><code class="language-bash">cd inhere</code></pre>
+      <p>Phir file read karein:</p>
+      <pre><code class="language-bash">cat ./.hidden</code></pre>
+
+      <h2>SSH Permission Denied</h2>
+      <p>Error:</p>
+      <pre><code class="language-text">Permission denied, please try again.</code></pre>
+      <p>Check karein:</p>
+      <ul>
+        <li>Current username <code>bandit3</code> hai.</li>
+        <li>Next username <code>bandit4</code> hai.</li>
+        <li>Port <code>2220</code> use ho raha hai.</li>
+        <li>Password exactly copy hua hai.</li>
+        <li>Password ke beginning ya ending mein extra space nahi hai.</li>
+      </ul>
+      <p>Correct next-level command:</p>
+      <pre><code class="language-bash">ssh bandit4@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h2>Password Screen Par Show Nahi Hota</h2>
+      <p>Linux terminal password type karte waqt characters ya asterisks display nahi karta. Password normally type karein aur <code>Enter</code> press karein.</p>
+
+      <h1>Security Lessons</h1>
+      <p>Is level se humein ye important lessons milte hain:</p>
+      <ul>
+        <li>Linux dot se start hone wali files ko hidden files ke roop mein treat karta hai.</li>
+        <li>Hidden ka matlab inaccessible nahi hota.</li>
+        <li><code>ls -a</code> hidden files show karta hai.</li>
+        <li><code>ls -l</code> detailed file metadata show karta hai.</li>
+        <li><code>ls -la</code> dono options combine karta hai.</li>
+        <li>Directory navigation ke liye <code>cd</code> command use hoti hai.</li>
+        <li>Current directory ko samajhna file access ke liye important hai.</li>
+        <li>Relative aur absolute paths dono useful hote hain.</li>
+        <li>File permissions access control provide karti hain.</li>
+        <li>Sensitive data hidden file mein stored ho sakta hai.</li>
+        <li>CTF challenges mein hidden files ko identify karna important skill hai.</li>
+      </ul>
+
+      <h1>Commands Summary</h1>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>ssh user@host -p 2220</code></td>
+              <td>Remote server par SSH login karta hai</td>
+            </tr>
+            <tr>
+              <td><code>whoami</code></td>
+              <td>Current username show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>pwd</code></td>
+              <td>Current working directory show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>ls</code></td>
+              <td>Visible files aur directories show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>ls -a</code></td>
+              <td>Hidden files ke saath all entries show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>ls -la</code></td>
+              <td>Hidden files ki detailed listing show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cd inhere</code></td>
+              <td><code>inhere</code> directory mein enter karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cd ..</code></td>
+              <td>Parent directory mein wapas jaata hai</td>
+            </tr>
+            <tr>
+              <td><code>cat .hidden</code></td>
+              <td>Hidden file read karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cat ./.hidden</code></td>
+              <td>Current directory ki hidden file read karta hai</td>
+            </tr>
+            <tr>
+              <td><code>exit</code></td>
+              <td>SSH session close karta hai</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h1>Final Solution</h1>
+      <p><code>bandit3</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit3@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Home directory ki files dekhein:</p>
+      <pre><code class="language-bash">ls</code></pre>
+      <p><code>inhere</code> directory mein jaayein:</p>
+      <pre><code class="language-bash">cd inhere</code></pre>
+      <p>Hidden files ki detailed list dekhein:</p>
+      <pre><code class="language-bash">ls -la</code></pre>
+      <p><code>.hidden</code> file read karein:</p>
+      <pre><code class="language-bash">cat ./.hidden</code></pre>
+      <p>Password:</p>
+      <pre><code class="language-text">2EW7BBsr6aMMoJ2HjW067dm8EgX26xNe</code></pre>
+      <p>Ab <code>bandit4</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit4@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Conclusion</h1>
+      <p>Bandit Level 3 → Level 4 mein humne hidden files ko identify karna, <code>inhere</code> directory ke andar jaana aur <code>.hidden</code> file ka password read karna seekha.</p>
+      <p>Complete workflow:</p>
+      <pre><code class="language-text">SSH Login as bandit3
+        ↓
+Home Directory Check
+        ↓
+inhere Directory Identify
+        ↓
+cd inhere
+        ↓
+ls -la
+        ↓
+.hidden File Identify
+        ↓
+cat ./.hidden
+        ↓
+Password Find
+        ↓
+SSH Login as bandit4</code></pre>
+      <p>Is level ke sabse important commands hain:</p>
+      <pre><code class="language-bash">ls -la</code></pre>
+      <p>Aur:</p>
+      <pre><code class="language-bash">cat ./.hidden</code></pre>
+      <blockquote>
+        <p><strong>Security Note:</strong> SSH ka use sirf un systems par karein jahan aapke paas permission ho. OverTheWire Bandit ek authorized cybersecurity learning environment hai.</p>
+      </blockquote>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <span> © 2026 SSSWriteups </span>
+      <span> Built with HTML & CSS </span>
+    </div>
+  </footer>
+</body>
+</html>
+```
