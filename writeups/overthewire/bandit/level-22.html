@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OverTheWire Bandit - Level 22 to Level 23 | SSSWriteups</title>
+  <link rel="stylesheet" href="../../../style.css">
+</head>
+<body>
+  <header class="hero page-header">
+    <nav class="nav container">
+      <a class="logo" href="../../../../index.html">
+        SSS<span>Writeups</span>
+      </a>
+      <div class="nav-links">
+    <a href="../../../index.html">Home</a>
+    <a href="../../../categories/overthewire.html">OverTheWire</a>
+</div>
+    </nav>
+  </header>
+
+  <main class="writeup-page section container">
+    <article class="writeup-content">
+      <h1>OverTheWire Bandit — Level 22 to Level 23</h1>
+
+      <h2>Introduction</h2>
+      <p>Is writeup ka heading <strong>Level 22 → Level 23</strong> hai.</p>
+      <p>Is level mein bhi password ek cron job ke through automatically <code>/tmp</code> directory ki file mein copy ho raha hai.</p>
+      <p>Difference ye hai ki is baar temporary filename directly script mein fixed nahi hai. Script variables aur MD5 hash ka use karke filename generate karti hai.</p>
+      <p>Relevant cron file:</p>
+      <pre><code class="language-text">cronjob_bandit23</code></pre>
+      <p>Relevant script:</p>
+      <pre><code class="language-text">/usr/bin/cronjob_bandit23.sh</code></pre>
+      <p>Script ka simplified logic:</p>
+      <pre><code class="language-bash">myname=$(whoami)
+mytarget=$(echo I am user $myname | md5sum | cut -d ' ' -f 1)
+cat /etc/bandit_pass/$myname > /tmp/$mytarget</code></pre>
+      <p>Humein script ko <code>bandit23</code> ke context mein samajhna hai, kyunki cron job script ko <code>bandit23</code> user ke roop mein execute karta hai.</p>
+
+      <h2>Objective</h2>
+      <p>Is level mein humein:</p>
+      <ul>
+        <li><code>bandit22</code> user se SSH login karna hai.</li>
+        <li><code>/etc/cron.d/cronjob_bandit23</code> read karna hai.</li>
+        <li><code>/usr/bin/cronjob_bandit23.sh</code> script inspect karni hai.</li>
+        <li>Script ke variables ka meaning samajhna hai.</li>
+        <li><code>bandit23</code> ke liye exact MD5 hash calculate karna hai.</li>
+        <li>Hash ko temporary filename ke roop mein use karna hai.</li>
+        <li><code>/tmp</code> se password file read karni hai.</li>
+        <li><code>bandit23</code> user se next SSH login karna hai.</li>
+      </ul>
+
+      <h2>Given Information</h2>
+      <p>Current level:</p>
+      <pre><code class="language-text">Username: bandit22
+Password: Previous level se mila password</code></pre>
+      <p>Cron file:</p>
+      <pre><code class="language-text">/etc/cron.d/cronjob_bandit23</code></pre>
+      <p>Script:</p>
+      <pre><code class="language-text">/usr/bin/cronjob_bandit23.sh</code></pre>
+      <p>Target user:</p>
+      <pre><code class="language-text">bandit23</code></pre>
+      <p>Hash input string:</p>
+      <pre><code class="language-text">I am user bandit23</code></pre>
+      <p>Computed MD5 hash:</p>
+      <pre><code class="language-text">8ca319486bfbbc3663ea0fbe81326349</code></pre>
+      <p>Next username:</p>
+      <pre><code class="language-text">bandit23</code></pre>
+      <p>Provided password:</p>
+      <pre><code class="language-text">QYwBY2aiA672PsMmh9puTQuhoz85yR2G</code></pre>
+
+      <h1>Cron Job Recap</h1>
+      <p>Cron automatically scripts ko scheduled intervals par run karta hai.</p>
+      <p>Is level mein cron job <code>bandit23</code> ke naam se script execute karti hai:</p>
+      <pre><code class="language-text">cronjob_bandit23</code></pre>
+      <p>Configuration read karein:</p>
+      <pre><code class="language-bash">cat /etc/cron.d/cronjob_bandit23</code></pre>
+      <p>Typical output:</p>
+      <pre><code class="language-text">@reboot bandit23 /usr/bin/cronjob_bandit23.sh &>/dev/null
+* * * * * bandit23 /usr/bin/cronjob_bandit23.sh &>/dev/null</code></pre>
+      <p>Iska meaning:</p>
+      <pre><code class="language-text">bandit23 user ke privileges mein script automatically execute karo.</code></pre>
+
+      <h1>Script Explanation</h1>
+      <p>Script:</p>
+      <pre><code class="language-bash">#!/bin/bash
+myname=$(whoami)
+mytarget=$(echo I am user $myname | md5sum | cut -d ' ' -f 1)
+echo "Copying passwordfile /etc/bandit_pass/$myname to /tmp/$mytarget"
+cat /etc/bandit_pass/$myname > /tmp/$mytarget</code></pre>
+
+      <h2>Shebang</h2>
+      <pre><code class="language-bash">#!/bin/bash</code></pre>
+      <p>Script ko Bash interpreter ke through run karne ke liye use hota hai.</p>
+
+      <h2><code>myname</code> Variable</h2>
+      <pre><code class="language-bash">myname=$(whoami)</code></pre>
+      <p><code>whoami</code> current user ka username return karta hai.</p>
+      <p>Script cron ke through <code>bandit23</code> user ke naam se execute ho rahi hai, isliye:</p>
+      <pre><code class="language-text">myname=bandit23</code></pre>
+
+      <h2>Command Substitution <code>$()</code></h2>
+      <pre><code class="language-bash">$(command)</code></pre>
+      <p>Command substitution ka use command ke output ko variable ya larger command ke andar insert karne ke liye hota hai.</p>
+      <p>Example:</p>
+      <pre><code class="language-bash">user=$(whoami)
+echo $user</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">bandit23</code></pre>
+
+      <h2><code>mytarget</code> Variable</h2>
+      <pre><code class="language-bash">mytarget=$(echo I am user $myname | md5sum | cut -d ' ' -f 1)</code></pre>
+      <p>Ye command chain input string ka MD5 hash calculate karke sirf hash value extract karti hai.</p>
+      <p>Expected input:</p>
+      <pre><code class="language-text">I am user bandit23</code></pre>
+      <p>Expected hash:</p>
+      <pre><code class="language-text">8ca319486bfbbc3663ea0fbe81326349</code></pre>
+      <p>Isliye:</p>
+      <pre><code class="language-text">mytarget=8ca319486bfbbc3663ea0fbe81326349</code></pre>
+
+      <h2><code>echo I am user $myname</code></h2>
+      <p>Agar <code>myname=bandit23</code> hai:</p>
+      <pre><code class="language-bash">echo I am user $myname</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">I am user bandit23</code></pre>
+
+      <h2>Pipe <code>|</code></h2>
+      <pre><code class="language-bash">command1 | command2</code></pre>
+      <p>Pipe first command ke output ko second command ke input mein send karta hai.</p>
+      <p>Script mein pipeline:</p>
+      <pre><code class="language-bash">echo I am user $myname | md5sum | cut -d ' ' -f 1</code></pre>
+      <p>Flow:</p>
+      <pre><code class="language-text">echo
+  ↓
+md5sum
+  ↓
+cut
+  ↓
+Final hash</code></pre>
+
+      <h1><code>md5sum</code> Command</h1>
+
+      <h2>MD5 Hash Kya Hota Hai?</h2>
+      <p>MD5 ek hash function hai jo input data ka fixed-length hexadecimal digest generate karta hai.</p>
+      <p>Example:</p>
+      <pre><code class="language-text">Input: I am user bandit23
+Output: 8ca319486bfbbc3663ea0fbe81326349</code></pre>
+      <p>MD5 output normally 32 hexadecimal characters ka hota hai.</p>
+
+      <h2>Important: Newline Ka Effect</h2>
+      <p>Script mein command hai:</p>
+      <pre><code class="language-bash">echo I am user bandit23 | md5sum</code></pre>
+      <p>Normal <code>echo</code> output ke end mein newline add karta hai. Ye newline hash calculation ka part ban sakti hai.</p>
+      <p>Isliye script ke exact behavior ko reproduce karne ke liye <code>echo</code> use karein:</p>
+      <pre><code class="language-bash">echo I am user bandit23 | md5sum</code></pre>
+      <p>Hash generate karte waqt <code>echo -n</code> use na karein, kyunki usse trailing newline remove ho jayegi aur hash different aa sakta hai.</p>
+
+      <h2>MD5 Security Note</h2>
+      <p>MD5 modern password storage ke liye secure nahi maana jata. Is level mein MD5 ka use educational purpose ke liye filename generate karne mein ho raha hai.</p>
+
+      <h1><code>cut</code> Command</h1>
+
+      <h2><code>cut</code> Kya Karti Hai?</h2>
+      <p><code>cut</code> command text ki specific fields ya characters extract karne ke liye use hoti hai.</p>
+      <p><code>md5sum</code> ka output generally is format mein hota hai:</p>
+      <pre><code class="language-text">8ca319486bfbbc3663ea0fbe81326349  -</code></pre>
+      <p>Hash aur <code>-</code> ke beech spaces hoti hain. Humein sirf first field chahiye.</p>
+
+      <h2><code>-d ' '</code> Option</h2>
+      <pre><code class="language-bash">-d ' '</code></pre>
+      <p>Delimiter ko space set karta hai.</p>
+
+      <h2><code>-f 1</code> Option</h2>
+      <pre><code class="language-bash">-f 1</code></pre>
+      <p>First field select karta hai.</p>
+      <p>Complete command:</p>
+      <pre><code class="language-bash">cut -d ' ' -f 1</code></pre>
+
+      <h2>Correct Command</h2>
+      <pre><code class="language-bash">echo I am user bandit23 | md5sum | cut -d ' ' -f 1</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">8ca319486bfbbc3663ea0fbe81326349</code></pre>
+      <blockquote>
+        <p><strong>Important:</strong> Aapke pasted command mein <code>cut -d'' -f 1</code> formatting error dikh raha hai. Correct form hai:</p>
+        <pre><code class="language-bash">cut -d ' ' -f 1</code></pre>
+      </blockquote>
+
+      <h1>Output File Path</h1>
+      <p>Script ki final line:</p>
+      <pre><code class="language-bash">cat /etc/bandit_pass/$myname > /tmp/$mytarget</code></pre>
+      <p>Variables replace hone ke baad:</p>
+      <pre><code class="language-bash">cat /etc/bandit_pass/bandit23 > /tmp/8ca319486bfbbc3663ea0fbe81326349</code></pre>
+      <p>Iska meaning:</p>
+      <pre><code class="language-text">Source: /etc/bandit_pass/bandit23
+Target: /tmp/8ca319486bfbbc3663ea0fbe81326349</code></pre>
+      <p>Cron job <code>bandit23</code> ka password target file mein copy karti hai.</p>
+
+      <h1>Complete Walkthrough</h1>
+
+      <h2>Step 1: <code>bandit22</code> Par Login Karein</h2>
+      <pre><code class="language-powershell">ssh bandit22@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password prompt par previous level ka password enter karein.</p>
+
+      <h2>Step 2: Cron Directory Mein Jaayein</h2>
+      <pre><code class="language-bash">cd /etc/cron.d</code></pre>
+
+      <h2>Step 3: Cron Files List Karein</h2>
+      <pre><code class="language-bash">ls</code></pre>
+
+      <h2>Step 4: Relevant Cron File Read Karein</h2>
+      <pre><code class="language-bash">cat cronjob_bandit23</code></pre>
+      <p>Script path identify karein:</p>
+      <pre><code class="language-text">/usr/bin/cronjob_bandit23.sh</code></pre>
+
+      <h2>Step 5: Script Read Karein</h2>
+      <pre><code class="language-bash">cat /usr/bin/cronjob_bandit23.sh</code></pre>
+      <p>Script se pata chalta hai ki filename is input ka MD5 hash hoga:</p>
+      <pre><code class="language-text">I am user bandit23</code></pre>
+
+      <h2>Step 6: Correct Hash Calculate Karein</h2>
+      <pre><code class="language-bash">echo I am user bandit23 | md5sum | cut -d ' ' -f 1</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">8ca319486bfbbc3663ea0fbe81326349</code></pre>
+
+      <h2>Step 7: Temporary Password File Read Karein</h2>
+      <pre><code class="language-bash">cat /tmp/8ca319486bfbbc3663ea0fbe81326349</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">QYwBY2aiA672PsMmh9puTQuhoz85yR2G</code></pre>
+
+      <h2>Step 8: Password Copy Karein</h2>
+      <pre><code class="language-text">QYwBY2aiA672PsMmh9puTQuhoz85yR2G</code></pre>
+
+      <h2>Step 9: <code>bandit23</code> Par Login Karein</h2>
+      <pre><code class="language-bash">ssh bandit23@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password enter karein:</p>
+      <pre><code class="language-text">QYwBY2aiA672PsMmh9puTQuhoz85yR2G</code></pre>
+
+      <h1>Actual Terminal Workflow</h1>
+      <pre><code class="language-text">bandit22@bandit:~$ cd /etc/cron.d
+bandit22@bandit:/etc/cron.d$ cat cronjob_bandit23
+* * * * * bandit23 /usr/bin/cronjob_bandit23.sh &>/dev/null
+bandit22@bandit:/etc/cron.d$ cat /usr/bin/cronjob_bandit23.sh
+#!/bin/bash
+myname=$(whoami)
+mytarget=$(echo I am user $myname | md5sum | cut -d ' ' -f 1)
+echo "Copying passwordfile /etc/bandit_pass/$myname to /tmp/$mytarget"
+cat /etc/bandit_pass/$myname > /tmp/$mytarget
+bandit22@bandit:/etc/cron.d$ echo I am user bandit23 | md5sum | cut -d ' ' -f 1
+8ca319486bfbbc3663ea0fbe81326349
+bandit22@bandit:/etc/cron.d$ cat /tmp/8ca319486bfbbc3663ea0fbe81326349
+QYwBY2aiA672PsMmh9puTQuhoz85yR2G</code></pre>
+
+      <h1>Common Errors</h1>
+
+      <h2>Wrong Username Hash Karna</h2>
+      <p>Incorrect input:</p>
+      <pre><code class="language-bash">echo I am user bandit22 | md5sum | cut -d ' ' -f 1</code></pre>
+      <p>Script <code>bandit23</code> ke naam se run hoti hai, isliye correct input hai:</p>
+      <pre><code class="language-bash">echo I am user bandit23 | md5sum | cut -d ' ' -f 1</code></pre>
+
+      <h2><code>echo -n</code> Use Karna</h2>
+      <p>Incorrect for reproducing this script:</p>
+      <pre><code class="language-bash">echo -n I am user bandit23 | md5sum</code></pre>
+      <p>Script normal <code>echo</code> use karti hai, jo newline include kar sakti hai. Correct command:</p>
+      <pre><code class="language-bash">echo I am user bandit23 | md5sum | cut -d ' ' -f 1</code></pre>
+
+      <h2>Wrong <code>cut</code> Syntax</h2>
+      <p>Incorrect:</p>
+      <pre><code class="language-bash">cut -d'' -f 1</code></pre>
+      <p>Correct:</p>
+      <pre><code class="language-bash">cut -d ' ' -f 1</code></pre>
+
+      <h2><code>No Such File or Directory</code></h2>
+      <p>Check karein:</p>
+      <pre><code class="language-bash">ls /tmp</code></pre>
+      <p>Hash dobara calculate karein:</p>
+      <pre><code class="language-bash">echo I am user bandit23 | md5sum | cut -d ' ' -f 1</code></pre>
+      <p>Phir exact hash path use karein:</p>
+      <pre><code class="language-bash">cat /tmp/8ca319486bfbbc3663ea0fbe81326349</code></pre>
+
+      <h2>Cron File Abhi Update Nahi Hui</h2>
+      <p>Cron job ko run hone ke liye kuch seconds ya ek minute lag sakta hai. Thoda wait karke dobara try karein:</p>
+      <pre><code class="language-bash">cat /tmp/8ca319486bfbbc3663ea0fbe81326349</code></pre>
+
+      <h2>Password Copy Error</h2>
+      <p>Password:</p>
+      <pre><code class="language-text">QYwBY2aiA672PsMmh9puTQuhoz85yR2G</code></pre>
+      <p>Check karein:</p>
+      <ul>
+        <li>Uppercase aur lowercase characters same hain.</li>
+        <li><code>0</code> aur <code>O</code> ko carefully distinguish karein.</li>
+        <li>Password ke start ya end mein extra space nahi hai.</li>
+      </ul>
+
+      <h2>SSH Permission Denied</h2>
+      <p>Next level par login karte waqt check karein:</p>
+      <ul>
+        <li>Username <code>bandit23</code> hai.</li>
+        <li>Port <code>2220</code> use ho raha hai.</li>
+        <li>Temporary file se exact password copy hua hai.</li>
+      </ul>
+      <p>Correct command:</p>
+      <pre><code class="language-bash">ssh bandit23@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Security Lessons</h1>
+      <p>Is level se humein ye important lessons milte hain:</p>
+      <ul>
+        <li>Shell variables dynamic filenames create kar sakti hain.</li>
+        <li><code>whoami</code> script ke executing user ko identify karta hai.</li>
+        <li>Command substitution <code>$()</code> output ko variable mein store karti hai.</li>
+        <li>Pipes complex command pipelines banane mein useful hain.</li>
+        <li>MD5 hash ko filename ke roop mein use kiya ja sakta hai.</li>
+        <li>Newline hash calculation ko change kar sakti hai.</li>
+        <li><code>cut</code> command command output se specific field extract karti hai.</li>
+        <li>Cron jobs sensitive data ko predictable temporary files mein copy kar sakti hain.</li>
+        <li>Script ko read karke file path mathematically reproduce kiya ja sakta hai.</li>
+        <li>Weakly designed scheduled scripts information disclosure create kar sakti hain.</li>
+      </ul>
+
+      <h1>Commands Summary</h1>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>ssh user@host -p 2220</code></td>
+              <td>Remote server par SSH login karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cd /etc/cron.d</code></td>
+              <td>Cron configuration directory mein enter karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cat cronjob_bandit23</code></td>
+              <td>Cron job configuration read karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cat /usr/bin/cronjob_bandit23.sh</code></td>
+              <td>Script read karta hai</td>
+            </tr>
+            <tr>
+              <td><code>whoami</code></td>
+              <td>Current username show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>echo I am user bandit23</code></td>
+              <td>Hash input string generate karta hai</td>
+            </tr>
+            <tr>
+              <td><code>md5sum</code></td>
+              <td>MD5 hash calculate karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cut -d ' ' -f 1</code></td>
+              <td>Hash output ka first field extract karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cat /tmp/hash</code></td>
+              <td>Temporary password file read karta hai</td>
+            </tr>
+            <tr>
+              <td><code>exit</code></td>
+              <td>SSH session close karta hai</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h1>Final Solution</h1>
+      <p><code>bandit22</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit22@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Cron script read karein:</p>
+      <pre><code class="language-bash">cat /usr/bin/cronjob_bandit23.sh</code></pre>
+      <p>Script ke logic ke according hash calculate karein:</p>
+      <pre><code class="language-bash">echo I am user bandit23 | md5sum | cut -d ' ' -f 1</code></pre>
+      <p>Hash:</p>
+      <pre><code class="language-text">8ca319486bfbbc3663ea0fbe81326349</code></pre>
+      <p>Temporary password file read karein:</p>
+      <pre><code class="language-bash">cat /tmp/8ca319486bfbbc3663ea0fbe81326349</code></pre>
+      <p>Password:</p>
+      <pre><code class="language-text">QYwBY2aiA672PsMmh9puTQuhoz85yR2G</code></pre>
+      <p>Ab <code>bandit23</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit23@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Conclusion</h1>
+      <p>Bandit Level 22 → Level 23 mein humne cron script ke variables ko manually reproduce karke temporary password file locate karna seekha.</p>
+      <p>Complete workflow:</p>
+      <pre><code class="language-text">SSH Login as bandit22
+        ↓
+cronjob_bandit23 Read
+        ↓
+Script Logic Understand
+        ↓
+Target Username bandit23 Identify
+        ↓
+MD5 Hash Calculate
+        ↓
+Hash Ko Filename Ke Roop Mein Use
+        ↓
+/tmp File Read
+        ↓
+Password Find
+        ↓
+SSH Login as bandit23</code></pre>
+      <p>Is level ka most important command hai:</p>
+      <pre><code class="language-bash">echo I am user bandit23 | md5sum | cut -d ' ' -f 1</code></pre>
+      <blockquote>
+        <p><strong>Security Note:</strong> Cron scripts, temporary files aur password data ko sirf authorized learning environments mein inspect karein. OverTheWire Bandit ek authorized cybersecurity learning environment hai.</p>
+      </blockquote>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <span> © 2026 SSSWriteups </span>
+      
+    </div>
+  </footer>
+</body>
+</html>
+```
