@@ -1,0 +1,484 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OverTheWire Bandit - Level 6 to Level 7 | SSSWriteups</title>
+  <link rel="stylesheet" href="../../../style.css">
+</head>
+<body>
+  <header class="hero page-header">
+    <nav class="nav container">
+      <a class="logo" href="../../../../index.html">
+        SSS<span>Writeups</span>
+      </a>
+      <div class="nav-links">
+        <a href="../../../../index.html">
+          Home
+        </a>
+
+        <a href="../../../../categories/overthewire.html">
+          OverTheWire
+        </a>
+
+        <a href="index.html">
+          Bandit
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="writeup-page section container">
+    <article class="writeup-content">
+      <h1>OverTheWire Bandit — Level 6 to Level 7</h1>
+
+      <h2>Introduction</h2>
+      <p>Is writeup ka heading <strong>Level 6 → Level 7</strong> hai.</p>
+      <p>Is level mein next level ka password <code>inhere</code> directory mein nahi, balki poore server ke kisi location par stored hai.</p>
+      <p>Required file ki properties:</p>
+      <ul>
+        <li>File user <code>bandit7</code> ke ownership mein ho.</li>
+        <li>File group <code>bandit6</code> ka ho.</li>
+        <li>File exactly <code>33</code> bytes ki ho.</li>
+      </ul>
+      <p>Poore server par search karne ke liye hum <code>find /</code> command ka use karenge.</p>
+      <p>Aapke provided command ka idea correct hai, lekin complete Linux syntax ye hai:</p>
+      <pre><code class="language-bash">find / -type f -group bandit6 -user bandit7 -size 33c 2>/dev/null</code></pre>
+
+      <h2>Objective</h2>
+      <p>Is level mein humein:</p>
+      <ul>
+        <li><code>bandit6</code> user se SSH ke through login karna hai.</li>
+        <li>Root directory <code>/</code> se poore server par search karna hai.</li>
+        <li>Sirf regular files ko select karna hai.</li>
+        <li>User owner <code>bandit7</code> filter lagana hai.</li>
+        <li>Group owner <code>bandit6</code> filter lagana hai.</li>
+        <li>Exactly <code>33</code> bytes ki file find karni hai.</li>
+        <li>Permission errors ko hide karna hai.</li>
+        <li>Found file ka password read karna hai.</li>
+        <li><code>bandit7</code> user se next SSH login karna hai.</li>
+      </ul>
+
+      <h2>Given Information</h2>
+      <p>Current level par login karne ke liye:</p>
+      <pre><code class="language-text">Host:     bandit.labs.overthewire.org
+Port:     2220
+Username: bandit6
+Password: Previous level se mila password</code></pre>
+      <p>Required file properties:</p>
+      <pre><code class="language-text">Owner user:  bandit7
+Owner group: bandit6
+Size:        33 bytes</code></pre>
+      <p>Next level ka username:</p>
+      <pre><code class="language-text">bandit7</code></pre>
+      <p>Found password:</p>
+      <pre><code class="language-text">z7WtoNQU2XfjmMtWA8u5rN4vzqu4v99S</code></pre>
+
+      <h1>File Ownership Basics</h1>
+
+      <h2>File Owner Kya Hota Hai?</h2>
+      <p>Linux mein har file ka ek owner hota hai. Owner usually ek user account hota hai.</p>
+      <p>Example:</p>
+      <pre><code class="language-text">-rw-r----- 1 bandit7 bandit6 33 file</code></pre>
+      <p>Is line mein:</p>
+      <pre><code class="language-text">bandit7 → File ka owner user
+bandit6 → File ka owner group</code></pre>
+
+      <h2>User Ownership</h2>
+      <p><code>-user bandit7</code> condition un files ko select karti hai jinka owner user <code>bandit7</code> hai.</p>
+      <pre><code class="language-bash">-user bandit7</code></pre>
+      <p>Meaning:</p>
+      <pre><code class="language-text">Sirf woh files select karo jinka owner bandit7 user hai.</code></pre>
+
+      <h2>Group Ownership</h2>
+      <p><code>-group bandit6</code> condition un files ko select karti hai jinka group owner <code>bandit6</code> hai.</p>
+      <pre><code class="language-bash">-group bandit6</code></pre>
+      <p>Meaning:</p>
+      <pre><code class="language-text">Sirf woh files select karo jinka group bandit6 hai.</code></pre>
+
+      <h2>User Aur Group Mein Difference</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Concept</th>
+              <th>Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>User owner</td>
+              <td>File kis user account ki hai</td>
+            </tr>
+            <tr>
+              <td>Group owner</td>
+              <td>File kis group se associated hai</td>
+            </tr>
+            <tr>
+              <td>Permission</td>
+              <td>User ya group file ke saath kya kar sakta hai</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Challenge mein dono conditions match karni hain:</p>
+      <pre><code class="language-text">User owner:  bandit7
+Group owner: bandit6</code></pre>
+
+      <h1><code>find</code> Command</h1>
+
+      <h2>Basic Syntax</h2>
+      <pre><code class="language-bash">find [starting-path] [conditions] [actions]</code></pre>
+      <p>Example:</p>
+      <pre><code class="language-bash">find / -type f -user bandit7 -group bandit6 -size 33c</code></pre>
+
+      <h2><code>/</code> Starting Path</h2>
+      <p>Command mein <code>/</code> root directory ko represent karta hai.</p>
+      <pre><code class="language-bash">find /</code></pre>
+      <p>Iska meaning hai:</p>
+      <pre><code class="language-text">Root directory se search start karo.</code></pre>
+      <p>Isse poore server ke directories mein search hoti hai, jaise:</p>
+      <pre><code class="language-text">/bin
+/etc
+/home
+/tmp
+/usr
+/var</code></pre>
+      <p>Agar hum sirf current directory mein search karte:</p>
+      <pre><code class="language-bash">find .</code></pre>
+      <p>To search current directory aur uske subdirectories tak limited hoti. Is challenge mein file server par kahin bhi ho sakti hai, isliye <code>/</code> use karte hain.</p>
+
+      <h2><code>-type f</code></h2>
+      <pre><code class="language-bash">-type f</code></pre>
+      <p>Sirf regular files ko select karta hai. Directories, symbolic links aur special files ko exclude karta hai.</p>
+
+      <h2><code>-user bandit7</code></h2>
+      <pre><code class="language-bash">-user bandit7</code></pre>
+      <p>File ke owner user ko <code>bandit7</code> se match karta hai.</p>
+
+      <h2><code>-group bandit6</code></h2>
+      <pre><code class="language-bash">-group bandit6</code></pre>
+      <p>File ke owner group ko <code>bandit6</code> se match karta hai.</p>
+
+      <h2><code>-size 33c</code></h2>
+      <pre><code class="language-bash">-size 33c</code></pre>
+      <p>Exactly <code>33</code> bytes ki file search karta hai.</p>
+      <p>Yahan:</p>
+      <pre><code class="language-text">33 → Exact size
+c  → Bytes</code></pre>
+      <p>Size examples:</p>
+      <pre><code class="language-bash">-size 33c    # Exactly 33 bytes
+-size +33c   # 33 bytes se badi
+-size -33c   # 33 bytes se chhoti</code></pre>
+
+      <h2><code>2>/dev/null</code></h2>
+      <pre><code class="language-bash">2>/dev/null</code></pre>
+      <p>Ye permission denied jaise error messages ko hide karta hai.</p>
+      <p>Linux mein standard streams:</p>
+      <pre><code class="language-text">0 → stdin  → Standard input
+1 → stdout → Standard output
+2 → stderr → Standard error</code></pre>
+      <p>Is expression mein:</p>
+      <pre><code class="language-text">2>          → Standard error redirect karo
+/dev/null   → Errors discard kar do</code></pre>
+      <p>Isliye:</p>
+      <pre><code class="language-bash">find / ... 2>/dev/null</code></pre>
+      <p>normal matching results display karta hai, lekin permission errors screen par show nahi karta.</p>
+
+      <h1>Complete Search Command</h1>
+      <p>Recommended command:</p>
+      <pre><code class="language-bash">find / -type f -user bandit7 -group bandit6 -size 33c 2>/dev/null</code></pre>
+      <p>Aapke provided command ka corrected version:</p>
+      <pre><code class="language-bash">find / -group bandit6 -user bandit7 -size 33c 2>/dev/null</code></pre>
+      <p><code>-type f</code> add karna better hai, kyunki challenge specifically file ke baare mein hai.</p>
+
+      <h2>Command Breakdown</h2>
+      <pre><code class="language-bash">find / -type f -user bandit7 -group bandit6 -size 33c 2>/dev/null</code></pre>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Part</th>
+              <th>Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>find</code></td>
+              <td>Files search karne wali command</td>
+            </tr>
+            <tr>
+              <td><code>/</code></td>
+              <td>Root se search start karo</td>
+            </tr>
+            <tr>
+              <td><code>-type f</code></td>
+              <td>Sirf regular files select karo</td>
+            </tr>
+            <tr>
+              <td><code>-user bandit7</code></td>
+              <td>Owner user <code>bandit7</code> ho</td>
+            </tr>
+            <tr>
+              <td><code>-group bandit6</code></td>
+              <td>Owner group <code>bandit6</code> ho</td>
+            </tr>
+            <tr>
+              <td><code>-size 33c</code></td>
+              <td>Exactly 33 bytes ho</td>
+            </tr>
+            <tr>
+              <td><code>2>/dev/null</code></td>
+              <td>Errors hide karo</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h1>File Metadata Check Karna</h1>
+      <p>Search ke baad found path ko verify karne ke liye <code>ls -l</code> use kar sakte hain:</p>
+      <pre><code class="language-bash">ls -l /path/to/found-file</code></pre>
+      <p>Expected information mein ye match hona chahiye:</p>
+      <pre><code class="language-text">Owner user:  bandit7
+Owner group: bandit6
+Size:        33 bytes</code></pre>
+      <p>Detailed metadata ke liye:</p>
+      <pre><code class="language-bash">stat /path/to/found-file</code></pre>
+      <p><code>stat</code> command file ka size, owner, group, permissions aur timestamps show karti hai.</p>
+
+      <h1>Password Read Karna</h1>
+      <p>Found path ko <code>cat</code> ke saath use karein:</p>
+      <pre><code class="language-bash">cat /path/to/found-file</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">z7WtoNQU2XfjmMtWA8u5rN4vzqu4v99S</code></pre>
+      <p>Agar path mein special characters ya spaces hon, to path ko quotes mein wrap karein:</p>
+      <pre><code class="language-bash">cat "/path/to/found-file"</code></pre>
+
+      <h1>Complete Walkthrough</h1>
+
+      <h2>Step 1: <code>bandit6</code> Par Login Karein</h2>
+      <pre><code class="language-powershell">ssh bandit6@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password prompt par previous level ka password enter karein.</p>
+      <p>Successful login ke baad prompt roughly is tarah dikhega:</p>
+      <pre><code class="language-text">bandit6@bandit:~$</code></pre>
+
+      <h2>Step 2: Current User Verify Karein</h2>
+      <pre><code class="language-bash">whoami</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">bandit6</code></pre>
+
+      <h2>Step 3: Root Se Search Karein</h2>
+      <pre><code class="language-bash">find / -type f -user bandit7 -group bandit6 -size 33c 2>/dev/null</code></pre>
+      <p>Command server ke root se search karegi aur matching file ka path display karegi.</p>
+      <p>Example format:</p>
+      <pre><code class="language-text">/some/directory/some-file</code></pre>
+      <blockquote>
+        <p><strong>Note:</strong> Exact path ko apne terminal ke output se copy karein. Path environment ke according different ho sakta hai.</p>
+      </blockquote>
+
+      <h2>Step 4: Found File Ki Details Check Karein</h2>
+      <pre><code class="language-bash">ls -l /path/to/found-file</code></pre>
+      <p>Size aur ownership verify karein.</p>
+
+      <h2>Step 5: Password Read Karein</h2>
+      <pre><code class="language-bash">cat /path/to/found-file</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">z7WtoNQU2XfjmMtWA8u5rN4vzqu4v99S</code></pre>
+
+      <h2>Step 6: Password Copy Karein</h2>
+      <pre><code class="language-text">z7WtoNQU2XfjmMtWA8u5rN4vzqu4v99S</code></pre>
+      <p>Password ke start ya end mein extra space copy na karein.</p>
+
+      <h2>Step 7: SSH Session Close Karein</h2>
+      <pre><code class="language-bash">exit</code></pre>
+
+      <h2>Step 8: <code>bandit7</code> Par Login Karein</h2>
+      <pre><code class="language-bash">ssh bandit7@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password enter karein:</p>
+      <pre><code class="language-text">z7WtoNQU2XfjmMtWA8u5rN4vzqu4v99S</code></pre>
+
+      <h1>Actual Command Flow</h1>
+      <pre><code class="language-text">bandit6@bandit:~$ find / -type f -user bandit7 -group bandit6 -size 33c 2>/dev/null
+/path/to/found-file
+bandit6@bandit:~$ ls -l /path/to/found-file
+bandit6@bandit:~$ cat /path/to/found-file
+z7WtoNQU2XfjmMtWA8u5rN4vzqu4v99S</code></pre>
+      <p>Next level login:</p>
+      <pre><code class="language-bash">ssh bandit7@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Common Errors</h1>
+
+      <h2><code>find: paths must precede expression</code></h2>
+      <p>Correct command syntax check karein:</p>
+      <pre><code class="language-bash">find / -type f -user bandit7 -group bandit6 -size 33c 2>/dev/null</code></pre>
+      <p>Options ke aage hyphen zaroor hona chahiye:</p>
+      <pre><code class="language-text">-user
+-group
+-size</code></pre>
+
+      <h2>Permission Denied Messages</h2>
+      <p>Agar <code>2>/dev/null</code> nahi lagaya, to output mein bahut saare errors aa sakte hain:</p>
+      <pre><code class="language-text">find: '/some/directory': Permission denied</code></pre>
+      <p>Errors hide karne ke liye:</p>
+      <pre><code class="language-bash">2>/dev/null</code></pre>
+      <p>Complete command:</p>
+      <pre><code class="language-bash">find / -type f -user bandit7 -group bandit6 -size 33c 2>/dev/null</code></pre>
+
+      <h2>No Output Aa Raha Hai</h2>
+      <p>Check karein:</p>
+      <ul>
+        <li>User name <code>bandit7</code> correct hai.</li>
+        <li>Group name <code>bandit6</code> correct hai.</li>
+        <li>Size <code>33c</code> correct hai.</li>
+        <li>Starting path <code>/</code> hai.</li>
+        <li><code>-type f</code> use hua hai.</li>
+      </ul>
+
+      <h2><code>cat</code> File Read Nahi Kar Rahi</h2>
+      <p>Search result ka exact path copy karein:</p>
+      <pre><code class="language-bash">cat /exact/path/from/find/output</code></pre>
+      <p>Agar path mein spaces hon, to quotes use karein:</p>
+      <pre><code class="language-bash">cat "/exact/path/from/find/output"</code></pre>
+
+      <h2>SSH Permission Denied</h2>
+      <p>Next level par login karte waqt check karein:</p>
+      <ul>
+        <li>Username <code>bandit7</code> hai.</li>
+        <li>Port <code>2220</code> use ho raha hai.</li>
+        <li>Password exactly copy hua hai.</li>
+        <li>Password ke beginning ya ending mein extra space nahi hai.</li>
+      </ul>
+      <p>Correct command:</p>
+      <pre><code class="language-bash">ssh bandit7@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Security Lessons</h1>
+      <p>Is level se humein ye important lessons milte hain:</p>
+      <ul>
+        <li>Linux files user aur group ownership rakhti hain.</li>
+        <li><code>find</code> ownership ke basis par files search kar sakta hai.</li>
+        <li>File size exact bytes mein filter ki ja sakti hai.</li>
+        <li>Root <code>/</code> se search karne par poore server ka filesystem scan hota hai.</li>
+        <li>Permission errors normal hain jab aap restricted directories search karte ho.</li>
+        <li><code>2>/dev/null</code> standard error ko hide karta hai.</li>
+        <li><code>ls -l</code> aur <code>stat</code> file metadata inspect karne ke liye useful hain.</li>
+        <li>Multiple conditions ko combine karke precise file search ki ja sakti hai.</li>
+        <li>File ownership aur permissions cybersecurity ke important concepts hain.</li>
+      </ul>
+
+      <h1>Commands Summary</h1>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>ssh user@host -p 2220</code></td>
+              <td>Remote server par SSH login karta hai</td>
+            </tr>
+            <tr>
+              <td><code>whoami</code></td>
+              <td>Current username show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>pwd</code></td>
+              <td>Current directory show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>find /</code></td>
+              <td>Root se search start karta hai</td>
+            </tr>
+            <tr>
+              <td><code>-type f</code></td>
+              <td>Sirf regular files select karta hai</td>
+            </tr>
+            <tr>
+              <td><code>-user bandit7</code></td>
+              <td>Owner user filter karta hai</td>
+            </tr>
+            <tr>
+              <td><code>-group bandit6</code></td>
+              <td>Owner group filter karta hai</td>
+            </tr>
+            <tr>
+              <td><code>-size 33c</code></td>
+              <td>Exactly 33-byte files select karta hai</td>
+            </tr>
+            <tr>
+              <td><code>2>/dev/null</code></td>
+              <td>Error output hide karta hai</td>
+            </tr>
+            <tr>
+              <td><code>ls -l filename</code></td>
+              <td>Owner, group, permissions aur size show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>stat filename</code></td>
+              <td>Detailed file metadata show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cat filename</code></td>
+              <td>File content display karta hai</td>
+            </tr>
+            <tr>
+              <td><code>exit</code></td>
+              <td>SSH session close karta hai</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h1>Final Solution</h1>
+      <p><code>bandit6</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit6@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Required properties wali file search karein:</p>
+      <pre><code class="language-bash">find / -type f -user bandit7 -group bandit6 -size 33c 2>/dev/null</code></pre>
+      <p>Jo path output mein mile, uska metadata check karein:</p>
+      <pre><code class="language-bash">ls -l /path/to/found-file</code></pre>
+      <p>Password read karein:</p>
+      <pre><code class="language-bash">cat /path/to/found-file</code></pre>
+      <p>Password:</p>
+      <pre><code class="language-text">z7WtoNQU2XfjmMtWA8u5rN4vzqu4v99S</code></pre>
+      <p>Ab <code>bandit7</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit7@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Conclusion</h1>
+      <p>Bandit Level 6 → Level 7 mein humne poore server par ownership, group aur file size ke basis par exact file search karna seekha.</p>
+      <p>Complete workflow:</p>
+      <pre><code class="language-text">SSH Login as bandit6
+        ↓
+Root Directory Se Search
+        ↓
+User Owner Filter
+        ↓
+Group Owner Filter
+        ↓
+Exact 33-Byte Size Filter
+        ↓
+Permission Errors Hide Karna
+        ↓
+Found File Read Karna
+        ↓
+Password Find Karna
+        ↓
+SSH Login as bandit7</code></pre>
+      <p>Is level ka most important command hai:</p>
+      <pre><code class="language-bash">find / -type f -user bandit7 -group bandit6 -size 33c 2>/dev/null</code></pre>
+      <blockquote>
+        <p><strong>Security Note:</strong> SSH ka use sirf un systems par karein jahan aapke paas permission ho. OverTheWire Bandit ek authorized cybersecurity learning environment hai.</p>
+      </blockquote>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <span> © 2026 SSSWriteups </span>
+    </div>
+  </footer>
+</body>
+</html>
+```
