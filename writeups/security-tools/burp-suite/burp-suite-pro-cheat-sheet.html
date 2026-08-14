@@ -5,39 +5,572 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Burp Suite for Pentesters | SSSWriteups</title>
+    <title>Burp Suite Pro Cheat Sheet | SSSWriteups</title>
 
-    <link rel="stylesheet" href="../../../style.css">
+    <style>
+
+        :root {
+            --bg: #05080d;
+            --panel: #0a1018;
+            --panel2: #0d141e;
+            --line: rgba(255,255,255,.08);
+            --text: #e7edf5;
+            --muted: #8795a8;
+            --accent: #69f0ae;
+            --accent2: #55c8ff;
+            --danger: #ff6b81;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family:
+                Inter,
+                ui-sans-serif,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+            line-height: 1.6;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+
+        /* =========================
+           TOP NAVIGATION
+        ========================= */
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+
+            background: rgba(5,8,13,.92);
+            backdrop-filter: blur(14px);
+
+            border-bottom: 1px solid var(--line);
+        }
+
+        .nav {
+            max-width: 1400px;
+            margin: auto;
+
+            min-height: 70px;
+
+            padding: 12px 24px;
+
+            display: flex;
+            align-items: center;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+
+            font-size: .82rem;
+            font-weight: 800;
+
+            letter-spacing: .12em;
+        }
+
+        .logo {
+            width: 38px;
+            height: 38px;
+
+            display: grid;
+            place-items: center;
+
+            border: 1px solid rgba(105,240,174,.35);
+            border-radius: 10px;
+
+            color: var(--accent);
+
+            font-weight: 900;
+        }
+
+
+        /* =========================
+           HERO
+        ========================= */
+
+        .hero {
+            max-width: 1400px;
+            margin: auto;
+
+            padding: 90px 24px 55px;
+        }
+
+        .eyebrow {
+            color: var(--accent);
+
+            font-size: .72rem;
+
+            text-transform: uppercase;
+
+            letter-spacing: .16em;
+
+            font-weight: 800;
+        }
+
+        .hero h1 {
+            margin: 14px 0 18px;
+
+            font-size: clamp(3rem, 7vw, 6.2rem);
+
+            line-height: .95;
+
+            letter-spacing: -.055em;
+        }
+
+        .hero h1 span {
+            color: var(--accent);
+        }
+
+        .hero p {
+            max-width: 760px;
+
+            color: var(--muted);
+
+            font-size: 1.05rem;
+        }
+
+
+        /* =========================
+           STATS
+        ========================= */
+
+        .stats {
+            display: flex;
+
+            flex-wrap: wrap;
+
+            gap: 9px;
+
+            margin-top: 26px;
+        }
+
+        .stat {
+            border: 1px solid var(--line);
+
+            background: rgba(255,255,255,.025);
+
+            padding: 7px 11px;
+
+            border-radius: 999px;
+
+            color: #aab7c8;
+
+            font-size: .76rem;
+        }
+
+
+        /* =========================
+           NOTICE
+        ========================= */
+
+        .notice {
+            margin-top: 24px;
+
+            border-left: 3px solid var(--accent);
+
+            padding: 13px 16px;
+
+            background: rgba(105,240,174,.04);
+
+            color: #9eacc0;
+
+            border-radius: 0 10px 10px 0;
+        }
+
+
+        /* =========================
+           MAIN LAYOUT
+        ========================= */
+
+        .layout {
+            max-width: 1400px;
+
+            margin: auto;
+
+            padding: 0 24px 60px;
+
+            display: grid;
+
+            grid-template-columns: 260px 1fr;
+
+            gap: 28px;
+        }
+
+
+        /* =========================
+           SIDEBAR
+        ========================= */
+
+        .sidebar {
+            position: sticky;
+
+            top: 95px;
+
+            align-self: start;
+
+            max-height: calc(100vh - 120px);
+
+            overflow: auto;
+
+            border: 1px solid var(--line);
+
+            background: var(--panel);
+
+            border-radius: 14px;
+
+            padding: 20px;
+        }
+
+        .sidebar h3 {
+            margin: 0 0 14px;
+
+            font-size: .82rem;
+
+            text-transform: uppercase;
+
+            letter-spacing: .12em;
+
+            color: #b9c5d4;
+        }
+
+        .toc {
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 4px;
+        }
+
+        .toc a {
+            color: #8290a3;
+
+            font-size: .78rem;
+
+            padding: 8px 9px;
+
+            border-radius: 7px;
+
+            transition: .2s;
+        }
+
+        .toc a:hover {
+            color: var(--accent);
+
+            background: rgba(105,240,174,.05);
+        }
+
+
+        /* =========================
+           CONTENT SECTIONS
+        ========================= */
+
+        .section {
+            margin-bottom: 24px;
+
+            border: 1px solid var(--line);
+
+            background: var(--panel);
+
+            border-radius: 15px;
+
+            overflow: hidden;
+        }
+
+        .section-head {
+            padding: 22px 26px;
+
+            border-bottom: 1px solid var(--line);
+
+            background:
+                linear-gradient(
+                    180deg,
+                    rgba(255,255,255,.025),
+                    rgba(255,255,255,0)
+                );
+        }
+
+        .section-head h2 {
+            margin: 0;
+
+            font-size: 1.35rem;
+
+            letter-spacing: -.02em;
+        }
+
+        .section-head p {
+            margin: 5px 0 0;
+
+            color: var(--muted);
+
+            font-size: .82rem;
+        }
+
+
+        /* =========================
+           TABLE
+        ========================= */
+
+        .table-wrap {
+            overflow: auto;
+        }
+
+        table {
+            width: 100%;
+
+            border-collapse: collapse;
+
+            min-width: 760px;
+        }
+
+        th,
+        td {
+            text-align: left;
+
+            padding: 14px 18px;
+
+            border-bottom: 1px solid var(--line);
+
+            vertical-align: top;
+        }
+
+        th {
+            color: #9eacbd;
+
+            background: #080e16;
+
+            font-size: .72rem;
+
+            text-transform: uppercase;
+
+            letter-spacing: .09em;
+        }
+
+        td {
+            color: #cbd5e1;
+
+            font-size: .87rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(255,255,255,.018);
+        }
+
+        td:first-child {
+            width: 65px;
+
+            color: var(--accent);
+
+            font-weight: 800;
+        }
+
+        td:nth-child(2) {
+            width: 270px;
+
+            color: #dce6f2;
+
+            font-weight: 600;
+        }
+
+
+        /* =========================
+           ARTICLE BUTTON
+        ========================= */
+
+        .article-link {
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 6px;
+
+            color: var(--accent);
+
+            font-weight: 700;
+
+            font-size: .8rem;
+
+            padding: 7px 10px;
+
+            border: 1px solid rgba(105,240,174,.18);
+
+            border-radius: 7px;
+
+            background: rgba(105,240,174,.035);
+
+            transition: .2s;
+        }
+
+        .article-link:hover {
+            background: rgba(105,240,174,.09);
+
+            border-color: rgba(105,240,174,.35);
+
+            transform: translateY(-1px);
+        }
+
+
+        /* =========================
+           SUMMARY
+        ========================= */
+
+        .summary {
+            max-width: 1400px;
+
+            margin: auto;
+
+            padding: 0 24px 28px;
+        }
+
+        .summary-box {
+            border: 1px solid var(--line);
+
+            background: var(--panel);
+
+            border-radius: 15px;
+
+            padding: 26px;
+        }
+
+        .summary-box h2 {
+            margin-top: 0;
+        }
+
+        .summary-box p {
+            color: var(--muted);
+        }
+
+        .summary-box ul {
+            color: #aebaca;
+
+            padding-left: 22px;
+        }
+
+
+        /* =========================
+           FOOTER
+        ========================= */
+
+        .footer {
+            max-width: 1400px;
+
+            margin: auto;
+
+            padding: 0 24px 50px;
+
+            color: #536278;
+
+            font-size: .8rem;
+        }
+
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media (max-width: 900px) {
+
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+
+                display: none;
+            }
+
+            .hero {
+                padding-top: 55px;
+            }
+
+        }
+
+
+        @media (max-width: 600px) {
+
+            .nav {
+                padding: 11px 14px;
+            }
+
+            .brand span {
+                display: none;
+            }
+
+            .hero,
+            .layout,
+            .summary,
+            .footer {
+                padding-left: 14px;
+
+                padding-right: 14px;
+            }
+
+            .hero {
+                padding-top: 42px;
+            }
+
+            .section-head {
+                padding: 20px;
+            }
+
+            th,
+            td {
+                padding: 12px 14px;
+            }
+
+        }
+
+    </style>
+
 </head>
+
 
 <body>
 
 
-<!-- Navigation -->
+<!-- =========================
+     NAVIGATION
+========================= -->
 
-<header class="hero page-header">
+<header class="topbar">
 
-    <nav class="nav container">
+    <nav class="nav">
 
-        <a class="logo" href="../../../index.html">
-            SSS<span>Writeups</span>
+        <a href="../../../../index.html" class="brand">
+
+            <span class="logo">
+                B
+            </span>
+
+            <span>
+                BURP SUITE PRO CHEAT SHEET
+            </span>
+
         </a>
-
-        <div class="nav-links">
-
-            <a href="../../../index.html">
-                Home
-            </a>
-
-            <a href="../../../categories/security-tools.html">
-                Security Tools
-            </a>
-
-            <a href="index.html">
-                Burp Suite
-            </a>
-
-        </div>
 
     </nav>
 
@@ -45,685 +578,1782 @@
 
 
 
-<!-- Main Content -->
+<!-- =========================
+     HERO
+========================= -->
 
-<main class="writeup-page section container">
+<main>
 
-<article class="writeup-content">
+<section class="hero">
 
-
-<p class="eyebrow">
-    SECURITY TOOLS • BURP SUITE
-</p>
-
-
-<h1>
-    🕷️ Burp Suite for Pentesters
-</h1>
+    <div class="eyebrow">
+        Web Application Security Reference
+    </div>
 
 
-<p>
-    A practical Burp Suite cheat sheet and learning guide designed
-    for bug bounty hunters and penetration testers to efficiently
-    discover web application vulnerabilities from low severity (P4)
-    to critical (P1) using Burp Suite.
-</p>
+    <h1>
+
+        Burp Suite.<br>
+
+        <span>
+            Intercept. Inspect. Test.
+        </span>
+
+    </h1>
 
 
-<p>
-    This provides a structured reference for web application
-    security testing, helping security researchers understand how to
-    use Burp Suite's powerful features for intercepting traffic,
-    analyzing requests, fuzzing parameters, and identifying
-    vulnerabilities in modern web applications.
-</p>
+    <p>
+
+        A practical Burp Suite reference for bug bounty hunters
+        and penetration testers covering web application testing,
+        traffic interception, fuzzing, request manipulation,
+        vulnerability discovery and useful Burp extensions.
+
+    </p>
+
+
+    <div class="stats">
+
+        <span class="stat">
+            21 Topics
+        </span>
+
+        <span class="stat">
+            Burp Suite Pro
+        </span>
+
+        <span class="stat">
+            Web Security
+        </span>
+
+        <span class="stat">
+            HTML &amp; CSS
+        </span>
+
+    </div>
+
+
+    <div class="notice">
+
+        Use Burp Suite and the techniques documented here only
+        against applications and systems that you own or are
+        explicitly authorized to test.
+
+    </div>
+
+</section>
 
 
 
-<h2>
-    🐞 Burp Suite for Pentesters
-</h2>
+<!-- =========================
+     CONTENT LAYOUT
+========================= -->
+
+<div class="layout">
 
 
+<!-- =========================
+     SIDEBAR
+========================= -->
 
-<div class="table-wrap">
+<aside class="sidebar">
 
-<table>
-
-<thead>
-
-<tr>
-
-    <th>#</th>
-
-    <th>Topic</th>
-
-    <th>Description</th>
-
-    <th>Article</th>
-
-</tr>
-
-</thead>
+    <h3>
+        Contents
+    </h3>
 
 
-<tbody>
+    <div class="toc">
 
-
-<tr>
-
-    <td>1</td>
-
-    <td>
-        🕷️ Web Scanner &amp; Crawler
-    </td>
-
-    <td>
-        Discover and scan web application endpoints automatically
-        using Burp crawler and scanner
-    </td>
-
-    <td>
-        <a href="https://www.hackingarticles.in/burp-suite-for-pentester-web-scanner-crawler/"
-           target="_blank"
-           rel="noopener noreferrer">
-            Read Article
+        <a href="#section-1">
+            01 · Web Scanner &amp; Crawler
         </a>
-    </td>
 
-</tr>
-
-
-
-<tr>
-
-    <td>2</td>
-
-    <td>
-        💥 Fuzzing with Intruder (Part 3)
-    </td>
-
-    <td>
-        Advanced fuzzing techniques using Burp Intruder
-        for vulnerability discovery
-    </td>
-
-    <td>
-        <a href="https://www.hackingarticles.in/burp-suite-for-pentester-fuzzing-with-intruder-part-3/"
-           target="_blank"
-           rel="noopener noreferrer">
-            Read Article
+        <a href="#section-2">
+            02 · Intruder Fuzzing Part 3
         </a>
-    </td>
 
-</tr>
-
-
-
-<tr>
-
-    <td>3</td>
-
-    <td>
-        💥 Fuzzing with Intruder (Part 2)
-    </td>
-
-    <td>
-        Intermediate fuzzing techniques using Burp Intruder
-    </td>
-
-    <td>
-        <a href="https://www.hackingarticles.in/burpsuite-for-pentester-fuzzing-with-intruder-part-2/"
-           target="_blank"
-           rel="noopener noreferrer">
-            Read Article
+        <a href="#section-3">
+            03 · Intruder Fuzzing Part 2
         </a>
-    </td>
 
-</tr>
-
-
-
-<tr>
-
-    <td>4</td>
-
-    <td>
-        💥 Fuzzing with Intruder (Part 1)
-    </td>
-
-    <td>
-        Introduction to fuzzing attacks using Burp Intruder
-    </td>
-
-    <td>
-        <a href="https://www.hackingarticles.in/burp-suite-for-pentester-fuzzing-with-intruder-part-1/"
-           target="_blank"
-           rel="noopener noreferrer">
-            Read Article
+        <a href="#section-4">
+            04 · Intruder Fuzzing Part 1
         </a>
-    </td>
 
-</tr>
-
-
-
-<tr>
-
-    <td>5</td>
-
-    <td>
-        ⚡ XSS Validator
-    </td>
-
-    <td>
-        Detect and validate Cross-Site Scripting vulnerabilities
-        using Burp
-    </td>
-
-    <td>
-        <a href="https://www.hackingarticles.in/burp-suite-for-pentester-xss-validator/"
-           target="_blank"
-           rel="noopener noreferrer">
-            Read Article
+        <a href="#section-5">
+            05 · XSS Validator
         </a>
-    </td>
 
-</tr>
-
-
-
-<tr>
-
-    <td>6</td>
-
-    <td>
-        🔗 Configuring Proxy
-    </td>
-
-    <td>
-        Configure browser proxy settings to intercept traffic
-        using Burp Suite
-    </td>
-
-    <td>
-        <a href="https://www.hackingarticles.in/burp-suite-for-pentester-configuring-proxy/"
-           target="_blank"
-           rel="noopener noreferrer">
-            Read Article
+        <a href="#section-6">
+            06 · Configuring Proxy
         </a>
-    </td>
 
-</tr>
-
-
-
-<tr>
-
-    <td>7</td>
-
-    <td>
-        🌐 Burp Collaborator
-    </td>
-
-    <td>
-        Detect out-of-band vulnerabilities such as SSRF
-        and Blind XSS
-    </td>
-
-    <td>
-        <a href="https://www.hackingarticles.in/burp-suite-for-pentester-burp-collaborator/"
-           target="_blank"
-           rel="noopener noreferrer">
-            Read Article
+        <a href="#section-7">
+            07 · Burp Collaborator
         </a>
-    </td>
 
-</tr>
-
-
-
-<tr>
-
-    <td>8</td>
-
-    <td>
-        🧰 HackBar
-    </td>
-
-    <td>
-        Use HackBar extension to craft and test payloads quickly
-    </td>
-
-    <td>
-        <a href="https://www.hackingarticles.in/burp-suite-for-pentester-hackbar/"
-           target="_blank"
-           rel="noopener noreferrer">
-            Read Article
+        <a href="#section-8">
+            08 · HackBar
         </a>
-    </td>
 
-</tr>
-
-
-
-<tr>
-
-    <td>9</td>
-
-    <td>
-        🎲 Burp Sequencer
-    </td>
-
-    <td>
-        Analyze randomness of session tokens and cookies
-    </td>
-
-    <td>
-        <a href="https://www.hackingarticles.in/burp-suite-for-pentester-burp-sequencer/"
-           target="_blank"
-           rel="noopener noreferrer">
-            Read Article
+        <a href="#section-9">
+            09 · Burp Sequencer
         </a>
-    </td>
 
-</tr>
-
-
-
-<tr>
-
-    <td>10</td>
-
-    <td>
-        🚀 Turbo Intruder
-    </td>
-
-    <td>
-        Perform high-speed fuzzing attacks using Turbo Intruder extension
-    </td>
-
-    <td>
-        <a href="https://www.hackingarticles.in/burp-suite-for-pentester-turbo-intruder/"
-           target="_blank"
-           rel="noopener noreferrer">
-            Read Article
+        <a href="#section-10">
+            10 · Turbo Intruder
         </a>
-    </td>
 
-</tr>
-
-
-
-<tr>
-
-    <td>11</td>
-
-    <td>
-        🧪 Engagement Tools
-    </td>
-
-    <td>
-        Explore Burp engagement tools for testing vulnerabilities
-    </td>
-
-    <td>
-        <a href="https://www.hackingarticles.in/engagement-tools-tutorial-burp-suite/"
-           target="_blank"
-           rel="noopener noreferrer">
-            Read Article
+        <a href="#section-11">
+            11 · Engagement Tools
         </a>
-    </td>
 
-</tr>
-
-
-
-<tr>
-
-    <td>12</td>
-
-    <td>
-        🔧 Payload Processing Rule (Part 2)
-    </td>
-
-    <td>
-        Advanced payload manipulation techniques in Burp Intruder
-    </td>
-
-    <td>
-        <a href="https://www.hackingarticles.in/payload-processing-rule-burp-suite-part-2/"
-           target="_blank"
-           rel="noopener noreferrer">
-            Read Article
+        <a href="#section-12">
+            12 · Payload Processing Part 2
         </a>
-    </td>
 
-</tr>
-
-
-
-<tr>
-
-    <td>13</td>
-
-    <td>
-        🔧 Payload Processing Rule (Part 1)
-    </td>
-
-    <td>
-        Introduction to payload processing rules in Burp Suite
-    </td>
-
-    <td>
-        <a href="https://www.hackingarticles.in/payload-processing-rule-burp-suite-part-1/"
-           target="_blank"
-           rel="noopener noreferrer">
-            Read Article
+        <a href="#section-13">
+            13 · Payload Processing Part 1
         </a>
-    </td>
 
-</tr>
-
-
-
-<tr>
-
-    <td>14</td>
-
-    <td>
-        📦 Burpsuite Payloads (Part 2)
-    </td>
-
-    <td>
-        Advanced payload generation techniques
-    </td>
-
-    <td>
-        <a href="https://www.hackingarticles.in/beginners-guide-burpsuite-payloads-part-2/"
-           target="_blank"
-           rel="noopener noreferrer">
-            Read Article
+        <a href="#section-14">
+            14 · BurpSuite Payloads Part 2
         </a>
-    </td>
 
-</tr>
-
-
-
-<tr>
-
-    <td>15</td>
-
-    <td>
-        📦 Burpsuite Payloads (Part 1)
-    </td>
-
-    <td>
-        Beginner guide to payload creation in Burp Intruder
-    </td>
-
-    <td>
-        <a href="https://www.hackingarticles.in/beginners-guide-burpsuite-payloads-part-1/"
-           target="_blank"
-           rel="noopener noreferrer">
-            Read Article
+        <a href="#section-15">
+            15 · BurpSuite Payloads Part 1
         </a>
-    </td>
 
-</tr>
-
-
-
-<tr>
-
-    <td>16</td>
-
-    <td>
-        🔐 Encoder &amp; Decoder
-    </td>
-
-    <td>
-        Encode and decode data formats like Base64, URL,
-        and HTML
-    </td>
-
-    <td>
-        <a href="https://www.hackingarticles.in/burpsuite-encoder-decoder-tutorial/"
-           target="_blank"
-           rel="noopener noreferrer">
-            Read Article
+        <a href="#section-16">
+            16 · Encoder &amp; Decoder
         </a>
-    </td>
 
-</tr>
-
-
-
-<tr>
-
-    <td>17</td>
-
-    <td>
-        🔍 Active Scan++
-    </td>
-
-    <td>
-        Improve vulnerability detection using Active Scan++
-        extension
-    </td>
-
-    <td>
-        <a href="https://www.hackingarticles.in/burp-suite-for-pentester-active-scan/"
-           target="_blank"
-           rel="noopener noreferrer">
-            Read Article
+        <a href="#section-17">
+            17 · Active Scan++
         </a>
-    </td>
 
-</tr>
-
-
-
-<tr>
-
-    <td>18</td>
-
-    <td>
-        🛡️ Software Vulnerability Scanner
-    </td>
-
-    <td>
-        Automated scanning of web applications for security issues
-    </td>
-
-    <td>
-        <a href="https://www.hackingarticles.in/burp-suite-for-pentester-software-vulnerability-scanner/"
-           target="_blank"
-           rel="noopener noreferrer">
-            Read Article
+        <a href="#section-18">
+            18 · Software Vulnerability Scanner
         </a>
-    </td>
 
-</tr>
-
-
-
-<tr>
-
-    <td>19</td>
-
-    <td>
-        📁 Project Management
-    </td>
-
-    <td>
-        Manage multiple pentesting projects inside Burp Suite
-    </td>
-
-    <td>
-        <a href="https://www.hackingarticles.in/burp-suite-for-pentester-burps-project-management/"
-           target="_blank"
-           rel="noopener noreferrer">
-            Read Article
+        <a href="#section-19">
+            19 · Project Management
         </a>
-    </td>
 
-</tr>
-
-
-
-<tr>
-
-    <td>20</td>
-
-    <td>
-        🔁 Repeater
-    </td>
-
-    <td>
-        Manually modify and resend HTTP requests to test
-        vulnerabilities
-    </td>
-
-    <td>
-        <a href="https://www.hackingarticles.in/burp-suite-for-pentester-repeater/"
-           target="_blank"
-           rel="noopener noreferrer">
-            Read Article
+        <a href="#section-20">
+            20 · Repeater
         </a>
-    </td>
 
-</tr>
-
-
-
-<tr>
-
-    <td>21</td>
-
-    <td>
-        🔓 Autorize
-    </td>
-
-    <td>
-        Detect authorization bypass vulnerabilities using
-        Autorize extension
-    </td>
-
-    <td>
-        <a href="https://www.hackingarticles.in/burpsuite-for-pentester-autorize/"
-           target="_blank"
-           rel="noopener noreferrer">
-            Read Article
+        <a href="#section-21">
+            21 · Autorize
         </a>
-    </td>
 
-</tr>
+    </div>
+
+</aside>
 
 
-</tbody>
 
-</table>
+<!-- =========================
+     MAIN CONTENT
+========================= -->
+
+<div id="content">
+
+
+
+<!-- 01 -->
+
+<section class="section" id="section-1">
+
+    <div class="section-head">
+
+        <h2>
+            🕷️ Web Scanner &amp; Crawler
+        </h2>
+
+        <p>
+            Burp Suite for Pentesters · Web discovery
+        </p>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>#</th>
+                    <th>Topic</th>
+                    <th>Description</th>
+                    <th>Article</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+
+                    <td>1</td>
+
+                    <td>
+                        🕷️ Web Scanner &amp; Crawler
+                    </td>
+
+                    <td>
+                        Discover and scan web application endpoints
+                        automatically using Burp crawler and scanner.
+                    </td>
+
+                    <td>
+
+                        <a
+                            class="article-link"
+                            href="https://www.hackingarticles.in/burp-suite-for-pentester-web-scanner-crawler/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Read Article ↗
+                        </a>
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+
+<!-- 02 -->
+
+<section class="section" id="section-2">
+
+    <div class="section-head">
+
+        <h2>
+            💥 Fuzzing with Intruder — Part 3
+        </h2>
+
+        <p>
+            Advanced fuzzing
+        </p>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>#</th>
+                    <th>Topic</th>
+                    <th>Description</th>
+                    <th>Article</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+
+                    <td>2</td>
+
+                    <td>
+                        Fuzzing with Intruder (Part 3)
+                    </td>
+
+                    <td>
+                        Advanced fuzzing techniques using Burp Intruder
+                        for vulnerability discovery.
+                    </td>
+
+                    <td>
+
+                        <a
+                            class="article-link"
+                            href="https://www.hackingarticles.in/burp-suite-for-pentester-fuzzing-with-intruder-part-3/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Read Article ↗
+                        </a>
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+
+<!-- 03 -->
+
+<section class="section" id="section-3">
+
+    <div class="section-head">
+
+        <h2>
+            💥 Fuzzing with Intruder — Part 2
+        </h2>
+
+        <p>
+            Intermediate fuzzing
+        </p>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>#</th>
+                    <th>Topic</th>
+                    <th>Description</th>
+                    <th>Article</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+
+                    <td>3</td>
+
+                    <td>
+                        Fuzzing with Intruder (Part 2)
+                    </td>
+
+                    <td>
+                        Intermediate fuzzing techniques using Burp Intruder.
+                    </td>
+
+                    <td>
+
+                        <a
+                            class="article-link"
+                            href="https://www.hackingarticles.in/burpsuite-for-pentester-fuzzing-with-intruder-part-2/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Read Article ↗
+                        </a>
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+
+<!-- 04 -->
+
+<section class="section" id="section-4">
+
+    <div class="section-head">
+
+        <h2>
+            💥 Fuzzing with Intruder — Part 1
+        </h2>
+
+        <p>
+            Introduction to fuzzing
+        </p>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>#</th>
+                    <th>Topic</th>
+                    <th>Description</th>
+                    <th>Article</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+
+                    <td>4</td>
+
+                    <td>
+                        Fuzzing with Intruder (Part 1)
+                    </td>
+
+                    <td>
+                        Introduction to fuzzing attacks using Burp Intruder.
+                    </td>
+
+                    <td>
+
+                        <a
+                            class="article-link"
+                            href="https://www.hackingarticles.in/burp-suite-for-pentester-fuzzing-with-intruder-part-1/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Read Article ↗
+                        </a>
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+
+<!-- 05 -->
+
+<section class="section" id="section-5">
+
+    <div class="section-head">
+
+        <h2>
+            ⚡ XSS Validator
+        </h2>
+
+        <p>
+            Cross-Site Scripting testing
+        </p>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>#</th>
+                    <th>Topic</th>
+                    <th>Description</th>
+                    <th>Article</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+
+                    <td>5</td>
+
+                    <td>
+                        XSS Validator
+                    </td>
+
+                    <td>
+                        Detect and validate Cross-Site Scripting
+                        vulnerabilities using Burp.
+                    </td>
+
+                    <td>
+
+                        <a
+                            class="article-link"
+                            href="https://www.hackingarticles.in/burp-suite-for-pentester-xss-validator/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Read Article ↗
+                        </a>
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+
+<!-- 06 -->
+
+<section class="section" id="section-6">
+
+    <div class="section-head">
+
+        <h2>
+            🔗 Configuring Proxy
+        </h2>
+
+        <p>
+            Traffic interception
+        </p>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>#</th>
+                    <th>Topic</th>
+                    <th>Description</th>
+                    <th>Article</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+
+                    <td>6</td>
+
+                    <td>
+                        Configuring Proxy
+                    </td>
+
+                    <td>
+                        Configure browser proxy settings to intercept
+                        traffic using Burp Suite.
+                    </td>
+
+                    <td>
+
+                        <a
+                            class="article-link"
+                            href="https://www.hackingarticles.in/burp-suite-for-pentester-configuring-proxy/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Read Article ↗
+                        </a>
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+
+<!-- 07 -->
+
+<section class="section" id="section-7">
+
+    <div class="section-head">
+
+        <h2>
+            🌐 Burp Collaborator
+        </h2>
+
+        <p>
+            Out-of-band vulnerability testing
+        </p>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>#</th>
+                    <th>Topic</th>
+                    <th>Description</th>
+                    <th>Article</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+
+                    <td>7</td>
+
+                    <td>
+                        Burp Collaborator
+                    </td>
+
+                    <td>
+                        Detect out-of-band vulnerabilities such as
+                        SSRF and Blind XSS.
+                    </td>
+
+                    <td>
+
+                        <a
+                            class="article-link"
+                            href="https://www.hackingarticles.in/burp-suite-for-pentester-burp-collaborator/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Read Article ↗
+                        </a>
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+
+<!-- 08 -->
+
+<section class="section" id="section-8">
+
+    <div class="section-head">
+
+        <h2>
+            🧰 HackBar
+        </h2>
+
+        <p>
+            Payload creation
+        </p>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>#</th>
+                    <th>Topic</th>
+                    <th>Description</th>
+                    <th>Article</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+
+                    <td>8</td>
+
+                    <td>
+                        HackBar
+                    </td>
+
+                    <td>
+                        Use HackBar extension to craft and test
+                        payloads quickly.
+                    </td>
+
+                    <td>
+
+                        <a
+                            class="article-link"
+                            href="https://www.hackingarticles.in/burp-suite-for-pentester-hackbar/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Read Article ↗
+                        </a>
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+
+<!-- 09 -->
+
+<section class="section" id="section-9">
+
+    <div class="section-head">
+
+        <h2>
+            🎲 Burp Sequencer
+        </h2>
+
+        <p>
+            Token randomness analysis
+        </p>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>#</th>
+                    <th>Topic</th>
+                    <th>Description</th>
+                    <th>Article</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+
+                    <td>9</td>
+
+                    <td>
+                        Burp Sequencer
+                    </td>
+
+                    <td>
+                        Analyze randomness of session tokens and cookies.
+                    </td>
+
+                    <td>
+
+                        <a
+                            class="article-link"
+                            href="https://www.hackingarticles.in/burp-suite-for-pentester-burp-sequencer/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Read Article ↗
+                        </a>
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+
+<!-- 10 -->
+
+<section class="section" id="section-10">
+
+    <div class="section-head">
+
+        <h2>
+            🚀 Turbo Intruder
+        </h2>
+
+        <p>
+            High-speed fuzzing
+        </p>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>#</th>
+                    <th>Topic</th>
+                    <th>Description</th>
+                    <th>Article</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+
+                    <td>10</td>
+
+                    <td>
+                        Turbo Intruder
+                    </td>
+
+                    <td>
+                        Perform high-speed fuzzing attacks using
+                        Turbo Intruder extension.
+                    </td>
+
+                    <td>
+
+                        <a
+                            class="article-link"
+                            href="https://www.hackingarticles.in/burp-suite-for-pentester-turbo-intruder/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Read Article ↗
+                        </a>
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+
+<!-- 11 -->
+
+<section class="section" id="section-11">
+
+    <div class="section-head">
+
+        <h2>
+            🧪 Engagement Tools
+        </h2>
+
+        <p>
+            Burp engagement features
+        </p>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>#</th>
+                    <th>Topic</th>
+                    <th>Description</th>
+                    <th>Article</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+
+                    <td>11</td>
+
+                    <td>
+                        Engagement Tools
+                    </td>
+
+                    <td>
+                        Explore Burp engagement tools for testing
+                        vulnerabilities.
+                    </td>
+
+                    <td>
+
+                        <a
+                            class="article-link"
+                            href="https://www.hackingarticles.in/engagement-tools-tutorial-burp-suite/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Read Article ↗
+                        </a>
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+
+<!-- 12 -->
+
+<section class="section" id="section-12">
+
+    <div class="section-head">
+
+        <h2>
+            🔧 Payload Processing Rule — Part 2
+        </h2>
+
+        <p>
+            Advanced payload manipulation
+        </p>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>#</th>
+                    <th>Topic</th>
+                    <th>Description</th>
+                    <th>Article</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+
+                    <td>12</td>
+
+                    <td>
+                        Payload Processing Rule (Part 2)
+                    </td>
+
+                    <td>
+                        Advanced payload manipulation techniques
+                        in Burp Intruder.
+                    </td>
+
+                    <td>
+
+                        <a
+                            class="article-link"
+                            href="https://www.hackingarticles.in/payload-processing-rule-burp-suite-part-2/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Read Article ↗
+                        </a>
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+
+<!-- 13 -->
+
+<section class="section" id="section-13">
+
+    <div class="section-head">
+
+        <h2>
+            🔧 Payload Processing Rule — Part 1
+        </h2>
+
+        <p>
+            Payload processing fundamentals
+        </p>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>#</th>
+                    <th>Topic</th>
+                    <th>Description</th>
+                    <th>Article</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+
+                    <td>13</td>
+
+                    <td>
+                        Payload Processing Rule (Part 1)
+                    </td>
+
+                    <td>
+                        Introduction to payload processing rules
+                        in Burp Suite.
+                    </td>
+
+                    <td>
+
+                        <a
+                            class="article-link"
+                            href="https://www.hackingarticles.in/payload-processing-rule-burp-suite-part-1/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Read Article ↗
+                        </a>
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+
+<!-- 14 -->
+
+<section class="section" id="section-14">
+
+    <div class="section-head">
+
+        <h2>
+            📦 BurpSuite Payloads — Part 2
+        </h2>
+
+        <p>
+            Advanced payload generation
+        </p>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>#</th>
+                    <th>Topic</th>
+                    <th>Description</th>
+                    <th>Article</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+
+                    <td>14</td>
+
+                    <td>
+                        Burpsuite Payloads (Part 2)
+                    </td>
+
+                    <td>
+                        Advanced payload generation techniques.
+                    </td>
+
+                    <td>
+
+                        <a
+                            class="article-link"
+                            href="https://www.hackingarticles.in/beginners-guide-burpsuite-payloads-part-2/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Read Article ↗
+                        </a>
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+
+<!-- 15 -->
+
+<section class="section" id="section-15">
+
+    <div class="section-head">
+
+        <h2>
+            📦 BurpSuite Payloads — Part 1
+        </h2>
+
+        <p>
+            Payload creation basics
+        </p>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>#</th>
+                    <th>Topic</th>
+                    <th>Description</th>
+                    <th>Article</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+
+                    <td>15</td>
+
+                    <td>
+                        Burpsuite Payloads (Part 1)
+                    </td>
+
+                    <td>
+                        Beginner guide to payload creation
+                        in Burp Intruder.
+                    </td>
+
+                    <td>
+
+                        <a
+                            class="article-link"
+                            href="https://www.hackingarticles.in/beginners-guide-burpsuite-payloads-part-1/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Read Article ↗
+                        </a>
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+
+<!-- 16 -->
+
+<section class="section" id="section-16">
+
+    <div class="section-head">
+
+        <h2>
+            🔐 Encoder &amp; Decoder
+        </h2>
+
+        <p>
+            Data transformation
+        </p>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>#</th>
+                    <th>Topic</th>
+                    <th>Description</th>
+                    <th>Article</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+
+                    <td>16</td>
+
+                    <td>
+                        Encoder &amp; Decoder
+                    </td>
+
+                    <td>
+                        Encode and decode data formats such as
+                        Base64, URL and HTML.
+                    </td>
+
+                    <td>
+
+                        <a
+                            class="article-link"
+                            href="https://www.hackingarticles.in/burpsuite-encoder-decoder-tutorial/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Read Article ↗
+                        </a>
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+
+<!-- 17 -->
+
+<section class="section" id="section-17">
+
+    <div class="section-head">
+
+        <h2>
+            🔍 Active Scan++
+        </h2>
+
+        <p>
+            Enhanced vulnerability detection
+        </p>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>#</th>
+                    <th>Topic</th>
+                    <th>Description</th>
+                    <th>Article</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+
+                    <td>17</td>
+
+                    <td>
+                        Active Scan++
+                    </td>
+
+                    <td>
+                        Improve vulnerability detection using
+                        the Active Scan++ extension.
+                    </td>
+
+                    <td>
+
+                        <a
+                            class="article-link"
+                            href="https://www.hackingarticles.in/burp-suite-for-pentester-active-scan/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Read Article ↗
+                        </a>
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+
+<!-- 18 -->
+
+<section class="section" id="section-18">
+
+    <div class="section-head">
+
+        <h2>
+            🛡️ Software Vulnerability Scanner
+        </h2>
+
+        <p>
+            Automated security scanning
+        </p>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>#</th>
+                    <th>Topic</th>
+                    <th>Description</th>
+                    <th>Article</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+
+                    <td>18</td>
+
+                    <td>
+                        Software Vulnerability Scanner
+                    </td>
+
+                    <td>
+                        Automated scanning of web applications
+                        for security issues.
+                    </td>
+
+                    <td>
+
+                        <a
+                            class="article-link"
+                            href="https://www.hackingarticles.in/burp-suite-for-pentester-software-vulnerability-scanner/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Read Article ↗
+                        </a>
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+
+<!-- 19 -->
+
+<section class="section" id="section-19">
+
+    <div class="section-head">
+
+        <h2>
+            📁 Project Management
+        </h2>
+
+        <p>
+            Burp project organization
+        </p>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>#</th>
+                    <th>Topic</th>
+                    <th>Description</th>
+                    <th>Article</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+
+                    <td>19</td>
+
+                    <td>
+                        Project Management
+                    </td>
+
+                    <td>
+                        Manage multiple penetration testing projects
+                        inside Burp Suite.
+                    </td>
+
+                    <td>
+
+                        <a
+                            class="article-link"
+                            href="https://www.hackingarticles.in/burp-suite-for-pentester-burps-project-management/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Read Article ↗
+                        </a>
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+
+<!-- 20 -->
+
+<section class="section" id="section-20">
+
+    <div class="section-head">
+
+        <h2>
+            🔁 Repeater
+        </h2>
+
+        <p>
+            Manual request testing
+        </p>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>#</th>
+                    <th>Topic</th>
+                    <th>Description</th>
+                    <th>Article</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+
+                    <td>20</td>
+
+                    <td>
+                        Repeater
+                    </td>
+
+                    <td>
+                        Manually modify and resend HTTP requests
+                        to test vulnerabilities.
+                    </td>
+
+                    <td>
+
+                        <a
+                            class="article-link"
+                            href="https://www.hackingarticles.in/burp-suite-for-pentester-repeater/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Read Article ↗
+                        </a>
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+
+<!-- 21 -->
+
+<section class="section" id="section-21">
+
+    <div class="section-head">
+
+        <h2>
+            🔓 Autorize
+        </h2>
+
+        <p>
+            Authorization testing
+        </p>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>#</th>
+                    <th>Topic</th>
+                    <th>Description</th>
+                    <th>Article</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+
+                    <td>21</td>
+
+                    <td>
+                        Autorize
+                    </td>
+
+                    <td>
+                        Detect authorization bypass vulnerabilities
+                        using the Autorize extension.
+                    </td>
+
+                    <td>
+
+                        <a
+                            class="article-link"
+                            href="https://www.hackingarticles.in/burpsuite-for-pentester-autorize/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Read Article ↗
+                        </a>
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+
+</div>
 
 </div>
 
 
 
-<h2>
-    📚 Topics Covered
-</h2>
+<!-- =========================
+     SUMMARY
+========================= -->
+
+<div class="summary">
+
+    <div class="summary-box">
+
+        <h2>
+            🐞 Burp Suite for Pentesters
+        </h2>
+
+        <p>
+
+            This reference provides a structured learning path
+            for understanding Burp Suite features used during
+            authorized web application security testing.
+
+        </p>
 
 
-<ul>
+        <ul>
 
-    <li>Web application scanning and crawling</li>
+            <li>
+                Web application crawling and scanning
+            </li>
 
-    <li>Burp Intruder and fuzzing</li>
+            <li>
+                HTTP proxy configuration and traffic interception
+            </li>
 
-    <li>Proxy configuration</li>
+            <li>
+                Intruder and fuzzing techniques
+            </li>
 
-    <li>Burp Collaborator</li>
+            <li>
+                Request manipulation with Repeater
+            </li>
 
-    <li>XSS validation</li>
+            <li>
+                Payload processing and generation
+            </li>
 
-    <li>Session token analysis</li>
+            <li>
+                Encoding and decoding
+            </li>
 
-    <li>Turbo Intruder</li>
+            <li>
+                Session token analysis
+            </li>
 
-    <li>Payload processing</li>
+            <li>
+                Authorization testing
+            </li>
 
-    <li>Payload generation</li>
+            <li>
+                Burp extensions and engagement tools
+            </li>
 
-    <li>Encoding and decoding</li>
+        </ul>
 
-    <li>Active Scan++</li>
+    </div>
 
-    <li>Vulnerability scanning</li>
+</div>
 
-    <li>Project management</li>
-
-    <li>Burp Repeater</li>
-
-    <li>Authorization testing with Autorize</li>
-
-</ul>
-
-
-
-<h2>
-    🎯 Purpose
-</h2>
-
-
-<p>
-    This cheat sheet is intended as a structured reference for
-    learning and practicing web application security testing
-    with Burp Suite.
-</p>
-
-
-<p>
-    The referenced material covers different Burp Suite features
-    and extensions that can assist security researchers during
-    authorized penetration testing and bug bounty assessments.
-</p>
-
-
-
-<h2>
-    ⚠️ Responsible Use
-</h2>
-
-
-<blockquote>
-
-    Use Burp Suite and the techniques documented here only against
-    applications and systems that you own or have explicit
-    authorization to test.
-
-</blockquote>
-
-
-
-</article>
 
 </main>
 
 
 
-<!-- Footer -->
+<!-- =========================
+     FOOTER
+========================= -->
 
-<footer>
+<footer class="footer">
 
-    <div class="container footer-inner">
-
-        <span>
-            © 2026 SSSWriteups
-        </span>
-
-    
-    </div>
+    Burp Suite Pro Cheat Sheet · SSSWriteups
 
 </footer>
 
