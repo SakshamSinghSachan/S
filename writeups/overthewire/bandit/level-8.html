@@ -1,0 +1,437 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OverTheWire Bandit - Level 8 to Level 9 | SSSWriteups</title>
+  <link rel="stylesheet" href="../../../style.css">
+</head>
+<body>
+  <header class="hero page-header">
+    <nav class="nav container">
+      <a class="logo" href="../../../../index.html">
+        SSS<span>Writeups</span>
+      </a>
+      <div class="nav-links">
+        <a href="../../../../index.html">
+          Home
+        </a>
+
+        <a href="../../../../categories/overthewire.html">
+          OverTheWire
+        </a>
+
+        <a href="index.html">
+          Bandit
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="writeup-page section container">
+    <article class="writeup-content">
+      <h1>OverTheWire Bandit — Level 8 to Level 9</h1>
+
+      <h2>Introduction</h2>
+      <p>Is writeup ka heading <strong>Level 8 → Level 9</strong> hai.</p>
+      <p>Is level mein next level ka password <code>data.txt</code> file ke andar stored hai. Password woh <strong>only line of text</strong> hai jo poori file mein exactly ek baar occur hoti hai.</p>
+      <p>Baaki lines file mein multiple times repeat hoti hain. Unique line find karne ke liye hum <code>sort</code> aur <code>uniq -u</code> commands ko pipe ke through combine karenge:</p>
+      <pre><code class="language-bash">sort data.txt | uniq -u</code></pre>
+      <p>Found password:</p>
+      <pre><code class="language-text">EN632PlfViZbn3PhVK3XOGSLNInNE00t</code></pre>
+
+      <h2>Objective</h2>
+      <p>Is level mein humein:</p>
+      <ul>
+        <li><code>bandit8</code> user se SSH ke through login karna hai.</li>
+        <li><code>data.txt</code> file identify karni hai.</li>
+        <li>File ki lines ko sort karna hai.</li>
+        <li>Repeated lines mein se only once occurring line find karni hai.</li>
+        <li>Password copy karna hai.</li>
+        <li><code>bandit9</code> user se next SSH login karna hai.</li>
+      </ul>
+
+      <h2>Given Information</h2>
+      <p>Current level par login karne ke liye:</p>
+      <pre><code class="language-text">Host:     bandit.labs.overthewire.org
+Port:     2220
+Username: bandit8
+Password: Previous level se mila password</code></pre>
+      <p>File:</p>
+      <pre><code class="language-text">data.txt</code></pre>
+      <p>Required line:</p>
+      <pre><code class="language-text">Jo line exactly ek baar occur hoti hai</code></pre>
+      <p>Next level ka username:</p>
+      <pre><code class="language-text">bandit9</code></pre>
+      <p>Found password:</p>
+      <pre><code class="language-text">EN632PlfViZbn3PhVK3XOGSLNInNE00t</code></pre>
+
+      <h1>Duplicate Aur Unique Lines</h1>
+
+      <h2>Duplicate Line Kya Hoti Hai?</h2>
+      <p>Duplicate line woh line hoti hai jo file mein ek se zyada baar present ho.</p>
+      <p>Example:</p>
+      <pre><code class="language-text">apple
+banana
+apple</code></pre>
+      <p>Yahan <code>apple</code> duplicate line hai kyunki woh do baar appear ho rahi hai.</p>
+
+      <h2>Unique Line Kya Hoti Hai?</h2>
+      <p>Unique line woh line hoti hai jo file mein exactly ek baar appear hoti hai.</p>
+      <p>Example:</p>
+      <pre><code class="language-text">apple
+banana
+apple
+orange</code></pre>
+      <p>Is example mein <code>banana</code> aur <code>orange</code> unique lines hain.</p>
+      <p>Bandit Level 8 mein humein woh line find karni hai jo exactly once appear hoti hai.</p>
+
+      <h1><code>sort</code> Command</h1>
+
+      <h2><code>sort</code> Kya Karti Hai?</h2>
+      <p><code>sort</code> command text lines ko alphabetical ya lexicographical order mein arrange karti hai.</p>
+      <p>Basic command:</p>
+      <pre><code class="language-bash">sort data.txt</code></pre>
+      <p>Ye <code>data.txt</code> ki lines ko sorted order mein terminal par display karegi.</p>
+
+      <h2>Sorting Kyun Zaroori Hai?</h2>
+      <p><code>uniq</code> command normally adjacent duplicate lines ko identify karti hai. Agar same line file mein alag-alag locations par scattered ho, to <code>uniq</code> unhe duplicate ke roop mein correctly identify nahi kar payegi.</p>
+      <p>Example unsorted data:</p>
+      <pre><code class="language-text">apple
+banana
+orange
+apple</code></pre>
+      <p>Yahan dono <code>apple</code> lines adjacent nahi hain.</p>
+      <p>Sort karne ke baad:</p>
+      <pre><code class="language-text">apple
+apple
+banana
+orange</code></pre>
+      <p>Ab duplicates adjacent ho gaye hain aur <code>uniq</code> unhe correctly process kar sakti hai.</p>
+
+      <h2><code>sort</code> Output Save Nahi Karti</h2>
+      <p>By default:</p>
+      <pre><code class="language-bash">sort data.txt</code></pre>
+      <p>Original <code>data.txt</code> file ko change nahi karti. Sorted result terminal par display hota hai.</p>
+
+      <h1><code>uniq</code> Command</h1>
+
+      <h2><code>uniq</code> Kya Karti Hai?</h2>
+      <p><code>uniq</code> command repeated adjacent lines ko filter, remove ya report karti hai.</p>
+      <p>Basic command:</p>
+      <pre><code class="language-bash">uniq data.txt</code></pre>
+      <p>Lekin accurate duplicate processing ke liye input ko pehle sort karna better hai:</p>
+      <pre><code class="language-bash">sort data.txt | uniq</code></pre>
+
+      <h2><code>uniq -u</code></h2>
+      <pre><code class="language-bash">uniq -u</code></pre>
+      <p><code>-u</code> ka meaning <strong>unique</strong> hai.</p>
+      <p>Ye sirf woh lines display karta hai jo exactly ek baar occur hoti hain. Repeated lines ko output se remove kar deta hai.</p>
+
+      <h2><code>uniq -c</code></h2>
+      <pre><code class="language-bash">uniq -c</code></pre>
+      <p>Har line ke occurrences ka count show karta hai.</p>
+      <p>Example:</p>
+      <pre><code class="language-text">2 apple
+1 banana
+2 orange</code></pre>
+      <p>Ye option analysis ke liye useful hai.</p>
+
+      <h2><code>uniq -d</code></h2>
+      <pre><code class="language-bash">uniq -d</code></pre>
+      <p>Sirf duplicate lines display karta hai.</p>
+
+      <h1>Pipe <code>|</code></h1>
+
+      <h2>Pipe Kya Hota Hai?</h2>
+      <p>Pipe symbol:</p>
+      <pre><code class="language-text">|</code></pre>
+      <p>Pipe first command ke output ko second command ke input mein send karta hai.</p>
+      <p>General format:</p>
+      <pre><code class="language-bash">command1 | command2</code></pre>
+
+      <h2>Is Level Mein Pipe</h2>
+      <pre><code class="language-bash">sort data.txt | uniq -u</code></pre>
+      <p>Process:</p>
+      <pre><code class="language-text">sort data.txt
+       ↓
+Sorted lines
+       ↓
+       |
+       ↓
+uniq -u
+       ↓
+Only line occurring once</code></pre>
+
+      <h2>Command Breakdown</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Part</th>
+              <th>Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>sort</code></td>
+              <td>Lines ko sorted order mein arrange karta hai</td>
+            </tr>
+            <tr>
+              <td><code>data.txt</code></td>
+              <td>Input file</td>
+            </tr>
+            <tr>
+              <td><code>|</code></td>
+              <td>First command ka output next command ko deta hai</td>
+            </tr>
+            <tr>
+              <td><code>uniq</code></td>
+              <td>Repeated adjacent lines ko process karta hai</td>
+            </tr>
+            <tr>
+              <td><code>-u</code></td>
+              <td>Sirf exactly once occurring lines show karta hai</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h1>Complete Solution Methods</h1>
+
+      <h2>Method 1: Recommended Pipe Method</h2>
+      <pre><code class="language-bash">sort data.txt | uniq -u</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">EN632PlfViZbn3PhVK3XOGSLNInNE00t</code></pre>
+
+      <h2>Method 2: Temporary Sorted File</h2>
+      <p>Pehle sorted output ko new file mein save karein:</p>
+      <pre><code class="language-bash">sort data.txt > sorted.txt</code></pre>
+      <p>Phir unique line find karein:</p>
+      <pre><code class="language-bash">uniq -u sorted.txt</code></pre>
+
+      <h2>Method 3: Count Lines</h2>
+      <p>Occurrences count karne ke liye:</p>
+      <pre><code class="language-bash">sort data.txt | uniq -c</code></pre>
+      <p>Output mein jis line ke saamne count <code>1</code> ho, woh password line hai.</p>
+
+      <h2>Method 4: <code>sort -u</code> Se Difference</h2>
+      <pre><code class="language-bash">sort -u data.txt</code></pre>
+      <p>Ye duplicate lines ko remove karke har different line ka ek copy show karta hai. Lekin ye sirf distinct lines show karta hai; ye specifically only-once occurring lines ko isolate nahi karta.</p>
+      <p>Is challenge ke liye correct command hai:</p>
+      <pre><code class="language-bash">sort data.txt | uniq -u</code></pre>
+
+      <h1>Complete Walkthrough</h1>
+
+      <h2>Step 1: <code>bandit8</code> Par Login Karein</h2>
+      <pre><code class="language-powershell">ssh bandit8@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password prompt par previous level se mila password enter karein.</p>
+      <p>Successful login ke baad prompt roughly is tarah dikh sakta hai:</p>
+      <pre><code class="language-text">bandit8@bandit:~$</code></pre>
+
+      <h2>Step 2: Current User Verify Karein</h2>
+      <pre><code class="language-bash">whoami</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">bandit8</code></pre>
+
+      <h2>Step 3: Current Directory Check Karein</h2>
+      <pre><code class="language-bash">pwd</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">/home/bandit8</code></pre>
+
+      <h2>Step 4: Files Ki List Dekhein</h2>
+      <pre><code class="language-bash">ls</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">data.txt</code></pre>
+
+      <h2>Step 5: Lines Sort Karke Unique Line Find Karein</h2>
+      <pre><code class="language-bash">sort data.txt | uniq -u</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">EN632PlfViZbn3PhVK3XOGSLNInNE00t</code></pre>
+
+      <h2>Step 6: Password Copy Karein</h2>
+      <pre><code class="language-text">EN632PlfViZbn3PhVK3XOGSLNInNE00t</code></pre>
+      <p>Password ke start ya end mein extra space copy na karein.</p>
+
+      <h2>Step 7: SSH Session Close Karein</h2>
+      <pre><code class="language-bash">exit</code></pre>
+
+      <h2>Step 8: <code>bandit9</code> Par Login Karein</h2>
+      <pre><code class="language-bash">ssh bandit9@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password enter karein:</p>
+      <pre><code class="language-text">EN632PlfViZbn3PhVK3XOGSLNInNE00t</code></pre>
+
+      <h1>Actual Terminal Session</h1>
+      <pre><code class="language-text">bandit8@bandit:~$ ls
+data.txt
+bandit8@bandit:~$ sort data.txt | uniq -u
+EN632PlfViZbn3PhVK3XOGSLNInNE00t
+bandit8@bandit:~$ exit
+logout</code></pre>
+      <p>Uske baad next level par login karein:</p>
+      <pre><code class="language-bash">ssh bandit9@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Complete Command Sequence</h1>
+      <pre><code class="language-powershell">ssh bandit8@bandit.labs.overthewire.org -p 2220</code></pre>
+      <pre><code class="language-bash">whoami</code></pre>
+      <pre><code class="language-bash">pwd</code></pre>
+      <pre><code class="language-bash">ls</code></pre>
+      <pre><code class="language-bash">sort data.txt | uniq -u</code></pre>
+      <pre><code class="language-bash">exit</code></pre>
+      <pre><code class="language-bash">ssh bandit9@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Common Errors</h1>
+
+      <h2><code>uniq -u</code> Se Multiple Lines Aa Rahi Hain</h2>
+      <p>Possible reason hai ki input pehle sorted nahi hai.</p>
+      <p>Incorrect:</p>
+      <pre><code class="language-bash">uniq -u data.txt</code></pre>
+      <p>Correct:</p>
+      <pre><code class="language-bash">sort data.txt | uniq -u</code></pre>
+      <p><code>uniq</code> repeated lines ko identify karne ke liye adjacent lines par depend karti hai. <code>sort</code> duplicates ko ek saath group karta hai.</p>
+
+      <h2><code>data.txt: No Such File</code></h2>
+      <p>Check karein:</p>
+      <pre><code class="language-bash">pwd
+ls</code></pre>
+      <p>Aap <code>bandit8</code> ki home directory mein hone chahiye:</p>
+      <pre><code class="language-text">/home/bandit8</code></pre>
+
+      <h2>Password Copy Error</h2>
+      <p>Password:</p>
+      <pre><code class="language-text">EN632PlfViZbn3PhVK3XOGSLNInNE00t</code></pre>
+      <p>Check karein:</p>
+      <ul>
+        <li>Uppercase aur lowercase characters correct hain.</li>
+        <li><code>0</code> aur <code>O</code> ko carefully distinguish karein.</li>
+        <li>Password ke start ya end mein extra space nahi hai.</li>
+      </ul>
+
+      <h2>SSH Permission Denied</h2>
+      <p>Next level par login karte waqt check karein:</p>
+      <ul>
+        <li>Username <code>bandit9</code> hai.</li>
+        <li>Port <code>2220</code> use ho raha hai.</li>
+        <li>Password exact copy hua hai.</li>
+      </ul>
+      <p>Correct command:</p>
+      <pre><code class="language-bash">ssh bandit9@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Security Lessons</h1>
+      <p>Is level se humein ye important lessons milte hain:</p>
+      <ul>
+        <li>Large text files mein repeated aur unique lines identify ki ja sakti hain.</li>
+        <li><code>sort</code> data ko ordered format mein arrange karta hai.</li>
+        <li><code>uniq</code> repeated lines ko process karta hai.</li>
+        <li><code>uniq -u</code> only-once occurring lines display karta hai.</li>
+        <li><code>uniq</code> ko correct results ke liye generally sorted input chahiye.</li>
+        <li>Pipe multiple commands ko combine karta hai.</li>
+        <li><code>uniq -c</code> frequency analysis ke liye useful hai.</li>
+        <li>Log analysis aur data processing mein <code>sort</code> aur <code>uniq</code> commonly use hote hain.</li>
+        <li>Command chaining Linux automation ka important part hai.</li>
+      </ul>
+
+      <h1>Commands Summary</h1>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>ssh user@host -p 2220</code></td>
+              <td>Remote server par SSH login karta hai</td>
+            </tr>
+            <tr>
+              <td><code>whoami</code></td>
+              <td>Current username show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>pwd</code></td>
+              <td>Current directory show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>ls</code></td>
+              <td>Files aur directories list karta hai</td>
+            </tr>
+            <tr>
+              <td><code>sort data.txt</code></td>
+              <td>File ki lines sort karta hai</td>
+            </tr>
+            <tr>
+              <td><code>uniq data.txt</code></td>
+              <td>Adjacent duplicate lines process karta hai</td>
+            </tr>
+            <tr>
+              <td><code>sort data.txt | uniq -u</code></td>
+              <td>Sirf once-occurring lines show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>sort data.txt | uniq -c</code></td>
+              <td>Lines ke occurrence counts show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>uniq -d</code></td>
+              <td>Duplicate lines show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>sort -u data.txt</code></td>
+              <td>Distinct lines show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>exit</code></td>
+              <td>SSH session close karta hai</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h1>Final Solution</h1>
+      <p><code>bandit8</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit8@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Files dekhein:</p>
+      <pre><code class="language-bash">ls</code></pre>
+      <p>Sorted data mein se only once occurring line find karein:</p>
+      <pre><code class="language-bash">sort data.txt | uniq -u</code></pre>
+      <p>Password:</p>
+      <pre><code class="language-text">EN632PlfViZbn3PhVK3XOGSLNInNE00t</code></pre>
+      <p>Ab <code>bandit9</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit9@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Conclusion</h1>
+      <p>Bandit Level 8 → Level 9 mein humne file ke andar exactly once occurring line ko find karna seekha.</p>
+      <p>Complete workflow:</p>
+      <pre><code class="language-text">SSH Login as bandit8
+        ↓
+data.txt Identify
+        ↓
+Lines Sort Karna
+        ↓
+Pipe Se Output Forward Karna
+        ↓
+uniq -u Se Unique Line Find Karna
+        ↓
+Password Copy Karna
+        ↓
+SSH Login as bandit9</code></pre>
+      <p>Is level ka most important command hai:</p>
+      <pre><code class="language-bash">sort data.txt | uniq -u</code></pre>
+      <blockquote>
+        <p><strong>Security Note:</strong> SSH ka use sirf un systems par karein jahan aapke paas permission ho. OverTheWire Bandit ek authorized cybersecurity learning environment hai.</p>
+      </blockquote>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <span> © 2026 SSSWriteups </span>
+     
+    </div>
+  </footer>
+</body>
+</html>
+```
