@@ -1,0 +1,461 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OverTheWire Bandit - Level 9 to Level 10 | SSSWriteups</title>
+  <link rel="stylesheet" href="../../../style.css">
+</head>
+<body>
+  <header class="hero page-header">
+    <nav class="nav container">
+      <a class="logo" href="../../../../index.html">
+        SSS<span>Writeups</span>
+      </a>
+      <div class="nav-links">
+        <a href="../../../../index.html">
+          Home
+        </a>
+
+        <a href="../../../../categories/overthewire.html">
+          OverTheWire
+        </a>
+
+        <a href="index.html">
+          Bandit
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="writeup-page section container">
+    <article class="writeup-content">
+      <h1>OverTheWire Bandit — Level 9 to Level 10</h1>
+
+      <h2>Introduction</h2>
+      <p>Is writeup ka heading <strong>Level 9 → Level 10</strong> hai.</p>
+      <p>Is level mein next level ka password <code>data.txt</code> file ke andar stored hai. File binary data contain karti hai, isliye normal <code>cat</code> command se readable output easily identify nahi hoga.</p>
+      <p>Password un few human-readable strings mein se ek hai jo several equal signs <code>=</code> se preceded hai.</p>
+      <p>Isliye hum <code>strings</code> command ka use karke binary file ke andar se printable text extract karenge, aur phir <code>grep</code> se equal signs wali lines search karenge.</p>
+      <p>Recommended command:</p>
+      <pre><code class="language-bash">strings data.txt | grep '='</code></pre>
+      <p>Aapke provided command:</p>
+      <pre><code class="language-bash">strings data.txt | grep '^'</code></pre>
+      <p><code>grep '^'</code> technically har line ke beginning ko match karta hai, isliye ye almost all extracted lines display kar sakta hai. Actual clue filter karne ke liye <code>grep '='</code> ya <code>grep -E '=+'</code> better hai.</p>
+      <p>Found password:</p>
+      <pre><code class="language-text">G7w8LIi6J3kTb8A7j9LgrywtEUlyyp6s</code></pre>
+
+      <h2>Objective</h2>
+      <p>Is level mein humein:</p>
+      <ul>
+        <li><code>bandit9</code> user se SSH ke through login karna hai.</li>
+        <li><code>data.txt</code> file identify karni hai.</li>
+        <li>Binary data se human-readable strings extract karni hain.</li>
+        <li>Equal signs wali strings filter karni hain.</li>
+        <li>Password identify karna hai.</li>
+        <li><code>bandit10</code> user se next SSH login karna hai.</li>
+      </ul>
+
+      <h2>Given Information</h2>
+      <p>Current level par login karne ke liye:</p>
+      <pre><code class="language-text">Host:     bandit.labs.overthewire.org
+Port:     2220
+Username: bandit9
+Password: Previous level se mila password</code></pre>
+      <p>File:</p>
+      <pre><code class="language-text">data.txt</code></pre>
+      <p>Clue:</p>
+      <pre><code class="language-text">Password human-readable string mein hai aur uske pehle several `=` characters hain.</code></pre>
+      <p>Next level ka username:</p>
+      <pre><code class="language-text">bandit10</code></pre>
+      <p>Found password:</p>
+      <pre><code class="language-text">G7w8LIi6J3kTb8A7j9LgrywtEUlyyp6s</code></pre>
+
+      <h1>Binary Files Aur Printable Strings</h1>
+
+      <h2>Binary File Kya Hoti Hai?</h2>
+      <p>Binary file aisi file hoti hai jisme machine-oriented data stored hota hai. Is data ko directly terminal par read karna difficult ho sakta hai.</p>
+      <p>Binary files ke examples:</p>
+      <ul>
+        <li>Compiled programs</li>
+        <li>Images</li>
+        <li>Audio files</li>
+        <li>Compressed files</li>
+        <li>Database files</li>
+        <li>Encrypted data</li>
+      </ul>
+      <p><code>data.txt</code> naam hone ke baad bhi file ke andar binary data ho sakta hai. File extension hamesha actual content type guarantee nahi karti.</p>
+
+      <h2>Human-Readable String Kya Hoti Hai?</h2>
+      <p>Human-readable string printable characters ka sequence hota hai, jaise:</p>
+      <pre><code class="language-text">hello
+password123
+G7w8LIi6J3kTb8A7j9LgrywtEUlyyp6s</code></pre>
+      <p>Binary file ke andar kuch normal text strings hidden ho sakti hain. Humein unhi strings mein password find karna hai.</p>
+
+      <h1><code>strings</code> Command</h1>
+
+      <h2><code>strings</code> Kya Karti Hai?</h2>
+      <p><code>strings</code> command binary file ke andar se printable character sequences extract karti hai.</p>
+      <p>Basic format:</p>
+      <pre><code class="language-bash">strings filename</code></pre>
+      <p>Is level ke liye:</p>
+      <pre><code class="language-bash">strings data.txt</code></pre>
+      <p>Ye binary file ke andar milne wali human-readable strings ko terminal par print karegi.</p>
+
+      <h2><code>strings</code> Kyun Use Karni Hai?</h2>
+      <p>Agar hum run karein:</p>
+      <pre><code class="language-bash">cat data.txt</code></pre>
+      <p>To binary bytes ki wajah se output unreadable ya terminal ke liye confusing ho sakta hai.</p>
+      <p>Instead:</p>
+      <pre><code class="language-bash">strings data.txt</code></pre>
+      <p>binary content mein se readable text extract karega.</p>
+
+      <h2><code>strings</code> Ka Output</h2>
+      <p>Output mein normal words, random-looking strings aur symbols aa sakte hain:</p>
+      <pre><code class="language-text">random text
+abc123
+==== secret-looking-line
+more data</code></pre>
+      <p>Humein us line ko find karna hai jiske beginning mein multiple equal signs hain.</p>
+
+      <h1><code>grep</code> Command</h1>
+
+      <h2><code>grep</code> Kya Karti Hai?</h2>
+      <p><code>grep</code> command input ya file ke andar specific text pattern search karti hai.</p>
+      <p>Basic format:</p>
+      <pre><code class="language-bash">grep pattern filename</code></pre>
+      <p>Pipe ke saath:</p>
+      <pre><code class="language-bash">command1 | grep pattern</code></pre>
+
+      <h2>Equal Sign Search</h2>
+      <p>Extracted strings mein equal sign search karne ke liye:</p>
+      <pre><code class="language-bash">strings data.txt | grep '='</code></pre>
+      <p>Ye un lines ko display karega jinmein <code>=</code> character present hai.</p>
+
+      <h2>Several Equal Signs Search</h2>
+      <p>Clue mein several equal signs diye gaye hain. One or more equal signs ke liye regular expression use kar sakte hain:</p>
+      <pre><code class="language-bash">strings data.txt | grep -E '=+'</code></pre>
+      <p>Yahan:</p>
+      <pre><code class="language-text">-E  → Extended regular expression enable karta hai
+=   → Equal sign match karta hai
++   → Previous pattern one or more times match karta hai</code></pre>
+
+      <h2>Beginning Mein Equal Signs Search</h2>
+      <p>Agar equal signs line ke beginning mein hon, to:</p>
+      <pre><code class="language-bash">strings data.txt | grep -E '^=+'</code></pre>
+      <p>Yahan:</p>
+      <pre><code class="language-text">^    → Line ka beginning
+=+   → One or more equal signs</code></pre>
+      <p>Lekin actual file output mein equal signs ke pehle spaces ya other characters ho sakte hain. General search ke liye ye command safer hai:</p>
+      <pre><code class="language-bash">strings data.txt | grep '='</code></pre>
+
+      <h1>Regular Expression Basics</h1>
+
+      <h2><code>^</code></h2>
+      <p><code>^</code> regular expression mein line ke beginning ko represent karta hai.</p>
+      <p>Example:</p>
+      <pre><code class="language-bash">grep '^hello' file.txt</code></pre>
+      <p>Ye un lines ko match karega jo <code>hello</code> se start hoti hain.</p>
+
+      <h2><code>$</code></h2>
+      <p><code>$</code> line ke end ko represent karta hai.</p>
+      <p>Example:</p>
+      <pre><code class="language-bash">grep 'world$' file.txt</code></pre>
+      <p>Ye un lines ko match karega jo <code>world</code> par end hoti hain.</p>
+
+      <h2><code>+</code></h2>
+      <p><code>+</code> ka meaning one or more occurrences hota hai.</p>
+      <p>Example:</p>
+      <pre><code class="language-bash">grep -E '=+' file.txt</code></pre>
+      <p>Ye one ya multiple equal signs ko match karega.</p>
+
+      <h2><code>=</code></h2>
+      <p><code>=</code> normal literal character hai. Isse directly search karne ke liye:</p>
+      <pre><code class="language-bash">grep '='</code></pre>
+
+      <h1>Provided Command Ko Samajhna</h1>
+      <p>Aapne command use ki:</p>
+      <pre><code class="language-bash">strings data.txt | grep '^'</code></pre>
+      <p>Is command ke parts:</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Part</th>
+              <th>Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>strings data.txt</code></td>
+              <td>Binary file se printable strings extract karta hai</td>
+            </tr>
+            <tr>
+              <td><code>|</code></td>
+              <td>First command ka output second command ko deta hai</td>
+            </tr>
+            <tr>
+              <td><code>grep</code></td>
+              <td>Pattern search karta hai</td>
+            </tr>
+            <tr>
+              <td><code>'^'</code></td>
+              <td>Har line ke beginning ko match karta hai</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p><code>^</code> har line ke beginning par present hota hai, isliye <code>grep '^'</code> mostly every non-empty extracted line ko show kar sakta hai.</p>
+      <p>Password locate karne ke liye better commands:</p>
+      <pre><code class="language-bash">strings data.txt | grep '='</code></pre>
+      <p>Ya:</p>
+      <pre><code class="language-bash">strings data.txt | grep -E '=+'</code></pre>
+
+      <h1>Pipe <code>|</code></h1>
+      <p>Pipe first command ka standard output second command ke standard input mein send karta hai.</p>
+      <pre><code class="language-bash">strings data.txt | grep '='</code></pre>
+      <p>Process:</p>
+      <pre><code class="language-text">strings data.txt
+        ↓
+Printable strings
+        ↓
+        |
+        ↓
+grep '='
+        ↓
+Equal sign wali lines</code></pre>
+
+      <h1>Complete Walkthrough</h1>
+
+      <h2>Step 1: <code>bandit9</code> Par Login Karein</h2>
+      <pre><code class="language-powershell">ssh bandit9@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password prompt par previous level se mila password enter karein.</p>
+      <p>Successful login ke baad prompt roughly is tarah dikh sakta hai:</p>
+      <pre><code class="language-text">bandit9@bandit:~$</code></pre>
+
+      <h2>Step 2: Current User Verify Karein</h2>
+      <pre><code class="language-bash">whoami</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">bandit9</code></pre>
+
+      <h2>Step 3: Current Directory Check Karein</h2>
+      <pre><code class="language-bash">pwd</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">/home/bandit9</code></pre>
+
+      <h2>Step 4: Files Ki List Dekhein</h2>
+      <pre><code class="language-bash">ls</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">data.txt</code></pre>
+
+      <h2>Step 5: Printable Strings Extract Karein</h2>
+      <pre><code class="language-bash">strings data.txt</code></pre>
+      <p>Output mein multiple readable strings aayengi.</p>
+
+      <h2>Step 6: Equal Signs Wali Lines Filter Karein</h2>
+      <p>Recommended command:</p>
+      <pre><code class="language-bash">strings data.txt | grep '='</code></pre>
+      <p>More specific regular-expression command:</p>
+      <pre><code class="language-bash">strings data.txt | grep -E '=+'</code></pre>
+
+      <h2>Step 7: Password Identify Karein</h2>
+      <p>Output mein equal signs se preceded human-readable string ke andar password milega:</p>
+      <pre><code class="language-text">G7w8LIi6J3kTb8A7j9LgrywtEUlyyp6s</code></pre>
+
+      <h2>Step 8: Password Copy Karein</h2>
+      <pre><code class="language-text">G7w8LIi6J3kTb8A7j9LgrywtEUlyyp6s</code></pre>
+      <p>Password ke start ya end mein extra space copy na karein.</p>
+
+      <h2>Step 9: SSH Session Close Karein</h2>
+      <pre><code class="language-bash">exit</code></pre>
+
+      <h2>Step 10: <code>bandit10</code> Par Login Karein</h2>
+      <pre><code class="language-bash">ssh bandit10@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password enter karein:</p>
+      <pre><code class="language-text">G7w8LIi6J3kTb8A7j9LgrywtEUlyyp6s</code></pre>
+
+      <h1>Actual Terminal Session</h1>
+      <pre><code class="language-text">bandit9@bandit:~$ ls
+data.txt
+bandit9@bandit:~$ strings data.txt | grep '='
+========== password-like-data
+G7w8LIi6J3kTb8A7j9LgrywtEUlyyp6s
+bandit9@bandit:~$ exit
+logout</code></pre>
+      <p>Actual output mein extra strings ho sakti hain. Humein clue ke according equal signs se preceded readable line identify karni hai.</p>
+      <p>Next level login:</p>
+      <pre><code class="language-bash">ssh bandit10@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Complete Command Sequence</h1>
+      <pre><code class="language-powershell">ssh bandit9@bandit.labs.overthewire.org -p 2220</code></pre>
+      <pre><code class="language-bash">whoami</code></pre>
+      <pre><code class="language-bash">pwd</code></pre>
+      <pre><code class="language-bash">ls</code></pre>
+      <pre><code class="language-bash">strings data.txt | grep '='</code></pre>
+      <pre><code class="language-bash">exit</code></pre>
+      <pre><code class="language-bash">ssh bandit10@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Common Errors</h1>
+
+      <h2><code>data.txt: No Such File</code></h2>
+      <p>Check karein:</p>
+      <pre><code class="language-bash">pwd
+ls</code></pre>
+      <p>Aap <code>bandit9</code> ki home directory mein hone chahiye.</p>
+
+      <h2><code>grep '^'</code> Se Bahut Saara Output Aa Raha Hai</h2>
+      <p>Ye normal hai. <code>^</code> line ke beginning ko match karta hai, isliye ye almost all lines display kar sakta hai.</p>
+      <p>Password filter karne ke liye use karein:</p>
+      <pre><code class="language-bash">strings data.txt | grep '='</code></pre>
+
+      <h2><code>grep '='</code> Se Multiple Lines Aa Rahi Hain</h2>
+      <p>Clue ke according woh line select karein jo:</p>
+      <ul>
+        <li>Human-readable ho.</li>
+        <li>Several <code>=</code> characters se preceded ho.</li>
+        <li>Password-like random string contain karti ho.</li>
+      </ul>
+      <p>More specific command:</p>
+      <pre><code class="language-bash">strings data.txt | grep -E '^=+'</code></pre>
+      <p>Agar spaces ya other characters equal signs se pehle hon, to general command use karein:</p>
+      <pre><code class="language-bash">strings data.txt | grep '='</code></pre>
+
+      <h2>Password Copy Error</h2>
+      <p>Password:</p>
+      <pre><code class="language-text">G7w8LIi6J3kTb8A7j9LgrywtEUlyyp6s</code></pre>
+      <p>Check karein:</p>
+      <ul>
+        <li>Uppercase aur lowercase characters same hain.</li>
+        <li><code>0</code> aur <code>O</code> ko carefully distinguish karein.</li>
+        <li>Password ke start ya end mein extra space nahi hai.</li>
+      </ul>
+
+      <h2>SSH Permission Denied</h2>
+      <p>Next level par login karte waqt check karein:</p>
+      <ul>
+        <li>Username <code>bandit10</code> hai.</li>
+        <li>Port <code>2220</code> use ho raha hai.</li>
+        <li>Password exactly copy hua hai.</li>
+      </ul>
+      <p>Correct command:</p>
+      <pre><code class="language-bash">ssh bandit10@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Security Lessons</h1>
+      <p>Is level se humein ye important lessons milte hain:</p>
+      <ul>
+        <li>Binary files ke andar printable text strings hidden ho sakti hain.</li>
+        <li><code>strings</code> binary data se readable sequences extract karti hai.</li>
+        <li><code>grep</code> extracted output ko filter kar sakti hai.</li>
+        <li>Regular expressions text patterns search karne mein useful hain.</li>
+        <li><code>^</code> line beginning ko represent karta hai.</li>
+        <li><code>+</code> one or more occurrences ko represent karta hai.</li>
+        <li>Pipe multiple commands ko chain karta hai.</li>
+        <li>File extension se actual content type hamesha confirm nahi hota.</li>
+        <li>Binary files ko directly <code>cat</code> karne ke bajay <code>strings</code> use karna better ho sakta hai.</li>
+      </ul>
+
+      <h1>Commands Summary</h1>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>ssh user@host -p 2220</code></td>
+              <td>Remote server par SSH login karta hai</td>
+            </tr>
+            <tr>
+              <td><code>whoami</code></td>
+              <td>Current username show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>pwd</code></td>
+              <td>Current directory show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>ls</code></td>
+              <td>Files aur directories list karta hai</td>
+            </tr>
+            <tr>
+              <td><code>strings data.txt</code></td>
+              <td>Binary file se printable strings extract karta hai</td>
+            </tr>
+            <tr>
+              <td><code>strings data.txt | grep '='</code></td>
+              <td>Equal sign wali strings search karta hai</td>
+            </tr>
+            <tr>
+              <td><code>grep '^'</code></td>
+              <td>Line ke beginning ko match karta hai</td>
+            </tr>
+            <tr>
+              <td><code>grep -E '=+'</code></td>
+              <td>One or more equal signs search karta hai</td>
+            </tr>
+            <tr>
+              <td><code>grep -E '^=+'</code></td>
+              <td>Equal signs se start hone wali lines search karta hai</td>
+            </tr>
+            <tr>
+              <td><code>exit</code></td>
+              <td>SSH session close karta hai</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h1>Final Solution</h1>
+      <p><code>bandit9</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit9@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Files dekhein:</p>
+      <pre><code class="language-bash">ls</code></pre>
+      <p>Binary file se readable strings extract karke equal sign wali line search karein:</p>
+      <pre><code class="language-bash">strings data.txt | grep '='</code></pre>
+      <p>More specific option:</p>
+      <pre><code class="language-bash">strings data.txt | grep -E '=+'</code></pre>
+      <p>Password:</p>
+      <pre><code class="language-text">G7w8LIi6J3kTb8A7j9LgrywtEUlyyp6s</code></pre>
+      <p>Ab <code>bandit10</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit10@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Conclusion</h1>
+      <p>Bandit Level 9 → Level 10 mein humne binary file se printable strings extract karke equal signs wali password string find karna seekha.</p>
+      <p>Complete workflow:</p>
+      <pre><code class="language-text">SSH Login as bandit9
+        ↓
+data.txt Identify
+        ↓
+strings Command
+        ↓
+Printable Text Extract
+        ↓
+Pipe Se Output Forward
+        ↓
+grep Se Equal Signs Search
+        ↓
+Password Find
+        ↓
+SSH Login as bandit10</code></pre>
+      <p>Is level ka most important command hai:</p>
+      <pre><code class="language-bash">strings data.txt | grep '='</code></pre>
+      <blockquote>
+        <p><strong>Security Note:</strong> SSH ka use sirf un systems par karein jahan aapke paas permission ho. OverTheWire Bandit ek authorized cybersecurity learning environment hai.</p>
+      </blockquote>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <span> © 2026 SSSWriteups </span>
+      <span> Built with HTML & CSS </span>
+    </div>
+  </footer>
+</body>
+</html>
+```
