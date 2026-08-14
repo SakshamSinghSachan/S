@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OverTheWire Bandit - Level 21 to Level 22 | SSSWriteups</title>
+  <link rel="stylesheet" href="../../../style.css">
+</head>
+<body>
+  <header class="hero page-header">
+    <nav class="nav container">
+      <a class="logo" href="../../../../index.html">
+        SSS<span>Writeups</span>
+      </a>
+      <div class="nav-links">
+    <a href="../../../index.html">Home</a>
+    <a href="../../../categories/overthewire.html">OverTheWire</a>
+</div>
+    </nav>
+  </header>
+
+  <main class="writeup-page section container">
+    <article class="writeup-content">
+      <h1>OverTheWire Bandit — Level 21 to Level 22</h1>
+
+      <h2>Introduction</h2>
+      <p>Is writeup ka heading <strong>Level 21 → Level 22</strong> hai.</p>
+      <p>Is level mein ek program cron ke through automatically run ho raha hai. Cron ek time-based job scheduler hai jo commands aur scripts ko fixed intervals par execute karta hai.</p>
+      <p>Humein:</p>
+      <ol>
+        <li><code>/etc/cron.d/</code> directory inspect karni hai.</li>
+        <li><code>cronjob_bandit22</code> file identify karni hai.</li>
+        <li>Cron configuration se script ka path find karna hai.</li>
+        <li>Script ka content read karna hai.</li>
+        <li>Script kis temporary file mein password copy kar rahi hai, ye identify karna hai.</li>
+        <li>Temporary file ko read karke <code>bandit22</code> ka password find karna hai.</li>
+      </ol>
+
+      <h2>Objective</h2>
+      <p>Is level mein humein:</p>
+      <ul>
+        <li><code>bandit21</code> user se SSH login karna hai.</li>
+        <li>Cron configuration files dekhni hain.</li>
+        <li><code>cronjob_bandit22</code> read karna hai.</li>
+        <li><code>/usr/bin/cronjob_bandit22.sh</code> script inspect karni hai.</li>
+        <li><code>/tmp</code> file ka exact path identify karna hai.</li>
+        <li>Script ke output ko read karna hai.</li>
+        <li><code>bandit22</code> user se next SSH login karna hai.</li>
+      </ul>
+
+      <h2>Given Information</h2>
+      <p>Current level:</p>
+      <pre><code class="language-text">Username: bandit21
+Password: Previous level se mila password</code></pre>
+      <p>Cron directory:</p>
+      <pre><code class="language-text">/etc/cron.d</code></pre>
+      <p>Relevant cron file:</p>
+      <pre><code class="language-text">cronjob_bandit22</code></pre>
+      <p>Relevant script:</p>
+      <pre><code class="language-text">/usr/bin/cronjob_bandit22.sh</code></pre>
+      <p>Next username:</p>
+      <pre><code class="language-text">bandit22</code></pre>
+      <p>Found password:</p>
+      <pre><code class="language-text">WdDozAdTM2z9DiFEQ2mGlwngMfj4EZff</code></pre>
+
+      <h1>Cron Kya Hota Hai?</h1>
+
+      <h2>Cron Scheduler</h2>
+      <p>Cron Linux ka time-based job scheduler hai. Ye commands ya scripts ko automatically run karta hai.</p>
+      <p>Cron jobs ka use commonly in tasks ke liye hota hai:</p>
+      <ul>
+        <li>Backups</li>
+        <li>Log rotation</li>
+        <li>System maintenance</li>
+        <li>Monitoring</li>
+        <li>Scheduled reports</li>
+        <li>Temporary file creation</li>
+        <li>Automated scripts</li>
+      </ul>
+
+      <h2>Cron Daemon</h2>
+      <p>Cron jobs ko execute karne wala background service cron daemon kehlata hai.</p>
+      <p>Daemon continuously background mein run karta hai aur scheduled jobs ke time ko check karta rehta hai.</p>
+
+      <h2>Cron Job</h2>
+      <p>Cron job ek scheduled command hoti hai.</p>
+      <p>Example:</p>
+      <pre><code class="language-text">* * * * * user command</code></pre>
+      <p>Iska meaning hota hai ki command har minute run hogi.</p>
+
+      <h1><code>/etc/cron.d/</code> Directory</h1>
+
+      <h2>Directory Ka Purpose</h2>
+      <p><code>/etc/cron.d/</code> mein system-level cron job configuration files stored hoti hain.</p>
+      <p>Directory list karne ke liye:</p>
+      <pre><code class="language-bash">ls /etc/cron.d</code></pre>
+      <p>Output mein multiple files aa sakti hain:</p>
+      <pre><code class="language-text">cronjob_bandit15_root
+cronjob_bandit17_root
+cronjob_bandit22
+cronjob_bandit23
+cronjob_bandit24
+cronjob_bandit25_root
+e2scrub_all
+sysstat
+otw-tap-dir</code></pre>
+
+      <h2>Relevant File Choose Karna</h2>
+      <p>Humein <code>bandit22</code> ka password find karna hai, isliye relevant file hai:</p>
+      <pre><code class="language-text">cronjob_bandit22</code></pre>
+      <p>Read command:</p>
+      <pre><code class="language-bash">cat /etc/cron.d/cronjob_bandit22</code></pre>
+
+      <h1>Cron Schedule Format</h1>
+
+      <h2>Five Fields</h2>
+      <p>Traditional cron schedule mein five time fields hoti hain:</p>
+      <pre><code class="language-text">minute hour day-of-month month day-of-week</code></pre>
+      <p>Example:</p>
+      <pre><code class="language-text">* * * * * command</code></pre>
+      <p>Fields:</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>First <code>*</code></td>
+              <td>Minute</td>
+            </tr>
+            <tr>
+              <td>Second <code>*</code></td>
+              <td>Hour</td>
+            </tr>
+            <tr>
+              <td>Third <code>*</code></td>
+              <td>Day of month</td>
+            </tr>
+            <tr>
+              <td>Fourth <code>*</code></td>
+              <td>Month</td>
+            </tr>
+            <tr>
+              <td>Fifth <code>*</code></td>
+              <td>Day of week</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Five Asterisks Ka Meaning</h2>
+      <pre><code class="language-text">* * * * *</code></pre>
+      <p>ka meaning hai:</p>
+      <pre><code class="language-text">Har minute
+Har hour
+Har day
+Har month
+Har day of week</code></pre>
+      <p>Isliye job approximately har minute execute hoti hai.</p>
+
+      <h2><code>@reboot</code></h2>
+      <p>Cron files mein <code>@reboot</code> bhi aa sakta hai:</p>
+      <pre><code class="language-text">@reboot user command</code></pre>
+      <p>Iska meaning hai ki system reboot hone par command run karo.</p>
+      <p>Challenge ke environment ya copied output mein <code>@reboot</code> aur five-star schedule dono dikh sakte hain. Relevant point ye hai ki script automatically execute ho rahi hai.</p>
+
+      <h1>Cron Job Line</h1>
+      <p>Configuration line ka typical format:</p>
+      <pre><code class="language-text">* * * * * bandit22 /usr/bin/cronjob_bandit22.sh &>/dev/null</code></pre>
+      <p>Is line ke parts:</p>
+      <pre><code class="language-text">* * * * *                    → Schedule: every minute
+bandit22                    → Job kis user ke privileges mein run hogi
+/usr/bin/cronjob_bandit22.sh → Execute hone wali script
+&>/dev/null                 → stdout aur stderr suppress</code></pre>
+
+      <h2>User Field</h2>
+      <p>System cron files mein schedule ke baad user name hota hai:</p>
+      <pre><code class="language-text">bandit22</code></pre>
+      <p>Iska meaning hai ki script <code>bandit22</code> user ke privileges mein execute hogi.</p>
+
+      <h2>Script Path</h2>
+      <pre><code class="language-text">/usr/bin/cronjob_bandit22.sh</code></pre>
+      <p>Ye actual shell script ka absolute path hai.</p>
+
+      <h2><code>&>/dev/null</code></h2>
+      <p>Bash mein standard output aur standard error dono ko <code>/dev/null</code> par redirect karta hai.</p>
+      <pre><code class="language-text">stdout + stderr → /dev/null</code></pre>
+      <p><code>/dev/null</code> ek special device hai jo data discard kar deta hai.</p>
+      <p>Isliye cron script ka output screen par appear nahi hota.</p>
+
+      <h1>Cron Script Read Karna</h1>
+      <p>Command:</p>
+      <pre><code class="language-bash">cat /usr/bin/cronjob_bandit22.sh</code></pre>
+      <p>Script ka corrected format:</p>
+      <pre><code class="language-bash">#!/bin/bash
+chmod 644 /tmp/t706lds9S0RqQh9aMcz6ShpAoZKF7fgv
+cat /etc/bandit_pass/bandit22 > /tmp/t706lds9S0RqQh9aMcz6ShpAoZKF7fgv</code></pre>
+      <blockquote>
+        <p><strong>Important:</strong> Aapke pasted command mein <code>chmod 644/tmp/...</code> dikh raha hai. Correct syntax mein <code>644</code> aur path ke beech space hota hai:</p>
+        <pre><code class="language-bash">chmod 644 /tmp/filename</code></pre>
+      </blockquote>
+
+      <h2>Shebang</h2>
+      <pre><code class="language-bash">#!/bin/bash</code></pre>
+      <p>Shebang system ko batata hai ki script Bash interpreter ke through execute honi chahiye.</p>
+
+      <h2><code>chmod 644</code></h2>
+      <pre><code class="language-bash">chmod 644 /tmp/filename</code></pre>
+      <p>Temporary file ki permissions set karta hai.</p>
+      <p>Permission <code>644</code> ka meaning:</p>
+      <pre><code class="language-text">6 → Owner: read + write
+4 → Group: read
+4 → Others: read</code></pre>
+      <p>Symbolic form:</p>
+      <pre><code class="language-text">-rw-r--r--</code></pre>
+      <p>Iska important result hai ki file everyone ke liye readable ho jati hai.</p>
+
+      <h2>Output Redirection <code>&gt;</code></h2>
+      <p>Script ki second line:</p>
+      <pre><code class="language-bash">cat /etc/bandit_pass/bandit22 > /tmp/filename</code></pre>
+      <p><code>&gt;</code> output redirection operator hai.</p>
+      <p>Meaning:</p>
+      <pre><code class="language-text">/etc/bandit_pass/bandit22 ka content read karo
+        ↓
+/tmp/filename mein write karo</code></pre>
+      <p>Agar target file already exist karti hai, <code>&gt;</code> usse overwrite kar sakta hai.</p>
+
+      <h1><code>/tmp</code> Directory</h1>
+
+      <h2>Temporary Files</h2>
+      <p><code>/tmp</code> directory temporary files ke liye use hoti hai.</p>
+      <p>Cron script password ko directly display nahi karti. Iske badle password ko <code>/tmp</code> ke andar ek file mein copy karti hai.</p>
+
+      <h2>Exact Filename Important Hai</h2>
+      <p>Temporary filename script ke andar clearly likha hota hai:</p>
+      <pre><code class="language-text">/tmp/t706lds9S0RqQh9aMcz6ShpAoZKF7fgv</code></pre>
+      <p>Is path ko guess nahi karna chahiye. Hamesha script read karke exact path copy karein.</p>
+
+      <h2>Temporary File Read Karna</h2>
+      <pre><code class="language-bash">cat /tmp/t706lds9S0RqQh9aMcz6ShpAoZKF7fgv</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">WdDozAdTM2z9DiFEQ2mGlwngMfj4EZff</code></pre>
+      <blockquote>
+        <p><strong>Filename Note:</strong> Different Bandit versions ya copied transcripts mein temporary filename ke characters <code>0</code> aur <code>O</code> ki wajah se confusing dikh sakte hain. Apne server par script se exact path copy karein.</p>
+      </blockquote>
+
+      <h1>Complete Walkthrough</h1>
+
+      <h2>Step 1: <code>bandit21</code> Par Login Karein</h2>
+      <pre><code class="language-powershell">ssh bandit21@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password prompt par previous level se mila password enter karein.</p>
+      <p>Successful login ke baad prompt roughly is tarah ho sakta hai:</p>
+      <pre><code class="language-text">bandit21@bandit:~$</code></pre>
+
+      <h2>Step 2: Cron Directory Mein Jaayein</h2>
+      <pre><code class="language-bash">cd /etc/cron.d</code></pre>
+      <p>Current directory check karein:</p>
+      <pre><code class="language-bash">pwd</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">/etc/cron.d</code></pre>
+
+      <h2>Step 3: Cron Files List Karein</h2>
+      <pre><code class="language-bash">ls</code></pre>
+
+      <h2>Step 4: Relevant Cron File Read Karein</h2>
+      <pre><code class="language-bash">cat cronjob_bandit22</code></pre>
+      <p>Ya absolute path:</p>
+      <pre><code class="language-bash">cat /etc/cron.d/cronjob_bandit22</code></pre>
+      <p>Script path identify karein:</p>
+      <pre><code class="language-text">/usr/bin/cronjob_bandit22.sh</code></pre>
+
+      <h2>Step 5: Script Read Karein</h2>
+      <pre><code class="language-bash">cat /usr/bin/cronjob_bandit22.sh</code></pre>
+      <p>Script se exact <code>/tmp</code> output filename identify karein.</p>
+
+      <h2>Step 6: Temporary Password File Read Karein</h2>
+      <p>Provided filename ke according:</p>
+      <pre><code class="language-bash">cat /tmp/t706lds9S0RqQh9aMcz6ShpAoZKF7fgv</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">WdDozAdTM2z9DiFEQ2mGlwngMfj4EZff</code></pre>
+
+      <h2>Step 7: Password Copy Karein</h2>
+      <pre><code class="language-text">WdDozAdTM2z9DiFEQ2mGlwngMfj4EZff</code></pre>
+
+      <h2>Step 8: <code>bandit22</code> Par Login Karein</h2>
+      <pre><code class="language-bash">ssh bandit22@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password enter karein:</p>
+      <pre><code class="language-text">WdDozAdTM2z9DiFEQ2mGlwngMfj4EZff</code></pre>
+
+      <h1>Actual Terminal Workflow</h1>
+      <pre><code class="language-text">bandit21@bandit:~$ cd /etc/cron.d
+bandit21@bandit:/etc/cron.d$ cat cronjob_bandit22
+* * * * * bandit22 /usr/bin/cronjob_bandit22.sh &>/dev/null
+bandit21@bandit:/etc/cron.d$ cat /usr/bin/cronjob_bandit22.sh
+#!/bin/bash
+chmod 644 /tmp/t706lds9S0RqQh9aMcz6ShpAoZKF7fgv
+cat /etc/bandit_pass/bandit22 > /tmp/t706lds9S0RqQh9aMcz6ShpAoZKF7fgv
+bandit21@bandit:/etc/cron.d$ cat /tmp/t706lds9S0RqQh9aMcz6ShpAoZKF7fgv
+WdDozAdTM2z9DiFEQ2mGlwngMfj4EZff</code></pre>
+
+      <h1>Useful Verification Commands</h1>
+
+      <h2>Check Cron File</h2>
+      <pre><code class="language-bash">cat /etc/cron.d/cronjob_bandit22</code></pre>
+
+      <h2>Check Script Permissions</h2>
+      <pre><code class="language-bash">ls -l /usr/bin/cronjob_bandit22.sh</code></pre>
+
+      <h2>Check Temporary File Permissions</h2>
+      <pre><code class="language-bash">ls -l /tmp/t706lds9S0RqQh9aMcz6ShpAoZKF7fgv</code></pre>
+      <p>Expected permission pattern:</p>
+      <pre><code class="language-text">-rw-r--r--</code></pre>
+
+      <h2>Check File Metadata</h2>
+      <pre><code class="language-bash">stat /tmp/t706lds9S0RqQh9aMcz6ShpAoZKF7fgv</code></pre>
+
+      <h1>Common Errors</h1>
+
+      <h2><code>No Such File or Directory</code></h2>
+      <p>Possible reasons:</p>
+      <ul>
+        <li>Temporary filename incorrectly typed hai.</li>
+        <li><code>0</code> aur <code>O</code> confuse hua hai.</li>
+        <li>Script ka exact path read nahi kiya.</li>
+        <li>Cron job ne file abhi create nahi ki.</li>
+      </ul>
+      <p>Script dobara read karein:</p>
+      <pre><code class="language-bash">cat /usr/bin/cronjob_bandit22.sh</code></pre>
+
+      <h2><code>cat</code> Without Filename</h2>
+      <p>Agar aap sirf ye type karte hain:</p>
+      <pre><code class="language-bash">cat</code></pre>
+      <p>To <code>cat</code> standard input ka wait karegi. Correct filename provide karein:</p>
+      <pre><code class="language-bash">cat cronjob_bandit22</code></pre>
+
+      <h2>Wrong Permission Syntax</h2>
+      <p>Incorrect:</p>
+      <pre><code class="language-bash">chmod 644/tmp/file</code></pre>
+      <p>Correct:</p>
+      <pre><code class="language-bash">chmod 644 /tmp/file</code></pre>
+
+      <h2>Password File Empty Hai</h2>
+      <p>Cron job ko run hone ke liye thoda time lag sakta hai. Kuch seconds wait karke dobara try karein:</p>
+      <pre><code class="language-bash">cat /tmp/t706lds9S0RqQh9aMcz6ShpAoZKF7fgv</code></pre>
+
+      <h2>Password Copy Error</h2>
+      <p>Password:</p>
+      <pre><code class="language-text">WdDozAdTM2z9DiFEQ2mGlwngMfj4EZff</code></pre>
+      <p>Check karein:</p>
+      <ul>
+        <li>Uppercase aur lowercase same hain.</li>
+        <li><code>0</code> aur <code>O</code> ko carefully distinguish karein.</li>
+        <li>Password ke start ya end mein extra space nahi hai.</li>
+      </ul>
+
+      <h2>SSH Permission Denied</h2>
+      <p>Next level par login karte waqt check karein:</p>
+      <ul>
+        <li>Username <code>bandit22</code> hai.</li>
+        <li>Port <code>2220</code> use ho raha hai.</li>
+        <li>Temporary file se exact password copy hua hai.</li>
+      </ul>
+      <p>Correct command:</p>
+      <pre><code class="language-bash">ssh bandit22@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Security Lessons</h1>
+      <p>Is level se humein ye important lessons milte hain:</p>
+      <ul>
+        <li>Cron jobs commands ko automatically execute karti hain.</li>
+        <li><code>/etc/cron.d/</code> system-level scheduled jobs contain karta hai.</li>
+        <li>Cron file se command aur executing user identify kiya ja sakta hai.</li>
+        <li>Scripts ko read karke unka exact behavior samjha ja sakta hai.</li>
+        <li>Output redirection sensitive data ko temporary file mein store kar sakti hai.</li>
+        <li><code>chmod 644</code> file ko everyone ke liye readable bana sakta hai.</li>
+        <li><code>/tmp</code> files ko secure samajhna dangerous ho sakta hai.</li>
+        <li>Scheduled privileged scripts sensitive information expose kar sakti hain.</li>
+        <li>Exact paths ko guess nahi karna chahiye; source script se verify karna chahiye.</li>
+        <li>Cron misconfiguration security vulnerability create kar sakti hai.</li>
+      </ul>
+
+      <h1>Commands Summary</h1>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>ssh user@host -p 2220</code></td>
+              <td>Remote server par SSH login karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cd /etc/cron.d</code></td>
+              <td>Cron configuration directory mein enter karta hai</td>
+            </tr>
+            <tr>
+              <td><code>ls</code></td>
+              <td>Cron files list karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cat cronjob_bandit22</code></td>
+              <td>Cron job configuration read karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cat /usr/bin/cronjob_bandit22.sh</code></td>
+              <td>Cron script read karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cat /tmp/filename</code></td>
+              <td>Temporary password file read karta hai</td>
+            </tr>
+            <tr>
+              <td><code>chmod 644 file</code></td>
+              <td>Owner read/write, baaki users read permission set karta hai</td>
+            </tr>
+            <tr>
+              <td><code>ls -l file</code></td>
+              <td>File permissions aur ownership show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>stat file</code></td>
+              <td>Detailed file metadata show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>exit</code></td>
+              <td>SSH session close karta hai</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h1>Final Solution</h1>
+      <p><code>bandit21</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit21@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Cron directory mein jaayein:</p>
+      <pre><code class="language-bash">cd /etc/cron.d</code></pre>
+      <p>Relevant cron file read karein:</p>
+      <pre><code class="language-bash">cat cronjob_bandit22</code></pre>
+      <p>Script path open karein:</p>
+      <pre><code class="language-bash">cat /usr/bin/cronjob_bandit22.sh</code></pre>
+      <p>Script se exact <code>/tmp</code> filename copy karein, phir file read karein:</p>
+      <pre><code class="language-bash">cat /tmp/t706lds9S0RqQh9aMcz6ShpAoZKF7fgv</code></pre>
+      <p>Password:</p>
+      <pre><code class="language-text">WdDozAdTM2z9DiFEQ2mGlwngMfj4EZff</code></pre>
+      <p>Ab <code>bandit22</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit22@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Conclusion</h1>
+      <p>Bandit Level 21 → Level 22 mein humne cron job configuration inspect karke automatically executed script ka behavior samjha.</p>
+      <p>Complete workflow:</p>
+      <pre><code class="language-text">SSH Login as bandit21
+        ↓
+/etc/cron.d Inspect
+        ↓
+cronjob_bandit22 Read
+        ↓
+Script Path Identify
+        ↓
+/usr/bin/cronjob_bandit22.sh Read
+        ↓
+/tmp Output File Identify
+        ↓
+Temporary File Read
+        ↓
+Password Find
+        ↓
+SSH Login as bandit22</code></pre>
+      <p>Is level ke most important commands hain:</p>
+      <pre><code class="language-bash">cat /etc/cron.d/cronjob_bandit22</code></pre>
+      <pre><code class="language-bash">cat /usr/bin/cronjob_bandit22.sh</code></pre>
+      <pre><code class="language-bash">cat /tmp/t706lds9S0RqQh9aMcz6ShpAoZKF7fgv</code></pre>
+      <blockquote>
+        <p><strong>Security Note:</strong> Cron jobs aur sensitive system files ko sirf authorized learning environments mein inspect karein. OverTheWire Bandit ek authorized cybersecurity learning environment hai.</p>
+      </blockquote>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <span> © 2026 SSSWriteups </span>
+      
+    </div>
+  </footer>
+</body>
+</html>
+```
