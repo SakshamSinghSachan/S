@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OverTheWire Bandit - Level 16 to Level 17 | SSSWriteups</title>
+  <link rel="stylesheet" href="../../../style.css">
+</head>
+<body>
+  <header class="hero page-header">
+    <nav class="nav container">
+      <a class="logo" href="../../../../index.html">
+        SSS<span>Writeups</span>
+      </a>
+      <div class="nav-links">
+    <a href="../../../index.html">Home</a>
+    <a href="../../../categories/overthewire.html">OverTheWire</a>
+</div>
+    </nav>
+  </header>
+
+  <main class="writeup-page section container">
+    <article class="writeup-content">
+      <h1>OverTheWire Bandit — Level 16 to Level 17</h1>
+
+      <h2>Introduction</h2>
+      <p>Is writeup ka heading <strong>Level 16 → Level 17</strong> hai.</p>
+      <p>Is level mein current password ko localhost ke port range <code>31000</code> se <code>32000</code> ke beech kisi service par submit karna hai.</p>
+      <p>Challenge ke steps:</p>
+      <ol>
+        <li>Port range scan karna.</li>
+        <li>Open ports identify karna.</li>
+        <li>SSL/TLS services aur normal services ko separate karna.</li>
+        <li>Correct SSL service se connect karna.</li>
+        <li>Current password submit karna.</li>
+        <li>Service se RSA private key receive karna.</li>
+        <li>Private key ko file mein save karna.</li>
+        <li>File permissions <code>chmod 600</code> se secure karna.</li>
+        <li>Private key ke through <code>bandit17</code> user par SSH login karna.</li>
+        <li><code>/etc/bandit_pass/bandit17</code> se password read karna.</li>
+      </ol>
+      <p>Aapke scan ke according correct SSL service port hai:</p>
+      <pre><code class="language-text">31790</code></pre>
+
+      <h2>Objective</h2>
+      <p>Is level mein humein:</p>
+      <ul>
+        <li><code>bandit16</code> user se login karna hai.</li>
+        <li><code>nmap</code> se ports <code>31000-32000</code> scan karne hain.</li>
+        <li>Open ports aur services identify karni hain.</li>
+        <li>SSL-enabled unknown service find karni hai.</li>
+        <li>OpenSSL se port <code>31790</code> par connect karna hai.</li>
+        <li>Current password submit karke RSA private key receive karni hai.</li>
+        <li>Private key ko <code>/tmp</code> ke andar save karna hai.</li>
+        <li><code>chmod 600</code> se permissions set karni hain.</li>
+        <li>Key se <code>bandit17</code> par SSH login karna hai.</li>
+        <li><code>/etc/bandit_pass/bandit17</code> file read karni hai.</li>
+      </ul>
+
+      <h2>Given Information</h2>
+      <p>Current level:</p>
+      <pre><code class="language-text">Username: bandit16
+Password: Previous level se mila password</code></pre>
+      <p>Port range:</p>
+      <pre><code class="language-text">31000-32000</code></pre>
+      <p>Correct SSL port:</p>
+      <pre><code class="language-text">31790</code></pre>
+      <p>Next username:</p>
+      <pre><code class="language-text">bandit17</code></pre>
+      <p>Provided password output:</p>
+      <pre><code class="language-text">VwOSWtCA7lRKKTfbr2IDh6awj9RNZM5e</code></pre>
+      <blockquote>
+        <p><strong>Password Note:</strong> Aapke pasted transcript mein password kuch jagah <code>VWDS...</code> aur kuch jagah <code>VwOS...</code> ke form mein dikh raha hai. Final writeup mein exact value ko actual <code>cat /etc/bandit_pass/bandit17</code> output se verify karein. <code>W/w</code>, <code>O/0</code>, <code>1/l</code> jaise characters carefully check karein.</p>
+      </blockquote>
+
+      <h1>Nmap</h1>
+
+      <h2>Nmap Kya Hota Hai?</h2>
+      <p>Nmap ka full form <strong>Network Mapper</strong> hai. Ye network discovery aur security auditing ke liye use hone wala tool hai.</p>
+      <p>Nmap ki madad se hum:</p>
+      <ul>
+        <li>Open ports find kar sakte hain.</li>
+        <li>Closed ports identify kar sakte hain.</li>
+        <li>Running services detect kar sakte hain.</li>
+        <li>Service versions identify kar sakte hain.</li>
+        <li>Localhost ya authorized network scan kar sakte hain.</li>
+      </ul>
+      <p>Is level mein hum sirf localhost ko scan kar rahe hain, jo authorized Bandit environment hai.</p>
+
+      <h2>Basic Nmap Command</h2>
+      <pre><code class="language-bash">nmap localhost</code></pre>
+      <p>Ye common ports scan karta hai.</p>
+      <p>Specific range scan karne ke liye:</p>
+      <pre><code class="language-bash">nmap -p 31000-32000 localhost</code></pre>
+
+      <h2><code>-p</code> Option</h2>
+      <pre><code class="language-text">-p 31000-32000</code></pre>
+      <p>Nmap ko batata hai ki sirf port range <code>31000</code> se <code>32000</code> tak scan karni hai.</p>
+
+      <h2><code>-sV</code> Option</h2>
+      <pre><code class="language-text">-sV</code></pre>
+      <p>Service version detection enable karta hai.</p>
+      <p>Isse Nmap try karta hai identify karne ki:</p>
+      <ul>
+        <li>Port par kaunsi service run ho rahi hai.</li>
+        <li>Service SSL/TLS use karti hai ya nahi.</li>
+        <li>Service ka version kya ho sakta hai.</li>
+      </ul>
+
+      <h2><code>-sC</code> Option</h2>
+      <pre><code class="language-text">-sC</code></pre>
+      <p>Nmap ke default scripts run karta hai. Ye additional service information collect karne mein help kar sakta hai.</p>
+
+      <h2>Complete Scan Command</h2>
+      <pre><code class="language-bash">nmap -sC -sV -p 31000-32000 localhost</code></pre>
+      <p>Aapke provided command mein <code>-sC</code>, <code>-sV</code> aur port range use hui hai.</p>
+
+      <h1>Nmap Output Samajhna</h1>
+      <p>Example output:</p>
+      <pre><code class="language-text">PORT      STATE SERVICE  VERSION
+31046/tcp open  echo
+31518/tcp open  ssl/echo
+31691/tcp open  echo
+31790/tcp open  ssl/unknown
+31960/tcp open  echo</code></pre>
+
+      <h2>PORT</h2>
+      <pre><code class="language-text">31790/tcp</code></pre>
+      <p>Meaning:</p>
+      <pre><code class="language-text">31790 → Port number
+tcp   → Transport protocol</code></pre>
+
+      <h2>STATE</h2>
+      <pre><code class="language-text">open</code></pre>
+      <p><code>open</code> ka matlab hai ki port par koi service connections accept kar rahi hai.</p>
+      <p>Other common states:</p>
+      <pre><code class="language-text">closed  → Port reachable hai, lekin service listening nahi kar rahi
+filtered → Firewall ya filtering ki wajah se status clear nahi hai</code></pre>
+
+      <h2>SERVICE</h2>
+      <pre><code class="language-text">echo
+ssl/echo
+ssl/unknown</code></pre>
+      <p>Service column Nmap ka best identification guess show karta hai.</p>
+
+      <h1>Echo Service Aur SSL Service</h1>
+
+      <h2>Echo Service</h2>
+      <p>Echo service client se jo data receive karti hai, wahi data wapas send kar deti hai.</p>
+      <p>Example:</p>
+      <pre><code class="language-text">Client: hello
+Server: hello</code></pre>
+      <p>Challenge mein echo services current password ko next credentials mein convert nahi karti. Woh sirf input wapas echo karti hain.</p>
+
+      <h2>SSL/Echo Service</h2>
+      <pre><code class="language-text">ssl/echo</code></pre>
+      <p>Is service mein SSL/TLS layer ho sakti hai, lekin underlying behavior echo ho sakta hai. Ye correct service nahi hai agar woh sirf input repeat kare.</p>
+
+      <h2>SSL/Unknown Service</h2>
+      <pre><code class="language-text">ssl/unknown</code></pre>
+      <p>Iska meaning hai:</p>
+      <ul>
+        <li>Service SSL/TLS use kar rahi hai.</li>
+        <li>Nmap exact application protocol identify nahi kar paya.</li>
+      </ul>
+      <p>Bandit Level 16 mein correct service <code>31790</code> par <code>ssl/unknown</code> ke roop mein identify hoti hai.</p>
+
+      <h1>Correct Port Identify Karna</h1>
+      <p>Scan output ke according open ports:</p>
+      <pre><code class="language-text">31046/tcp open echo
+31518/tcp open ssl/echo
+31691/tcp open echo
+31790/tcp open ssl/unknown
+31960/tcp open echo</code></pre>
+      <p>Potential candidates:</p>
+      <pre><code class="language-text">31518 → SSL/echo, input repeat karega
+31790 → SSL/unknown, credentials return karega</code></pre>
+      <p>Correct port:</p>
+      <pre><code class="language-text">31790</code></pre>
+
+      <h1>OpenSSL Connection</h1>
+
+      <h2><code>openssl s_client</code></h2>
+      <p>SSL/TLS service se connect karne ke liye:</p>
+      <pre><code class="language-bash">openssl s_client -connect localhost:31790</code></pre>
+      <p>Alternative:</p>
+      <pre><code class="language-bash">openssl s_client -connect localhost:31790 -ign_eof</code></pre>
+
+      <h2>Command Breakdown</h2>
+      <pre><code class="language-bash">openssl s_client -connect localhost:31790</code></pre>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Part</th>
+              <th>Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>openssl</code></td>
+              <td>OpenSSL toolkit</td>
+            </tr>
+            <tr>
+              <td><code>s_client</code></td>
+              <td>SSL/TLS client mode</td>
+            </tr>
+            <tr>
+              <td><code>-connect</code></td>
+              <td>Target host aur port specify karta hai</td>
+            </tr>
+            <tr>
+              <td><code>localhost</code></td>
+              <td>Current machine</td>
+            </tr>
+            <tr>
+              <td><code>31790</code></td>
+              <td>Correct SSL service port</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Password Submit Karna</h2>
+      <p>Connection establish hone ke baad current <code>bandit16</code> password enter karein:</p>
+      <pre><code class="language-text">CURRENT_BANDIT16_PASSWORD</code></pre>
+      <p>Correct service password ke response mein RSA private key return karegi.</p>
+
+      <h1>RSA Private Key</h1>
+
+      <h2>RSA Key Kya Hoti Hai?</h2>
+      <p>RSA ek public-key cryptography algorithm hai. SSH key authentication mein private key ka use user ki identity prove karne ke liye hota hai.</p>
+      <p>Private key output usually in markers ke beech hoti hai:</p>
+      <pre><code class="language-text">-----BEGIN RSA PRIVATE KEY-----
+...
+-----END RSA PRIVATE KEY-----</code></pre>
+
+      <h2>Key Copy Karne Ke Important Rules</h2>
+      <p>Private key copy karte waqt:</p>
+      <ul>
+        <li><code>BEGIN</code> line include karein.</li>
+        <li><code>END</code> line include karein.</li>
+        <li>Beech ki har line exactly preserve karein.</li>
+        <li>Extra spaces add na karein.</li>
+        <li>Line breaks preserve karein.</li>
+        <li>Terminal formatting characters copy na karein.</li>
+        <li>Key ke andar random <code>@</code> ya Unicode characters accidentally add na karein.</li>
+      </ul>
+      <blockquote>
+        <p><strong>Important:</strong> Aapke pasted RSA key transcript mein kuch characters corrupted dikh rahe hain, jaise <code>@</code>, spaces aur non-ASCII characters. Website writeup mein key ka full corrupted block paste karne ke bajay explain karein ki key ko service ke actual output se exactly copy karna hai.</p>
+      </blockquote>
+
+      <h1>Temporary Directory</h1>
+
+      <h2><code>/tmp</code> Directory</h2>
+      <p>Private key ko <code>/tmp</code> ke andar temporary working directory mein save karna convenient hota hai.</p>
+      <pre><code class="language-bash">mkdir /tmp/trial
+cd /tmp/trial</code></pre>
+
+      <h2><code>nano</code> Editor</h2>
+      <p>Key file create karne ke liye:</p>
+      <pre><code class="language-bash">nano rsa.key</code></pre>
+      <p>Paste karte waqt complete key format preserve karein:</p>
+      <pre><code class="language-text">-----BEGIN RSA PRIVATE KEY-----
+KEY_CONTENT
+-----END RSA PRIVATE KEY-----</code></pre>
+      <p>Nano mein save karne ke steps:</p>
+      <pre><code class="language-text">Ctrl + O  → Save
+Enter     → Filename confirm
+Ctrl + X  → Exit</code></pre>
+
+      <h2>Key File Verify Karna</h2>
+      <pre><code class="language-bash">ls</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">rsa.key</code></pre>
+      <p>Private key ki validity test karne ke liye:</p>
+      <pre><code class="language-bash">ssh-keygen -y -f rsa.key</code></pre>
+      <p>Agar key valid hai, to public key output generate hoga.</p>
+
+      <h1><code>chmod 600</code></h1>
+
+      <h2>File Permissions</h2>
+      <p>SSH private keys ko secure permissions chahiye hoti hain. Agar key file group ya others ke liye readable ho, SSH warning ya error de sakta hai.</p>
+      <p>Correct permission command:</p>
+      <pre><code class="language-bash">chmod 600 rsa.key</code></pre>
+
+      <h2><code>600</code> Ka Meaning</h2>
+      <pre><code class="language-text">6 → Owner: read + write
+0 → Group: no permissions
+0 → Others: no permissions</code></pre>
+      <p>Permission format:</p>
+      <pre><code class="language-text">rw-------</code></pre>
+      <p>Only file owner key ko read aur modify kar sakta hai.</p>
+
+      <h2>Permissions Check Karna</h2>
+      <pre><code class="language-bash">ls -l rsa.key</code></pre>
+      <p>Expected format:</p>
+      <pre><code class="language-text">-rw------- 1 bandit16 bandit16 ... rsa.key</code></pre>
+
+      <h1>SSH Login With RSA Key</h1>
+      <p>Private key se <code>bandit17</code> par localhost login:</p>
+      <pre><code class="language-bash">ssh -i rsa.key bandit17@localhost -p 2220</code></pre>
+      <p>Command ke parts:</p>
+      <pre><code class="language-text">-i rsa.key → RSA private key use karo
+bandit17   → Next user
+localhost  → Same machine
+-p 2220    → Bandit SSH port</code></pre>
+
+      <h1>Password File Read Karna</h1>
+      <p>Successful login ke baad verify karein:</p>
+      <pre><code class="language-bash">whoami</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">bandit17</code></pre>
+      <p>Password read karein:</p>
+      <pre><code class="language-bash">cat /etc/bandit_pass/bandit17</code></pre>
+      <p>Provided password:</p>
+      <pre><code class="language-text">VwOSWtCA7lRKKTfbr2IDh6awj9RNZM5e</code></pre>
+
+      <h1>Complete Walkthrough</h1>
+
+      <h2>Step 1: <code>bandit16</code> Par Login Karein</h2>
+      <pre><code class="language-powershell">ssh bandit16@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Previous level se mila password enter karein.</p>
+
+      <h2>Step 2: Port Range Scan Karein</h2>
+      <pre><code class="language-bash">nmap -sC -sV -p 31000-32000 localhost</code></pre>
+      <p>Expected important output:</p>
+      <pre><code class="language-text">31046/tcp open echo
+31518/tcp open ssl/echo
+31691/tcp open echo
+31790/tcp open ssl/unknown
+31960/tcp open echo</code></pre>
+
+      <h2>Step 3: Correct SSL Port Choose Karein</h2>
+      <p>Correct port:</p>
+      <pre><code class="language-text">31790</code></pre>
+      <p>Reason:</p>
+      <pre><code class="language-text">31518 → SSL echo service
+31790 → SSL unknown service, credentials return karegi</code></pre>
+
+      <h2>Step 4: SSL Service Se Connect Karein</h2>
+      <pre><code class="language-bash">openssl s_client -connect localhost:31790</code></pre>
+      <p>Ya:</p>
+      <pre><code class="language-bash">openssl s_client -connect localhost:31790 -ign_eof</code></pre>
+
+      <h2>Step 5: Current Password Submit Karein</h2>
+      <p>Current <code>bandit16</code> password enter karein.</p>
+      <p>Correct service RSA private key return karegi.</p>
+
+      <h2>Step 6: Temporary Directory Create Karein</h2>
+      <p>SSL session se exit karne ke baad:</p>
+      <pre><code class="language-bash">mkdir /tmp/trial
+cd /tmp/trial</code></pre>
+      <p>Agar directory already exist karti ho:</p>
+      <pre><code class="language-bash">mkdir /tmp/trial2
+cd /tmp/trial2</code></pre>
+
+      <h2>Step 7: RSA Key File Create Karein</h2>
+      <pre><code class="language-bash">nano rsa.key</code></pre>
+      <p>Service se mili complete RSA private key paste karein.</p>
+      <p>Required format:</p>
+      <pre><code class="language-text">-----BEGIN RSA PRIVATE KEY-----
+...
+-----END RSA PRIVATE KEY-----</code></pre>
+      <p>Save and exit:</p>
+      <pre><code class="language-text">Ctrl + O
+Enter
+Ctrl + X</code></pre>
+
+      <h2>Step 8: Permissions Set Karein</h2>
+      <pre><code class="language-bash">chmod 600 rsa.key</code></pre>
+      <p>Verify:</p>
+      <pre><code class="language-bash">ls -l rsa.key</code></pre>
+
+      <h2>Step 9: <code>bandit17</code> Par SSH Login Karein</h2>
+      <pre><code class="language-bash">ssh -i rsa.key bandit17@localhost -p 2220</code></pre>
+      <p>Pehli baar host key warning aaye to authorized learning environment mein:</p>
+      <pre><code class="language-text">yes</code></pre>
+
+      <h2>Step 10: Password Read Karein</h2>
+      <pre><code class="language-bash">cat /etc/bandit_pass/bandit17</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">VwOSWtCA7lRKKTfbr2IDh6awj9RNZM5e</code></pre>
+
+      <h1>Actual Terminal Workflow</h1>
+      <pre><code class="language-text">bandit16@bandit:~$ nmap -sC -sV -p 31000-32000 localhost
+PORT      STATE SERVICE
+31046/tcp open  echo
+31518/tcp open  ssl/echo
+31691/tcp open  echo
+31790/tcp open  ssl/unknown
+31960/tcp open  echo</code></pre>
+      <p>Correct SSL port:</p>
+      <pre><code class="language-bash">openssl s_client -connect localhost:31790</code></pre>
+      <p>Current password submit karne ke baad RSA key milegi.</p>
+      <p>Key save karein:</p>
+      <pre><code class="language-bash">mkdir /tmp/trial
+cd /tmp/trial
+nano rsa.key</code></pre>
+      <p>Permissions set karein:</p>
+      <pre><code class="language-bash">chmod 600 rsa.key</code></pre>
+      <p>Next user login:</p>
+      <pre><code class="language-bash">ssh -i rsa.key bandit17@localhost -p 2220</code></pre>
+      <p>Password read karein:</p>
+      <pre><code class="language-bash">cat /etc/bandit_pass/bandit17</code></pre>
+
+      <h1>Common Errors</h1>
+
+      <h2>Wrong Port Select Karna</h2>
+      <p><code>31518</code> SSL/echo service hai. Ye input ko echo kar sakti hai.</p>
+      <p>Correct credential service:</p>
+      <pre><code class="language-text">31790/tcp open ssl/unknown</code></pre>
+
+      <h2><code>Connection Refused</code></h2>
+      <p>Check karein:</p>
+      <ul>
+        <li>Port <code>31790</code> correct hai.</li>
+        <li>Host <code>localhost</code> correct hai.</li>
+        <li>OpenSSL command correct hai.</li>
+      </ul>
+      <pre><code class="language-bash">openssl s_client -connect localhost:31790</code></pre>
+
+      <h2>RSA Key Invalid</h2>
+      <p>Possible reasons:</p>
+      <ul>
+        <li>Key copy karte waqt line break remove ho gayi.</li>
+        <li><code>BEGIN</code> ya <code>END</code> marker missing hai.</li>
+        <li>Key ke andar extra spaces add ho gaye.</li>
+        <li>Terminal ke random characters copy ho gaye.</li>
+        <li>Unicode characters accidentally insert ho gaye.</li>
+      </ul>
+      <p>Key ko actual service output se dobara copy karein.</p>
+
+      <h2>Permissions Too Open</h2>
+      <p>Error:</p>
+      <pre><code class="language-text">WARNING: UNPROTECTED PRIVATE KEY FILE!</code></pre>
+      <p>Correct command:</p>
+      <pre><code class="language-bash">chmod 600 rsa.key</code></pre>
+
+      <h2><code>Permission denied (publickey)</code></h2>
+      <p>Check karein:</p>
+      <pre><code class="language-bash">ls -l rsa.key</code></pre>
+      <p>Correct login command:</p>
+      <pre><code class="language-bash">ssh -i rsa.key bandit17@localhost -p 2220</code></pre>
+
+      <h2><code>.ssh/known_hosts</code> Warning</h2>
+      <p>Agar ye warning aaye:</p>
+      <pre><code class="language-text">Could not create directory '/home/bandit16/.ssh' (Permission denied).</code></pre>
+      <p>To iska matlab host key save nahi hui. Ye private key invalid hone ka direct proof nahi hai. Agar SSH <code>bandit17</code> prompt open kar de, to login successful hai.</p>
+
+      <h2>Password Characters Confuse Hona</h2>
+      <p>Password mein similar characters carefully verify karein:</p>
+      <pre><code class="language-text">W vs w
+O vs 0
+1 vs l</code></pre>
+      <p>Final password ko actual command output se copy karein:</p>
+      <pre><code class="language-bash">cat /etc/bandit_pass/bandit17</code></pre>
+
+      <h1>Security Lessons</h1>
+      <p>Is level se humein ye important lessons milte hain:</p>
+      <ul>
+        <li>Port scanning open services identify karne mein help karta hai.</li>
+        <li>Service detection port ke behavior ko samajhne mein useful hai.</li>
+        <li>Echo service aur credential service alag ho sakti hain.</li>
+        <li>SSL-enabled services ko OpenSSL client se test kiya ja sakta hai.</li>
+        <li>RSA private keys ko secret rakhna chahiye.</li>
+        <li>Private key file permissions restrictive honi chahiye.</li>
+        <li><code>chmod 600</code> private key ko owner-only read/write permission deta hai.</li>
+        <li><code>/tmp</code> temporary security workspace ke roop mein useful hai.</li>
+        <li>Exact key formatting SSH authentication ke liye important hai.</li>
+        <li>Nmap sirf authorized systems par use karna chahiye.</li>
+      </ul>
+
+      <h1>Commands Summary</h1>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>nmap -sC -sV -p 31000-32000 localhost</code></td>
+              <td>Port range scan aur service detection karta hai</td>
+            </tr>
+            <tr>
+              <td><code>openssl s_client -connect localhost:31790</code></td>
+              <td>SSL service se connect karta hai</td>
+            </tr>
+            <tr>
+              <td><code>mkdir /tmp/trial</code></td>
+              <td>Temporary directory create karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cd /tmp/trial</code></td>
+              <td>Temporary directory mein enter karta hai</td>
+            </tr>
+            <tr>
+              <td><code>nano rsa.key</code></td>
+              <td>RSA key file create/edit karta hai</td>
+            </tr>
+            <tr>
+              <td><code>chmod 600 rsa.key</code></td>
+              <td>Private key permissions secure karta hai</td>
+            </tr>
+            <tr>
+              <td><code>ls -l rsa.key</code></td>
+              <td>Key permissions verify karta hai</td>
+            </tr>
+            <tr>
+              <td><code>ssh -i rsa.key bandit17@localhost -p 2220</code></td>
+              <td>Private key se SSH login karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cat /etc/bandit_pass/bandit17</code></td>
+              <td><code>bandit17</code> password read karta hai</td>
+            </tr>
+            <tr>
+              <td><code>exit</code></td>
+              <td>SSH session close karta hai</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h1>Final Solution</h1>
+      <p><code>bandit16</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit16@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Ports scan karein:</p>
+      <pre><code class="language-bash">nmap -sC -sV -p 31000-32000 localhost</code></pre>
+      <p>Correct SSL service port <code>31790</code> par connect karein:</p>
+      <pre><code class="language-bash">openssl s_client -connect localhost:31790</code></pre>
+      <p>Current <code>bandit16</code> password submit karein aur returned RSA key ko save karein:</p>
+      <pre><code class="language-bash">mkdir /tmp/trial
+cd /tmp/trial
+nano rsa.key</code></pre>
+      <p>Permissions set karein:</p>
+      <pre><code class="language-bash">chmod 600 rsa.key</code></pre>
+      <p>Private key se <code>bandit17</code> par login karein:</p>
+      <pre><code class="language-bash">ssh -i rsa.key bandit17@localhost -p 2220</code></pre>
+      <p>Password read karein:</p>
+      <pre><code class="language-bash">cat /etc/bandit_pass/bandit17</code></pre>
+      <p>Provided password:</p>
+      <pre><code class="language-text">VwOSWtCA7lRKKTfbr2IDh6awj9RNZM5e</code></pre>
+
+      <h1>Conclusion</h1>
+      <p>Bandit Level 16 → Level 17 mein humne port scanning, service detection, SSL service identification aur RSA private-key authentication seekha.</p>
+      <p>Complete workflow:</p>
+      <pre><code class="language-text">SSH Login as bandit16
+        ↓
+Nmap Port Range Scan
+        ↓
+Open Ports Identify
+        ↓
+SSL Service Find
+        ↓
+Port 31790 Se OpenSSL Connection
+        ↓
+Current Password Submit
+        ↓
+RSA Private Key Receive
+        ↓
+Key File Save
+        ↓
+chmod 600
+        ↓
+SSH Login as bandit17
+        ↓
+Password File Read</code></pre>
+      <p>Is level ke most important commands hain:</p>
+      <pre><code class="language-bash">nmap -sC -sV -p 31000-32000 localhost</code></pre>
+      <pre><code class="language-bash">openssl s_client -connect localhost:31790</code></pre>
+      <pre><code class="language-bash">chmod 600 rsa.key</code></pre>
+      <pre><code class="language-bash">ssh -i rsa.key bandit17@localhost -p 2220</code></pre>
+      <blockquote>
+        <p><strong>Security Note:</strong> Port scanning aur private-key authentication sirf authorized systems aur learning environments par use karein. OverTheWire Bandit ek authorized cybersecurity learning environment hai.</p>
+      </blockquote>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <span> © 2026 SSSWriteups </span>
+      
+    </div>
+  </footer>
+</body>
+</html>
+```
