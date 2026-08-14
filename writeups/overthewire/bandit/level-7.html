@@ -1,0 +1,453 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OverTheWire Bandit - Level 7 to Level 8 | SSSWriteups</title>
+  <link rel="stylesheet" href="../../../style.css">
+</head>
+<body>
+  <header class="hero page-header">
+    <nav class="nav container">
+      <a class="logo" href="../../../../index.html">
+        SSS<span>Writeups</span>
+      </a>
+      <div class="nav-links">
+        <a href="../../../../index.html">
+          Home
+        </a>
+
+        <a href="../../../../categories/overthewire.html">
+          OverTheWire
+        </a>
+
+        <a href="index.html">
+          Bandit
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="writeup-page section container">
+    <article class="writeup-content">
+      <h1>OverTheWire Bandit — Level 7 to Level 8</h1>
+
+      <h2>Introduction</h2>
+      <p>Is writeup ka heading <strong>Level 7 → Level 8</strong> hai.</p>
+      <p>Is level mein next level ka password <code>data.txt</code> file ke andar stored hai. Password us word ke next to likha hua hai:</p>
+      <pre><code class="language-text">millionth</code></pre>
+      <p><code>data.txt</code> ek large text file ho sakti hai, isliye poori file ko manually read karna practical nahi hai. Humein specific word search karne ke liye <code>grep</code> command ka use karna hoga.</p>
+      <p>Aapke solution mein <code>cat</code> aur <code>grep</code> ko pipe <code>|</code> ke through connect kiya gaya hai:</p>
+      <pre><code class="language-bash">cat data.txt | grep millionth</code></pre>
+      <p>Found password:</p>
+      <pre><code class="language-text">TESKZCOXvTetK0S9xNwm25STk5iWrBvP</code></pre>
+
+      <h2>Objective</h2>
+      <p>Is level mein humein:</p>
+      <ul>
+        <li><code>bandit7</code> user se SSH ke through login karna hai.</li>
+        <li><code>data.txt</code> file ko locate karna hai.</li>
+        <li>File ke andar <code>millionth</code> word search karna hai.</li>
+        <li>Password ko word <code>millionth</code> ke next se read karna hai.</li>
+        <li>Password copy karna hai.</li>
+        <li><code>bandit8</code> user se next SSH login karna hai.</li>
+      </ul>
+
+      <h2>Given Information</h2>
+      <p>Current level par login karne ke liye:</p>
+      <pre><code class="language-text">Host:     bandit.labs.overthewire.org
+Port:     2220
+Username: bandit7
+Password: Previous level se mila password</code></pre>
+      <p>File:</p>
+      <pre><code class="language-text">data.txt</code></pre>
+      <p>Search word:</p>
+      <pre><code class="language-text">millionth</code></pre>
+      <p>Next level ka username:</p>
+      <pre><code class="language-text">bandit8</code></pre>
+      <p>Found password:</p>
+      <pre><code class="language-text">TESKZCOXvTetK0S9xNwm25STk5iWrBvP</code></pre>
+
+      <h1><code>cat</code> Command</h1>
+
+      <h2><code>cat</code> Kya Karti Hai?</h2>
+      <p><code>cat</code> command file ka complete content terminal par display karti hai.</p>
+      <pre><code class="language-bash">cat data.txt</code></pre>
+      <p>Agar file chhoti ho to <code>cat</code> useful hai. Lekin agar file large ho, to complete output screen par display karna difficult ho sakta hai.</p>
+
+      <h2>Is Level Mein <code>cat</code> Ka Role</h2>
+      <p>Is level mein <code>cat</code> <code>data.txt</code> file ka content read karke output generate karti hai:</p>
+      <pre><code class="language-bash">cat data.txt</code></pre>
+      <p>Ye output terminal par print hone ke bajay <code>grep</code> command ko bhi diya ja sakta hai.</p>
+
+      <h1><code>grep</code> Command</h1>
+
+      <h2><code>grep</code> Kya Hoti Hai?</h2>
+      <p><code>grep</code> command text ke andar specific pattern ya word search karne ke liye use hoti hai.</p>
+      <p>Basic format:</p>
+      <pre><code class="language-bash">grep pattern filename</code></pre>
+      <p>Example:</p>
+      <pre><code class="language-bash">grep millionth data.txt</code></pre>
+      <p>Ye <code>data.txt</code> file ki un lines ko display karegi jinmein <code>millionth</code> word present hai.</p>
+
+      <h2><code>grep millionth</code></h2>
+      <pre><code class="language-bash">grep millionth</code></pre>
+      <p>Iska meaning hai:</p>
+      <pre><code class="language-text">Input mein `millionth` word search karo.</code></pre>
+      <p>Jab <code>grep</code> ko file name directly nahi diya jata, to ye standard input se data read kar sakti hai.</p>
+      <p>Isliye pipe ke saath ye command kaam karti hai:</p>
+      <pre><code class="language-bash">cat data.txt | grep millionth</code></pre>
+
+      <h1>Pipe <code>|</code></h1>
+
+      <h2>Pipe Kya Hota Hai?</h2>
+      <p>Pipe symbol:</p>
+      <pre><code class="language-text">|</code></pre>
+      <p>Pipe ek command ka output doosri command ke input mein send karta hai.</p>
+      <p>General format:</p>
+      <pre><code class="language-bash">command1 | command2</code></pre>
+      <p>Meaning:</p>
+      <pre><code class="language-text">command1 ka output → command2 ka input</code></pre>
+
+      <h2>Is Level Mein Pipe</h2>
+      <pre><code class="language-bash">cat data.txt | grep millionth</code></pre>
+      <p>Process:</p>
+      <pre><code class="language-text">cat data.txt
+      ↓
+File ka content output
+      ↓
+      |
+      ↓
+grep millionth
+      ↓
+Sirf matching line output</code></pre>
+
+      <h2>Command Breakdown</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Part</th>
+              <th>Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>cat</code></td>
+              <td>File content read karta hai</td>
+            </tr>
+            <tr>
+              <td><code>data.txt</code></td>
+              <td>Read ki jaane wali file</td>
+            </tr>
+            <tr>
+              <td><code>|</code></td>
+              <td>First command ka output second command ko deta hai</td>
+            </tr>
+            <tr>
+              <td><code>grep</code></td>
+              <td>Text pattern search karta hai</td>
+            </tr>
+            <tr>
+              <td><code>millionth</code></td>
+              <td>Search kiya jaane wala word</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h1>Standard Input Aur Standard Output</h1>
+
+      <h2>Standard Input</h2>
+      <p>Standard input ko <code>stdin</code> bhi kaha jata hai. Ye woh input source hai jahan se command data read karti hai.</p>
+      <p>Usually standard input keyboard hota hai, lekin pipe ke through doosri command ka output bhi standard input ban sakta hai.</p>
+
+      <h2>Standard Output</h2>
+      <p>Standard output ko <code>stdout</code> kaha jata hai. Ye command ka normal output hota hai, jo usually terminal par display hota hai.</p>
+      <p>Pipe ke case mein pehli command ka standard output doosri command ke standard input mein chala jata hai.</p>
+      <pre><code class="language-text">cat stdout → grep stdin</code></pre>
+
+      <h1>Direct <code>grep</code> Method</h1>
+      <p>Is level ko pipe ke bina bhi solve kar sakte hain:</p>
+      <pre><code class="language-bash">grep millionth data.txt</code></pre>
+      <p>Ye command directly <code>data.txt</code> file mein <code>millionth</code> word search karti hai.</p>
+      <p>Dono commands valid hain:</p>
+      <pre><code class="language-bash">cat data.txt | grep millionth</code></pre>
+      <pre><code class="language-bash">grep millionth data.txt</code></pre>
+      <p>Direct method zyada short aur efficient hai, lekin pipe method Linux command chaining samajhne ke liye useful hai.</p>
+
+      <h1>Case Sensitivity</h1>
+      <p>By default <code>grep</code> case-sensitive hoti hai.</p>
+      <p>Ye patterns different samjhe jayenge:</p>
+      <pre><code class="language-text">millionth
+Millionth
+MILLIONTH</code></pre>
+      <p>Is challenge mein exact word lowercase hai:</p>
+      <pre><code class="language-text">millionth</code></pre>
+      <p>Isliye command exactly is tarah run karein:</p>
+      <pre><code class="language-bash">grep millionth data.txt</code></pre>
+      <p>Case-insensitive search ke liye <code>-i</code> option use hota hai:</p>
+      <pre><code class="language-bash">grep -i millionth data.txt</code></pre>
+      <p>Lekin is level mein <code>-i</code> ki zaroorat nahi hai.</p>
+
+      <h1>Complete Walkthrough</h1>
+
+      <h2>Step 1: <code>bandit7</code> Par Login Karein</h2>
+      <pre><code class="language-powershell">ssh bandit7@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password prompt par previous level se mila password enter karein.</p>
+      <p>Successful login ke baad prompt roughly is tarah dikh sakta hai:</p>
+      <pre><code class="language-text">bandit7@bandit:~$</code></pre>
+
+      <h2>Step 2: Current User Verify Karein</h2>
+      <pre><code class="language-bash">whoami</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">bandit7</code></pre>
+
+      <h2>Step 3: Current Directory Check Karein</h2>
+      <pre><code class="language-bash">pwd</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">/home/bandit7</code></pre>
+
+      <h2>Step 4: Files Ki List Dekhein</h2>
+      <pre><code class="language-bash">ls</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">data.txt</code></pre>
+
+      <h2>Step 5: Word Search Karein</h2>
+      <p>Pipe method:</p>
+      <pre><code class="language-bash">cat data.txt | grep millionth</code></pre>
+      <p>Direct method:</p>
+      <pre><code class="language-bash">grep millionth data.txt</code></pre>
+
+      <h2>Step 6: Matching Line Read Karein</h2>
+      <p>Output mein <code>millionth</code> word ke next password hoga.</p>
+      <p>Expected output format:</p>
+      <pre><code class="language-text">millionth    TESKZCOXvTetK0S9xNwm25STk5iWrBvP</code></pre>
+
+      <h2>Step 7: Password Copy Karein</h2>
+      <p>Found password:</p>
+      <pre><code class="language-text">TESKZCOXvTetK0S9xNwm25STk5iWrBvP</code></pre>
+      <p>Password ke start ya end mein extra space copy na karein.</p>
+
+      <h2>Step 8: SSH Session Close Karein</h2>
+      <pre><code class="language-bash">exit</code></pre>
+
+      <h2>Step 9: <code>bandit8</code> Par Login Karein</h2>
+      <pre><code class="language-bash">ssh bandit8@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password enter karein:</p>
+      <pre><code class="language-text">TESKZCOXvTetK0S9xNwm25STk5iWrBvP</code></pre>
+
+      <h1>Actual Terminal Session</h1>
+      <pre><code class="language-text">bandit7@bandit:~$ ls
+data.txt
+bandit7@bandit:~$ cat data.txt | grep millionth
+millionth    TESKZCOXvTetK0S9xNwm25STk5iWrBvP
+bandit7@bandit:~$ exit
+logout</code></pre>
+      <p>Uske baad next level par login karein:</p>
+      <pre><code class="language-bash">ssh bandit8@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Complete Command Sequence</h1>
+      <pre><code class="language-powershell">ssh bandit7@bandit.labs.overthewire.org -p 2220</code></pre>
+      <pre><code class="language-bash">whoami</code></pre>
+      <pre><code class="language-bash">pwd</code></pre>
+      <pre><code class="language-bash">ls</code></pre>
+      <pre><code class="language-bash">cat data.txt | grep millionth</code></pre>
+      <pre><code class="language-bash">exit</code></pre>
+      <pre><code class="language-bash">ssh bandit8@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Common Errors</h1>
+
+      <h2><code>No such file or directory</code></h2>
+      <p>Error:</p>
+      <pre><code class="language-text">cat: data.txt: No such file or directory</code></pre>
+      <p>Possible reasons:</p>
+      <ul>
+        <li>Aap wrong directory mein ho.</li>
+        <li>Filename spelling galat hai.</li>
+        <li>Aap <code>bandit7</code> ke home directory mein nahi ho.</li>
+      </ul>
+      <p>Check karein:</p>
+      <pre><code class="language-bash">pwd
+ls</code></pre>
+
+      <h2><code>grep: millionth: No such file or directory</code></h2>
+      <p>Agar aap ye command run karte hain:</p>
+      <pre><code class="language-bash">grep millionth</code></pre>
+      <p>To <code>grep</code> standard input ka wait karegi. File directly search karne ke liye:</p>
+      <pre><code class="language-bash">grep millionth data.txt</code></pre>
+      <p>Ya pipe use karein:</p>
+      <pre><code class="language-bash">cat data.txt | grep millionth</code></pre>
+
+      <h2>No Matching Output</h2>
+      <p>Check karein:</p>
+      <ul>
+        <li>Word lowercase mein <code>millionth</code> type hua hai.</li>
+        <li>Spelling correct hai.</li>
+        <li>File ka naam <code>data.txt</code> hai.</li>
+        <li>Aap correct directory mein ho.</li>
+      </ul>
+      <p>Correct command:</p>
+      <pre><code class="language-bash">grep millionth data.txt</code></pre>
+
+      <h2>Password Copy Error</h2>
+      <p>Password copy karte waqt:</p>
+      <ul>
+        <li>Extra space copy na karein.</li>
+        <li>Uppercase aur lowercase same rakhein.</li>
+        <li>Similar characters carefully check karein.</li>
+      </ul>
+      <p>Password:</p>
+      <pre><code class="language-text">TESKZCOXvTetK0S9xNwm25STk5iWrBvP</code></pre>
+
+      <h2>SSH Permission Denied</h2>
+      <p>Check karein:</p>
+      <ul>
+        <li>Username <code>bandit8</code> hai.</li>
+        <li>Port <code>2220</code> use ho raha hai.</li>
+        <li>Password exactly copy hua hai.</li>
+        <li>Password ke start ya end mein extra space nahi hai.</li>
+      </ul>
+      <p>Correct command:</p>
+      <pre><code class="language-bash">ssh bandit8@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Useful <code>grep</code> Options</h1>
+
+      <h2><code>-i</code> Case-Insensitive Search</h2>
+      <pre><code class="language-bash">grep -i millionth data.txt</code></pre>
+      <p>Uppercase aur lowercase dono match karega.</p>
+
+      <h2><code>-n</code> Line Number Show Karna</h2>
+      <pre><code class="language-bash">grep -n millionth data.txt</code></pre>
+      <p>Matching line ka line number bhi show karega.</p>
+
+      <h2><code>-w</code> Complete Word Search</h2>
+      <pre><code class="language-bash">grep -w millionth data.txt</code></pre>
+      <p>Sirf complete word <code>millionth</code> match karega.</p>
+
+      <h2><code>-n -w</code> Combine Karna</h2>
+      <pre><code class="language-bash">grep -n -w millionth data.txt</code></pre>
+      <p>Level 7 ke liye simple command sufficient hai:</p>
+      <pre><code class="language-bash">grep millionth data.txt</code></pre>
+
+      <h1>Security Lessons</h1>
+      <p>Is level se humein ye important lessons milte hain:</p>
+      <ul>
+        <li>Large text files ko manually read karna inefficient ho sakta hai.</li>
+        <li><code>grep</code> text search aur filtering ke liye useful hai.</li>
+        <li>Pipe ek command ka output doosri command ke input mein bhejta hai.</li>
+        <li>Linux commands ko chain karke powerful workflows banaye ja sakte hain.</li>
+        <li>Standard input aur standard output shell scripting ke important concepts hain.</li>
+        <li><code>grep</code> default roop se case-sensitive hoti hai.</li>
+        <li>Direct file search ke liye <code>grep pattern filename</code> simple method hai.</li>
+        <li>Command-line filtering cybersecurity aur log analysis mein commonly use hoti hai.</li>
+      </ul>
+
+      <h1>Commands Summary</h1>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>ssh user@host -p 2220</code></td>
+              <td>Remote server par SSH login karta hai</td>
+            </tr>
+            <tr>
+              <td><code>whoami</code></td>
+              <td>Current username show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>pwd</code></td>
+              <td>Current directory show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>ls</code></td>
+              <td>Files aur directories list karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cat data.txt</code></td>
+              <td>File ka complete content display karta hai</td>
+            </tr>
+            <tr>
+              <td><code>grep millionth data.txt</code></td>
+              <td>File mein <code>millionth</code> search karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cat data.txt | grep millionth</code></td>
+              <td>Pipe ke through matching line search karta hai</td>
+            </tr>
+            <tr>
+              <td><code>grep -i pattern file</code></td>
+              <td>Case-insensitive search karta hai</td>
+            </tr>
+            <tr>
+              <td><code>grep -n pattern file</code></td>
+              <td>Matching line number show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>grep -w word file</code></td>
+              <td>Complete word search karta hai</td>
+            </tr>
+            <tr>
+              <td><code>exit</code></td>
+              <td>SSH session close karta hai</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h1>Final Solution</h1>
+      <p><code>bandit7</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit7@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Files dekhein:</p>
+      <pre><code class="language-bash">ls</code></pre>
+      <p><code>millionth</code> word search karein:</p>
+      <pre><code class="language-bash">cat data.txt | grep millionth</code></pre>
+      <p>Ya direct command:</p>
+      <pre><code class="language-bash">grep millionth data.txt</code></pre>
+      <p>Password:</p>
+      <pre><code class="language-text">TESKZCOXvTetK0S9xNwm25STk5iWrBvP</code></pre>
+      <p>Ab <code>bandit8</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit8@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Conclusion</h1>
+      <p>Bandit Level 7 → Level 8 mein humne large text file ke andar specific word search karna seekha.</p>
+      <p>Complete workflow:</p>
+      <pre><code class="language-text">SSH Login as bandit7
+        ↓
+data.txt Identify
+        ↓
+cat Se File Read
+        ↓
+Pipe Se Output Forward
+        ↓
+grep Se millionth Search
+        ↓
+Password Find
+        ↓
+SSH Login as bandit8</code></pre>
+      <p>Is level ka most important command hai:</p>
+      <pre><code class="language-bash">cat data.txt | grep millionth</code></pre>
+      <p>Aur iska shorter alternative hai:</p>
+      <pre><code class="language-bash">grep millionth data.txt</code></pre>
+      <blockquote>
+        <p><strong>Security Note:</strong> SSH ka use sirf un systems par karein jahan aapke paas permission ho. OverTheWire Bandit ek authorized cybersecurity learning environment hai.</p>
+      </blockquote>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <span> © 2026 SSSWriteups </span>
+    
+    </div>
+  </footer>
+</body>
+</html>
+```
