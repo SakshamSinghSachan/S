@@ -1,0 +1,432 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OverTheWire Bandit - Level 2 to Level 3 | SSSWriteups</title>
+  <link rel="stylesheet" href="../../../style.css">
+</head>
+<body>
+  <header class="hero page-header">
+    <nav class="nav container">
+      <a class="logo" href="../../../../index.html">
+        SSS<span>Writeups</span>
+      </a>
+      <div class="nav-links">
+        <a href="../../../../index.html">
+          Home
+        </a>
+
+        <a href="../../../../categories/overthewire.html">
+          OverTheWire
+        </a>
+
+        <a href="index.html">
+          Bandit
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="writeup-page section container">
+    <article class="writeup-content">
+      <h1>OverTheWire Bandit — Level 2 to Level 3</h1>
+
+      <h2>Introduction</h2>
+      <p>Is writeup ka heading <strong>Level 2 → Level 3</strong> hai.</p>
+      <p>Is level mein next level ka password home directory mein present ek file ke andar stored hai. File ka naam hai:</p>
+      <pre><code class="language-text">spaces in this filename</code></pre>
+      <p>Filename mein spaces hone ki wajah se ise terminal mein directly use nahi kar sakte. Shell normally spaces ko separate arguments samajhta hai. Isliye file ko read karne ke liye filename ko double quotes ke andar likhna hoga:</p>
+      <pre><code class="language-bash">cat "spaces in this filename"</code></pre>
+
+      <h2>Objective</h2>
+      <p>Is level mein humein:</p>
+      <ul>
+        <li><code>bandit2</code> user se SSH ke through login karna hai.</li>
+        <li>Home directory ki files list karni hain.</li>
+        <li>Spaces wale filename ko identify karna hai.</li>
+        <li>Quotes ka use karke file ko read karna hai.</li>
+        <li>Password copy karna hai.</li>
+        <li><code>bandit3</code> user se next SSH login karna hai.</li>
+      </ul>
+
+      <h2>Given Information</h2>
+      <p>Current level par login karne ke liye:</p>
+      <pre><code class="language-text">Host:     bandit.labs.overthewire.org
+Port:     2220
+Username: bandit2
+Password: Previous level se mila password</code></pre>
+      <p>Current file:</p>
+      <pre><code class="language-text">spaces in this filename</code></pre>
+      <p>Next level ka username:</p>
+      <pre><code class="language-text">bandit3</code></pre>
+      <p>Found password:</p>
+      <pre><code class="language-text">aBZ0W5EmUfAf7kHTQeOwd8bauFJ2lAiG</code></pre>
+
+      <h1>SSH Login</h1>
+
+      <h2>PowerShell Se Login</h2>
+      <p>Windows PowerShell ya Windows Terminal open karein.</p>
+      <p>Command:</p>
+      <pre><code class="language-powershell">ssh bandit2@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Aapke terminal mein command kuch is tarah dikh sakti hai:</p>
+      <pre><code class="language-powershell">PS C:\Users\dolla> ssh bandit2@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password prompt par previous level se mila password enter karein.</p>
+      <p>Successful login ke baad prompt kuch is tarah dikh sakta hai:</p>
+      <pre><code class="language-text">bandit2@bandit:~$</code></pre>
+
+      <h2>Prompt Ko Samajhna</h2>
+      <pre><code class="language-text">bandit2@bandit:~$</code></pre>
+      <p>Iske parts:</p>
+      <pre><code class="language-text">bandit2  → Current username
+bandit    → Remote server ka hostname
+~         → Current user ki home directory
+$         → Normal user shell prompt</code></pre>
+
+      <h1>Filename Mein Spaces</h1>
+
+      <h2>File Ka Actual Naam</h2>
+      <p>Is level mein file ka exact naam hai:</p>
+      <pre><code class="language-text">spaces in this filename</code></pre>
+      <p>Ye ek single filename hai, chaar separate filenames nahi.</p>
+      <p>Linux filenames mein spaces allowed hote hain. Lekin command line par spaces ka special meaning hota hai.</p>
+
+      <h2>Shell Spaces Ko Kaise Treat Karta Hai?</h2>
+      <p>Shell command ko parts ya arguments mein divide karta hai.</p>
+      <p>Example:</p>
+      <pre><code class="language-bash">cat file.txt</code></pre>
+      <p>Shell is command ko samajhta hai:</p>
+      <pre><code class="language-text">Command:  cat
+Argument: file.txt</code></pre>
+      <p>Agar hum bina quotes ke ye command run karein:</p>
+      <pre><code class="language-bash">cat spaces in this filename</code></pre>
+      <p>To shell ise is tarah interpret kar sakta hai:</p>
+      <pre><code class="language-text">Command:   cat
+Argument1: spaces
+Argument2: in
+Argument3: this
+Argument4: filename</code></pre>
+      <p>Lekin humein <code>cat</code> command ko ek hi complete filename dena hai. Isliye quotes ya escaping ka use karte hain.</p>
+
+      <h1>File Read Karne Ke Methods</h1>
+
+      <h2>Method 1: Double Quotes</h2>
+      <p>Recommended command:</p>
+      <pre><code class="language-bash">cat "spaces in this filename"</code></pre>
+      <p>Double quotes shell ko batati hain ki quotes ke andar ka complete text ek single argument hai.</p>
+      <p>Is command mein:</p>
+      <pre><code class="language-text">Command:  cat
+Filename: spaces in this filename</code></pre>
+      <p>Double quotes actual filename ka part nahi hoti. Ye sirf shell parsing ke liye use hoti hain.</p>
+
+      <h2>Method 2: Single Quotes</h2>
+      <p>Single quotes bhi use kar sakte hain:</p>
+      <pre><code class="language-bash">cat 'spaces in this filename'</code></pre>
+      <p>Ye bhi complete filename ko ek single argument ke roop mein treat karne ke liye shell ko batata hai.</p>
+
+      <h2>Method 3: Backslash Se Spaces Escape Karna</h2>
+      <p>Har space se pehle backslash lagakar bhi filename read kar sakte hain:</p>
+      <pre><code class="language-bash">cat spaces\ in\ this\ filename</code></pre>
+      <p>Backslash shell ko batata hai ki space argument separator nahi, balki filename ka part hai.</p>
+
+      <h2>Methods Comparison</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Command</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Double quotes</td>
+              <td><code>cat "spaces in this filename"</code></td>
+            </tr>
+            <tr>
+              <td>Single quotes</td>
+              <td><code>cat 'spaces in this filename'</code></td>
+            </tr>
+            <tr>
+              <td>Backslash escaping</td>
+              <td><code>cat spaces\ in\ this\ filename</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Teeno commands same file ka content display karengi.</p>
+      <p>Beginner ke liye sabse readable command hai:</p>
+      <pre><code class="language-bash">cat "spaces in this filename"</code></pre>
+
+      <h1>Linux Commands</h1>
+
+      <h2><code>ls</code> Command</h2>
+      <p><code>ls</code> command current directory ke andar available files aur directories ki list show karti hai.</p>
+      <pre><code class="language-bash">ls</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">spaces in this filename</code></pre>
+      <p>Output mein spaces ki wajah se filename multiple words jaisa dikh sakta hai, lekin ye ek hi file hai.</p>
+
+      <h2><code>pwd</code> Command</h2>
+      <p><code>pwd</code> ka full form <strong>Print Working Directory</strong> hai.</p>
+      <pre><code class="language-bash">pwd</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">/home/bandit2</code></pre>
+      <p>Isse confirm hota hai ki aap <code>bandit2</code> ki home directory mein ho.</p>
+
+      <h2><code>whoami</code> Command</h2>
+      <p>Current user verify karne ke liye:</p>
+      <pre><code class="language-bash">whoami</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">bandit2</code></pre>
+
+      <h2><code>cat</code> Command</h2>
+      <p><code>cat</code> command file ka content terminal par display karti hai.</p>
+      <p>Basic format:</p>
+      <pre><code class="language-bash">cat filename</code></pre>
+      <p>Spaces wale filename ke liye:</p>
+      <pre><code class="language-bash">cat "spaces in this filename"</code></pre>
+
+      <h1>Complete Walkthrough</h1>
+
+      <h2>Step 1: PowerShell Open Karein</h2>
+      <p>Windows par PowerShell ya Windows Terminal open karein.</p>
+      <p>Example:</p>
+      <pre><code class="language-powershell">PS C:\Users\dolla></code></pre>
+
+      <h2>Step 2: <code>bandit2</code> Par Login Karein</h2>
+      <pre><code class="language-powershell">ssh bandit2@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password prompt par previous level ka password enter karein.</p>
+
+      <h2>Step 3: Current User Check Karein</h2>
+      <pre><code class="language-bash">whoami</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">bandit2</code></pre>
+
+      <h2>Step 4: Current Directory Check Karein</h2>
+      <pre><code class="language-bash">pwd</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">/home/bandit2</code></pre>
+
+      <h2>Step 5: Files Ki List Dekhein</h2>
+      <pre><code class="language-bash">ls</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">spaces in this filename</code></pre>
+
+      <h2>Step 6: Spaces Wali File Read Karein</h2>
+      <p>Double quotes ka use karein:</p>
+      <pre><code class="language-bash">cat "spaces in this filename"</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">aBZ0W5EmUfAf7kHTQeOwd8bauFJ2lAiG</code></pre>
+
+      <h2>Step 7: Password Copy Karein</h2>
+      <p>Found password:</p>
+      <pre><code class="language-text">aBZ0W5EmUfAf7kHTQeOwd8bauFJ2lAiG</code></pre>
+      <p>Password copy karte waqt:</p>
+      <ul>
+        <li>Extra space copy na karein.</li>
+        <li>Uppercase aur lowercase characters same rakhein.</li>
+        <li>Password ke beginning aur ending ko carefully check karein.</li>
+      </ul>
+
+      <h2>Step 8: SSH Session Close Karein</h2>
+      <pre><code class="language-bash">exit</code></pre>
+      <p>Aap <code>Ctrl + D</code> bhi press kar sakte hain.</p>
+
+      <h2>Step 9: <code>bandit3</code> Par Login Karein</h2>
+      <pre><code class="language-bash">ssh bandit3@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password enter karein:</p>
+      <pre><code class="language-text">aBZ0W5EmUfAf7kHTQeOwd8bauFJ2lAiG</code></pre>
+
+      <h1>Actual Terminal Session</h1>
+      <p>Aapka terminal session roughly is tarah dikh sakta hai:</p>
+      <pre><code class="language-text">PS C:\Users\dolla> ssh bandit2@bandit.labs.overthewire.org -p 2220
+bandit2@bandit.labs.overthewire.org's password:
+bandit2@bandit:~$ ls
+spaces in this filename
+bandit2@bandit:~$ cat "spaces in this filename"
+aBZ0W5EmUfAf7kHTQeOwd8bauFJ2lAiG
+bandit2@bandit:~$ exit
+logout</code></pre>
+      <p>Uske baad next level par login karein:</p>
+      <pre><code class="language-bash">ssh bandit3@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Complete Command Sequence</h1>
+      <pre><code class="language-powershell">ssh bandit2@bandit.labs.overthewire.org -p 2220</code></pre>
+      <pre><code class="language-bash">whoami</code></pre>
+      <pre><code class="language-bash">pwd</code></pre>
+      <pre><code class="language-bash">ls</code></pre>
+      <pre><code class="language-bash">cat "spaces in this filename"</code></pre>
+      <pre><code class="language-bash">exit</code></pre>
+      <pre><code class="language-bash">ssh bandit3@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Common Errors</h1>
+
+      <h2><code>No such file or directory</code></h2>
+      <p>Agar aap ye command run karte hain:</p>
+      <pre><code class="language-bash">cat spaces in this filename</code></pre>
+      <p>To shell filename ko multiple arguments ke roop mein treat kar sakta hai.</p>
+      <p>Possible error:</p>
+      <pre><code class="language-text">cat: spaces: No such file or directory
+cat: in: No such file or directory
+cat: this: No such file or directory
+cat: filename: No such file or directory</code></pre>
+      <p>Correct command:</p>
+      <pre><code class="language-bash">cat "spaces in this filename"</code></pre>
+
+      <h2>Filename Spelling Error</h2>
+      <p>Linux filenames case-sensitive hote hain. Ye filenames alag-alag hain:</p>
+      <pre><code class="language-text">spaces in this filename
+Spaces in this filename
+spaces In this filename</code></pre>
+      <p>Correct filename exactly ye hai:</p>
+      <pre><code class="language-text">spaces in this filename</code></pre>
+
+      <h2>SSH Permission Denied</h2>
+      <p>Error:</p>
+      <pre><code class="language-text">Permission denied, please try again.</code></pre>
+      <p>Check karein:</p>
+      <ul>
+        <li>Username <code>bandit3</code> hai.</li>
+        <li>Port <code>2220</code> use ho raha hai.</li>
+        <li>Password exact copy hua hai.</li>
+        <li>Password ke start ya end mein extra space nahi hai.</li>
+        <li>Similar characters carefully check kiye gaye hain.</li>
+      </ul>
+      <p>Correct command:</p>
+      <pre><code class="language-bash">ssh bandit3@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h2>Password Display Nahi Hota</h2>
+      <p>Linux terminal password type karte waqt characters ya asterisks display nahi karta. Password normally type karein aur <code>Enter</code> press karein.</p>
+
+      <h2>Prompt Par Extra <code>|</code> Character</h2>
+      <p>Kabhi-kabhi terminal copy karte waqt prompt ke baad <code>|</code> ya koi extra cursor character dikh sakta hai.</p>
+      <p>Example:</p>
+      <pre><code class="language-text">bandit2@bandit:~$ |</code></pre>
+      <p>Ye usually cursor ya copied terminal formatting hoti hai. Isse password ka part na samjhein.</p>
+
+      <h1>Shell Parsing Ko Samajhna</h1>
+      <p>Shell command ko execute karne se pehle uski parsing karta hai.</p>
+      <p>Command:</p>
+      <pre><code class="language-bash">cat "spaces in this filename"</code></pre>
+      <p>Shell ise samajhta hai:</p>
+      <pre><code class="language-text">Program:  cat
+Argument: spaces in this filename</code></pre>
+      <p>Without quotes:</p>
+      <pre><code class="language-bash">cat spaces in this filename</code></pre>
+      <p>Shell ise multiple arguments mein divide kar sakta hai:</p>
+      <pre><code class="language-text">Program:   cat
+Argument1: spaces
+Argument2: in
+Argument3: this
+Argument4: filename</code></pre>
+      <p>Quotes ka purpose shell parsing ko control karna hai.</p>
+
+      <h1>Security Lessons</h1>
+      <p>Is level se humein ye important lessons milte hain:</p>
+      <ul>
+        <li>Linux filenames mein spaces allowed hote hain.</li>
+        <li>Shell spaces ko argument separators samajhta hai.</li>
+        <li>Quotes complete filename ko single argument banati hain.</li>
+        <li>Backslash spaces ko escape kar sakta hai.</li>
+        <li>Exact filename identify karna zaroori hai.</li>
+        <li>Linux filenames case-sensitive hote hain.</li>
+        <li>Command-line parsing ko samajhna cybersecurity mein important hai.</li>
+        <li>Passwords ko carefully copy karna chahiye.</li>
+        <li>Har level complete hone ke baad next username ke saath new SSH login karna hota hai.</li>
+      </ul>
+
+      <h1>Commands Summary</h1>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>ssh user@host -p 2220</code></td>
+              <td>Remote server par SSH login karta hai</td>
+            </tr>
+            <tr>
+              <td><code>whoami</code></td>
+              <td>Current username show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>pwd</code></td>
+              <td>Current working directory show karta hai</td>
+            </tr>
+            <tr>
+              <td><code>ls</code></td>
+              <td>Current directory ki files list karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cat "spaces in this filename"</code></td>
+              <td>Spaces wale filename ka content read karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cat 'spaces in this filename'</code></td>
+              <td>Single quotes ke through file read karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cat spaces\ in\ this\ filename</code></td>
+              <td>Escaped spaces ke through file read karta hai</td>
+            </tr>
+            <tr>
+              <td><code>exit</code></td>
+              <td>SSH session close karta hai</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h1>Final Solution</h1>
+      <p><code>bandit2</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit2@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Files dekhein:</p>
+      <pre><code class="language-bash">ls</code></pre>
+      <p>Spaces wale filename ko double quotes ke saath read karein:</p>
+      <pre><code class="language-bash">cat "spaces in this filename"</code></pre>
+      <p>Password:</p>
+      <pre><code class="language-text">aBZ0W5EmUfAf7kHTQeOwd8bauFJ2lAiG</code></pre>
+      <p>Ab <code>bandit3</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit3@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Conclusion</h1>
+      <p>Bandit Level 2 → Level 3 mein humne seekha ki spaces wale filename ko Linux terminal mein correctly kaise access kiya jata hai.</p>
+      <p>Complete workflow:</p>
+      <pre><code class="language-text">SSH Login as bandit2
+        ↓
+Current Directory Check
+        ↓
+ls Command
+        ↓
+Spaces Wala Filename Identify
+        ↓
+Quotes Ka Use
+        ↓
+cat Command
+        ↓
+Password Find
+        ↓
+SSH Login as bandit3</code></pre>
+      <p>Is level ka sabse important command hai:</p>
+      <pre><code class="language-bash">cat "spaces in this filename"</code></pre>
+      <blockquote>
+        <p><strong>Security Note:</strong> SSH ka use sirf un systems par karein jahan aapke paas permission ho. OverTheWire Bandit ek authorized cybersecurity learning environment hai.</p>
+      </blockquote>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <span> © 2026 SSSWriteups </span>
+      <span> Built with HTML & CSS </span>
+    </div>
+  </footer>
+</body>
+</html>
+```
