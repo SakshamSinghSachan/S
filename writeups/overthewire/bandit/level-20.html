@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OverTheWire Bandit - Level 20 to Level 21 | SSSWriteups</title>
+  <link rel="stylesheet" href="../../../style.css">
+</head>
+<body>
+  <header class="hero page-header">
+    <nav class="nav container">
+      <a class="logo" href="../../../../index.html">
+        SSS<span>Writeups</span>
+      </a>
+      <div class="nav-links">
+    <a href="../../../index.html">Home</a>
+    <a href="../../../categories/overthewire.html">OverTheWire</a>
+</div>
+    </nav>
+  </header>
+
+  <main class="writeup-page section container">
+    <article class="writeup-content">
+      <h1>OverTheWire Bandit — Level 20 to Level 21</h1>
+
+      <h2>Introduction</h2>
+      <p>Is writeup ka heading <strong>Level 20 → Level 21</strong> hai.</p>
+      <p>Is level mein home directory ke andar ek setuid binary hai:</p>
+      <pre><code class="language-text">suconnect</code></pre>
+      <p>Ye binary localhost ke us port se connect karti hai jo hum command-line argument ke roop mein provide karte hain.</p>
+      <p>Process:</p>
+      <ol>
+        <li><code>suconnect</code> localhost ke specified port se connect hoti hai.</li>
+        <li>Port se ek line of text read karti hai.</li>
+        <li>Received text ko current <code>bandit20</code> password se compare karti hai.</li>
+        <li>Password correct hone par <code>bandit21</code> ka next password send karti hai.</li>
+      </ol>
+      <p>Humein is level mein ek <strong>Netcat listener</strong> create karna hoga jo current password send karega.</p>
+
+      <h2>Objective</h2>
+      <p>Is level mein humein:</p>
+      <ul>
+        <li><code>bandit20</code> user ke do SSH sessions open karne hain.</li>
+        <li>Pehle session mein Netcat listener start karna hai.</li>
+        <li>Listener ko current <code>bandit20</code> password file se input dena hai.</li>
+        <li>Doosre session mein <code>./suconnect</code> ko same port ke saath run karna hai.</li>
+        <li><code>suconnect</code> ko listener se connect karwana hai.</li>
+        <li>Next level ka password receive karna hai.</li>
+        <li><code>bandit21</code> user se next SSH login karna hai.</li>
+      </ul>
+
+      <h2>Given Information</h2>
+      <p>Current level:</p>
+      <pre><code class="language-text">Username: bandit20
+Password: Previous level se mila password</code></pre>
+      <p>Setuid binary:</p>
+      <pre><code class="language-text">suconnect</code></pre>
+      <p>Example port:</p>
+      <pre><code class="language-text">1234</code></pre>
+      <p>Password file:</p>
+      <pre><code class="language-text">/etc/bandit_pass/bandit20</code></pre>
+      <p>Next username:</p>
+      <pre><code class="language-text">bandit21</code></pre>
+      <p>Provided next password:</p>
+      <pre><code class="language-text">NvEJF7oVjkddltPSrdKEFOllh9V1IBcq</code></pre>
+      <blockquote>
+        <p><strong>Password Note:</strong> Listener ko current <code>bandit20</code> password send karna hai. Current password aur next password ko confuse na karein. Current password previous level se mila hota hai; <code>suconnect</code> correct input ke baad next password return karti hai.</p>
+      </blockquote>
+
+      <h1><code>suconnect</code> Binary</h1>
+
+      <h2><code>suconnect</code> Kya Karti Hai?</h2>
+      <p><code>suconnect</code> ek setuid helper binary hai jo:</p>
+      <ul>
+        <li>Localhost ke specified TCP port se connect karti hai.</li>
+        <li>Connection se ek line read karti hai.</li>
+        <li>Us line ko <code>bandit20</code> password se compare karti hai.</li>
+        <li>Match hone par next password send karti hai.</li>
+      </ul>
+      <p>Basic syntax:</p>
+      <pre><code class="language-bash">./suconnect port</code></pre>
+      <p>Example:</p>
+      <pre><code class="language-bash">./suconnect 1234</code></pre>
+
+      <h2>Usage Check Karna</h2>
+      <p>Bina argument ke run karein:</p>
+      <pre><code class="language-bash">./suconnect</code></pre>
+      <p>Program usage information display kar sakti hai.</p>
+
+      <h1>Netcat Listener</h1>
+
+      <h2>Listener Kya Hota Hai?</h2>
+      <p>Listener ek network program hota hai jo specified port par incoming connection ka wait karta hai.</p>
+      <p>Netcat ke through listener create karne ke liye:</p>
+      <pre><code class="language-bash">nc -l 1234</code></pre>
+      <p>Yahan:</p>
+      <pre><code class="language-text">nc → Netcat
+-l → Listen mode
+1234 → Listening port</code></pre>
+
+      <h2>File Se Password Send Karna</h2>
+      <p>Current password file ko listener ke standard input mein redirect karne ke liye:</p>
+      <pre><code class="language-bash">nc -l 1234 &lt; /etc/bandit_pass/bandit20</code></pre>
+      <p>Iska meaning:</p>
+      <pre><code class="language-text">/etc/bandit_pass/bandit20 ka content
+        ↓
+Netcat listener ka input
+        ↓
+Port 1234 par connect hone wale client ko send</code></pre>
+
+      <h2>Input Redirection <code>&lt;</code></h2>
+      <p>Shell mein <code>&lt;</code> input redirection operator hai.</p>
+      <pre><code class="language-bash">command &lt; file</code></pre>
+      <p>Iska meaning hai:</p>
+      <pre><code class="language-text">File ka content command ke standard input ke roop mein use karo.</code></pre>
+      <p>Example:</p>
+      <pre><code class="language-bash">cat &lt; /etc/bandit_pass/bandit20</code></pre>
+      <p>Bandit challenge mein:</p>
+      <pre><code class="language-bash">nc -l 1234 &lt; /etc/bandit_pass/bandit20</code></pre>
+      <p>Netcat ko password file ka content input ke roop mein milta hai.</p>
+
+      <h1>Two-Terminal Technique</h1>
+
+      <h2>Do Connections Kyun Chahiye?</h2>
+      <p>Ek terminal mein listener ko running rehna hai. Doosre terminal se <code>suconnect</code> run karna hai.</p>
+      <p>Isliye do separate SSH sessions use karna easiest hai.</p>
+      <p>Diagram:</p>
+      <pre><code class="language-text">Terminal 1: bandit20
+        ↓
+nc listener on port 1234
+        ↑
+        ↓
+Terminal 2: bandit20
+        ↓
+./suconnect 1234</code></pre>
+
+      <h2>Terminal 1</h2>
+      <pre><code class="language-bash">ssh bandit20@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Phir:</p>
+      <pre><code class="language-bash">nc -l 1234 &lt; /etc/bandit_pass/bandit20</code></pre>
+
+      <h2>Terminal 2</h2>
+      <p>Doosra SSH connection open karein:</p>
+      <pre><code class="language-bash">ssh bandit20@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Phir:</p>
+      <pre><code class="language-bash">./suconnect 1234</code></pre>
+
+      <h2>Connection Flow</h2>
+      <pre><code class="language-text">Terminal 1
+nc listener port 1234
+        ↑
+        │ TCP connection
+        │
+Terminal 2
+./suconnect 1234</code></pre>
+      <p>Listener current password send karta hai. <code>suconnect</code> password verify karke next password return karti hai.</p>
+
+      <h1>Localhost Aur TCP Port</h1>
+
+      <h2>Localhost</h2>
+      <p><code>localhost</code> current machine ko represent karta hai.</p>
+      <p>Common IPv4 address:</p>
+      <pre><code class="language-text">127.0.0.1</code></pre>
+      <p><code>suconnect</code> same Bandit machine par port <code>1234</code> se connect karti hai.</p>
+
+      <h2>TCP Port</h2>
+      <p>Port ek numbered communication endpoint hota hai.</p>
+      <p>Is level mein:</p>
+      <pre><code class="language-text">Listener port: 1234
+Client:        suconnect</code></pre>
+      <p>Dono commands mein same port number hona chahiye:</p>
+      <pre><code class="language-bash">nc -l 1234</code></pre>
+      <pre><code class="language-bash">./suconnect 1234</code></pre>
+      <p>Agar port numbers different honge, to connection establish nahi hoga.</p>
+
+      <h1>Setuid Concept</h1>
+      <p><code>suconnect</code> setuid binary hai. Iska matlab hai ki ye owner ke effective privileges ke saath execute ho sakti hai.</p>
+      <p>File permissions check karne ke liye:</p>
+      <pre><code class="language-bash">ls -l suconnect</code></pre>
+      <p>Setuid permission mein execute position par <code>s</code> character dikh sakta hai:</p>
+      <pre><code class="language-text">-rwsr-x---</code></pre>
+      <p>Is level mein main focus networking aur data flow par hai, lekin <code>suconnect</code> ka setuid behavior bhi important hai.</p>
+
+      <h1>Complete Walkthrough</h1>
+
+      <h2>Step 1: Terminal 1 Mein Login Karein</h2>
+      <pre><code class="language-powershell">ssh bandit20@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password prompt par previous level ka password enter karein.</p>
+
+      <h2>Step 2: Listener Start Karein</h2>
+      <p>Terminal 1 mein:</p>
+      <pre><code class="language-bash">nc -l 1234 &lt; /etc/bandit_pass/bandit20</code></pre>
+      <p>Ye command port <code>1234</code> par listen karegi aur client connection ka wait karegi.</p>
+      <p>Terminal ko close na karein.</p>
+
+      <h2>Step 3: Terminal 2 Mein Same User Se Login Karein</h2>
+      <p>Doosra terminal open karein:</p>
+      <pre><code class="language-powershell">ssh bandit20@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h2>Step 4: <code>suconnect</code> Run Karein</h2>
+      <p>Terminal 2 mein:</p>
+      <pre><code class="language-bash">./suconnect 1234</code></pre>
+      <p><code>suconnect</code> localhost ke port <code>1234</code> par connect karegi.</p>
+
+      <h2>Step 5: Password Verification Dekhein</h2>
+      <p>Agar listener ne correct current password send kiya, to output aa sakta hai:</p>
+      <pre><code class="language-text">Read: CURRENT_BANDIT20_PASSWORD
+Password matches, sending next password</code></pre>
+      <p>Next password <code>suconnect</code> ke output mein display hoga:</p>
+      <pre><code class="language-text">NvEJF7oVjkddltPSrdKEFOllh9V1IBcq</code></pre>
+
+      <h2>Step 6: Password Copy Karein</h2>
+      <pre><code class="language-text">NvEJF7oVjkddltPSrdKEFOllh9V1IBcq</code></pre>
+
+      <h2>Step 7: <code>bandit21</code> Par Login Karein</h2>
+      <pre><code class="language-bash">ssh bandit21@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password enter karein:</p>
+      <pre><code class="language-text">NvEJF7oVjkddltPSrdKEFOllh9V1IBcq</code></pre>
+
+      <h1>Actual Terminal Flow</h1>
+
+      <h2>Terminal 1</h2>
+      <pre><code class="language-text">bandit20@bandit:~$ nc -l 1234 &lt; /etc/bandit_pass/bandit20</code></pre>
+      <p>Listener connection ka wait karega.</p>
+
+      <h2>Terminal 2</h2>
+      <pre><code class="language-text">bandit20@bandit:~$ ./suconnect 1234
+Read: CURRENT_BANDIT20_PASSWORD
+Password matches, sending next password
+NvEJF7oVjkddltPSrdKEFOllh9V1IBcq</code></pre>
+
+      <h1>Alternative Method: <code>echo</code></h1>
+      <p>Password file redirect karne ke bajay <code>echo</code> se current password send kar sakte hain:</p>
+      <pre><code class="language-bash">echo 'CURRENT_BANDIT20_PASSWORD' | nc -l 1234</code></pre>
+      <p>Lekin password ko manually type karne ke bajay password file se read karna better hai:</p>
+      <pre><code class="language-bash">nc -l 1234 &lt; /etc/bandit_pass/bandit20</code></pre>
+
+      <h1>Netcat Options</h1>
+
+      <h2><code>-l</code></h2>
+      <pre><code class="language-text">-l</code></pre>
+      <p>Listen mode enable karta hai.</p>
+
+      <h2><code>-p</code></h2>
+      <p>Kuch Netcat versions mein port specify karne ke liye:</p>
+      <pre><code class="language-bash">nc -l -p 1234</code></pre>
+      <p>use kiya jata hai.</p>
+      <p>Modern versions mein ye bhi kaam kar sakta hai:</p>
+      <pre><code class="language-bash">nc -l 1234</code></pre>
+      <p>Agar pehla syntax work na kare, to doosra try karein:</p>
+      <pre><code class="language-bash">nc -l -p 1234 &lt; /etc/bandit_pass/bandit20</code></pre>
+
+      <h2>Port Busy Error</h2>
+      <p>Agar port already in use ho:</p>
+      <pre><code class="language-text">Address already in use</code></pre>
+      <p>To different unused port choose karein, jaise:</p>
+      <pre><code class="language-bash">nc -l 2345 &lt; /etc/bandit_pass/bandit20</code></pre>
+      <p>Doosre terminal mein same port use karein:</p>
+      <pre><code class="language-bash">./suconnect 2345</code></pre>
+
+      <h1>Common Errors</h1>
+
+      <h2><code>Connection Refused</code></h2>
+      <p>Possible reasons:</p>
+      <ul>
+        <li>Listener start nahi hua.</li>
+        <li>Port numbers different hain.</li>
+        <li>Listener terminal close ho gaya.</li>
+        <li>Port already blocked ya unavailable hai.</li>
+      </ul>
+      <p>Check karein:</p>
+      <pre><code class="language-bash">nc -l 1234 &lt; /etc/bandit_pass/bandit20</code></pre>
+      <p>Aur doosre terminal mein:</p>
+      <pre><code class="language-bash">./suconnect 1234</code></pre>
+
+      <h2>Password Does Not Match</h2>
+      <p>Check karein ki listener current <code>bandit20</code> password send kar raha hai:</p>
+      <pre><code class="language-bash">cat /etc/bandit_pass/bandit20</code></pre>
+      <p>Correct listener command:</p>
+      <pre><code class="language-bash">nc -l 1234 &lt; /etc/bandit_pass/bandit20</code></pre>
+      <p>Next password ko listener mein send na karein. Listener ko current password send karna hai.</p>
+
+      <h2>Wrong Port</h2>
+      <p>Listener:</p>
+      <pre><code class="language-bash">nc -l 1234</code></pre>
+      <p>Client:</p>
+      <pre><code class="language-bash">./suconnect 1234</code></pre>
+      <p>Dono commands mein port same hona chahiye.</p>
+
+      <h2><code>suconnect: No Such File</code></h2>
+      <p>Current directory check karein:</p>
+      <pre><code class="language-bash">pwd
+ls</code></pre>
+      <p>Aapko home directory mein <code>suconnect</code> binary dikhni chahiye.</p>
+      <p>Run karein:</p>
+      <pre><code class="language-bash">./suconnect 1234</code></pre>
+
+      <h2>Netcat Syntax Problem</h2>
+      <p>Agar ye command work na kare:</p>
+      <pre><code class="language-bash">nc -l 1234 &lt; /etc/bandit_pass/bandit20</code></pre>
+      <p>To try karein:</p>
+      <pre><code class="language-bash">nc -l -p 1234 &lt; /etc/bandit_pass/bandit20</code></pre>
+
+      <h2>Password Copy Error</h2>
+      <p>Next password:</p>
+      <pre><code class="language-text">NvEJF7oVjkddltPSrdKEFOllh9V1IBcq</code></pre>
+      <p>Similar characters carefully check karein:</p>
+      <pre><code class="language-text">0 vs O
+1 vs l</code></pre>
+
+      <h1>Security Lessons</h1>
+      <p>Is level se humein ye important lessons milte hain:</p>
+      <ul>
+        <li>Network services client-server model par kaam karti hain.</li>
+        <li>Netcat simple TCP listener create kar sakta hai.</li>
+        <li>Ek process listener hota hai aur doosra process client.</li>
+        <li>Input redirection file content ko network service ko send kar sakti hai.</li>
+        <li><code>localhost</code> same machine par network communication ke liye use hota hai.</li>
+        <li>Ports client aur server ko connect karte hain.</li>
+        <li>Setuid binaries privileged network operations kar sakti hain.</li>
+        <li>Current password aur next password ko confuse nahi karna chahiye.</li>
+        <li>Two-terminal technique networking challenges mein useful hoti hai.</li>
+      </ul>
+
+      <h1>Commands Summary</h1>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>ssh user@host -p 2220</code></td>
+              <td>Remote server par SSH login karta hai</td>
+            </tr>
+            <tr>
+              <td><code>nc -l 1234</code></td>
+              <td>Port 1234 par Netcat listener start karta hai</td>
+            </tr>
+            <tr>
+              <td><code>nc -l 1234 &lt; file</code></td>
+              <td>File content ko listener ke input mein bhejta hai</td>
+            </tr>
+            <tr>
+              <td><code>nc -l -p 1234</code></td>
+              <td>Alternative Netcat listen syntax</td>
+            </tr>
+            <tr>
+              <td><code>./suconnect 1234</code></td>
+              <td>Localhost port 1234 se connect karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cat /etc/bandit_pass/bandit20</code></td>
+              <td>Current password file read karta hai</td>
+            </tr>
+            <tr>
+              <td><code>ls -l suconnect</code></td>
+              <td>Setuid permissions inspect karta hai</td>
+            </tr>
+            <tr>
+              <td><code>exit</code></td>
+              <td>SSH session close karta hai</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h1>Final Solution</h1>
+      <p>Terminal 1 mein <code>bandit20</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit20@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Port <code>1234</code> par listener start karein:</p>
+      <pre><code class="language-bash">nc -l 1234 &lt; /etc/bandit_pass/bandit20</code></pre>
+      <p>Terminal 2 mein same <code>bandit20</code> user par login karein:</p>
+      <pre><code class="language-bash">ssh bandit20@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p><code>suconnect</code> ko listener port ke saath run karein:</p>
+      <pre><code class="language-bash">./suconnect 1234</code></pre>
+      <p>Correct password match hone par next password receive hoga:</p>
+      <pre><code class="language-text">NvEJF7oVjkddltPSrdKEFOllh9V1IBcq</code></pre>
+      <p>Ab <code>bandit21</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit21@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Conclusion</h1>
+      <p>Bandit Level 20 → Level 21 mein humne ek TCP listener create karke <code>suconnect</code> setuid binary ko us listener se connect karna seekha.</p>
+      <p>Complete workflow:</p>
+      <pre><code class="language-text">Two SSH Connections as bandit20
+        ↓
+Terminal 1: Netcat Listener
+        ↓
+Current Password File Send
+        ↓
+Terminal 2: ./suconnect 1234
+        ↓
+Password Verification
+        ↓
+Next Password Receive
+        ↓
+SSH Login as bandit21</code></pre>
+      <p>Is level ke most important commands hain:</p>
+      <pre><code class="language-bash">nc -l 1234 &lt; /etc/bandit_pass/bandit20</code></pre>
+      <pre><code class="language-bash">./suconnect 1234</code></pre>
+      <blockquote>
+        <p><strong>Security Note:</strong> Network listeners aur setuid binaries ka use sirf authorized learning environments mein karein. OverTheWire Bandit ek authorized cybersecurity learning environment hai.</p>
+      </blockquote>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <span> © 2026 SSSWriteups </span>
+      
+    </div>
+  </footer>
+</body>
+</html>
+```
