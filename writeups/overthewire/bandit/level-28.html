@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OverTheWire Bandit - Level 28 to Level 29 | SSSWriteups</title>
+  <link rel="stylesheet" href="../../../style.css">
+</head>
+<body>
+  <header class="hero page-header">
+    <nav class="nav container">
+      <a class="logo" href="../../../../index.html">
+        SSS<span>Writeups</span>
+      </a>
+      <div class="nav-links">
+    <a href="../../../index.html">Home</a>
+    <a href="../../../categories/overthewire.html">OverTheWire</a>
+</div>
+    </nav>
+  </header>
+
+  <main class="writeup-page section container">
+    <article class="writeup-content">
+      <h1>OverTheWire Bandit — Level 28 to Level 29</h1>
+
+      <h2>Introduction</h2>
+      <p>Is writeup ka heading <strong>Level 28 → Level 29</strong> hai.</p>
+      <p>Is level mein bhi humein ek Git repository clone karni hai, lekin is baar <code>README.md</code> file mein password censored (<code>XXXXXXXXXX</code>) hai. Humein Git ke version control features ka use karke password recover karna hai.</p>
+      <p>Git commit history mein purane commits check karne se humein wo version mil sakta hai jisme password abhi censored nahi tha.</p>
+      <p>Humein:</p>
+      <ul>
+        <li>Git repository clone karni hai.</li>
+        <li><code>README.md</code> file inspect karni hai.</li>
+        <li>Commit history check karni hai.</li>
+        <li>Purane commit mein password find karna hai.</li>
+      </ul>
+
+      <h2>Objective</h2>
+      <p>Is level mein humein:</p>
+      <ul>
+        <li><code>bandit28</code> user se SSH login karna hai.</li>
+        <li>Git repository ka URL note karna hai.</li>
+        <li>Correct port (<code>2220</code>) specify karna hai.</li>
+        <li><code>git clone</code> command use karna hai.</li>
+        <li>Repository directory mein enter karna hai.</li>
+        <li><code>README.md</code> file read karni hai.</li>
+        <li>Git commit history inspect karni hai.</li>
+        <li>Purane commit checkout karna hai.</li>
+        <li>Password extract karna hai.</li>
+        <li><code>bandit29</code> user se next SSH login karna hai.</li>
+      </ul>
+
+      <h2>Given Information</h2>
+      <p>Current level:</p>
+      <pre><code class="language-text">Username: bandit28
+Password: Previous level se mila password</code></pre>
+      <p>Git repository:</p>
+      <pre><code class="language-text">URL: ssh://bandit28-git@localhost/home/bandit28-git/repo
+Port: 2220</code></pre>
+      <p>Git user:</p>
+      <pre><code class="language-text">Username: bandit28-git
+Password: Same as bandit28</code></pre>
+      <p>Next username:</p>
+      <pre><code class="language-text">bandit29</code></pre>
+      <p>Found password:</p>
+      <pre><code class="language-text">tQKvmcwNYcFS6vmPHIUSI3ShmsrQZKBS</code></pre>
+
+      <h1>Git Commit History</h1>
+
+      <h2>Git Log</h2>
+      <p><code>git log</code> command commit history display karti hai.</p>
+      <p>Basic syntax:</p>
+      <pre><code class="language-bash">git log</code></pre>
+      <p>Output example:</p>
+      <pre><code class="language-text">commit 14f754b3ba6531a2b89df6ccae6446e8969a41f3 (HEAD -> master, origin/master, origin/HEAD)
+Author: Morla Porla &lt;morla@overthewire.org&gt;
+Date:   Thu Oct 5 06:19:41 2023 +0000
+
+    fix info leak
+
+commit f08b9cc63fa1a4602fb665257633c2dae6e5651b
+Author: Morla Porla &lt;morla@overthewire.org&gt;
+Date:   Thu Oct 5 06:19:41 2023 +0000
+
+    add missing data
+
+commit a645bcc508c63f081234911d2f631f87cf469258
+Author: Ben Dover &lt;noone@overthewire.org&gt;
+Date:   Thu Oct 5 06:19:41 2023 +0000
+
+    initial commit of README.md</code></pre>
+
+      <h2>Commit Messages Analysis</h2>
+      <p>Commit messages se clues mil sakti hain:</p>
+      <ul>
+        <li><code>initial commit of README.md</code> → Pehla commit, original content</li>
+        <li><code>add missing data</code> → Kuch data add hua (shayad password)</li>
+        <li><code>fix info leak</code> → Information leak fix hua (password censored)</li>
+      </ul>
+
+      <h1>Git Checkout</h1>
+
+      <h2>Checkout Command</h2>
+      <p><code>git checkout</code> command se hum kisi specific commit par switch kar sakte hain.</p>
+      <p>Basic syntax:</p>
+      <pre><code class="language-bash">git checkout &lt;commit-hash&gt;</code></pre>
+
+      <h2>Detached HEAD State</h2>
+      <p>Jab hum kisi specific commit par checkout karte hain (branch par nahi), to Git "detached HEAD" state mein chala jata hai.</p>
+      <p>Warning message:</p>
+      <pre><code class="language-text">Note: switching to 'f08b9cc...'.
+You are in 'detached HEAD' state. You can look around, make experimental changes and commit them, and you can discard any commits you make in this state without impacting any branches by switching back to a branch.</code></pre>
+      <p>Iska matlab:</p>
+      <ul>
+        <li>Hum files inspect kar sakte hain.</li>
+        <li>Changes temporary honge.</li>
+        <li>Wapas branch par jaane se ye changes discard ho jayenge.</li>
+      </ul>
+
+      <h1>Complete Walkthrough</h1>
+
+      <h2>Step 1: <code>bandit28</code> Par Login Karein</h2>
+      <pre><code class="language-bash">ssh bandit28@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h2>Step 2: Temporary Directory Create Karein</h2>
+      <pre><code class="language-bash">mkdir /tmp/git28
+cd /tmp/git28</code></pre>
+
+      <h2>Step 3: Git Repository Clone Karein</h2>
+      <pre><code class="language-bash">git clone ssh://bandit28-git@localhost:2220/home/bandit28-git/repo</code></pre>
+      <p>Password prompt par <code>bandit28</code> ka password enter karein.</p>
+
+      <h2>Step 4: Repository Directory Mein Enter Karein</h2>
+      <pre><code class="language-bash">cd repo</code></pre>
+
+      <h2>Step 5: README.md File Read Karein</h2>
+      <pre><code class="language-bash">cat README.md</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text"># Bandit Notes
+Some notes for level29 of bandit.
+## credentials
+username: bandit29
+password: XXXXXXXXXX</code></pre>
+      <p>Password censored hai!</p>
+
+      <h2>Step 6: Commit History Check Karein</h2>
+      <pre><code class="language-bash">git log</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">commit 14f754b3ba6531a2b89df6ccae6446e8969a41f3 (HEAD -> master, origin/master, origin/HEAD)
+Author: Morla Porla &lt;morla@overthewire.org&gt;
+Date:   Thu Oct 5 06:19:41 2023 +0000
+
+    fix info leak
+
+commit f08b9cc63fa1a4602fb665257633c2dae6e5651b
+Author: Morla Porla &lt;morla@overthewire.org&gt;
+Date:   Thu Oct 5 06:19:41 2023 +0000
+
+    add missing data
+
+commit a645bcc508c63f081234911d2f631f87cf469258
+Author: Ben Dover &lt;noone@overthewire.org&gt;
+Date:   Thu Oct 5 06:19:41 2023 +0000
+
+    initial commit of README.md</code></pre>
+
+      <h2>Step 7: Purana Commit Checkout Karein</h2>
+      <p><code>fix info leak</code> commit mein password censored hua. Isse pehle wale commit (<code>add missing data</code>) mein password visible hoga.</p>
+      <pre><code class="language-bash">git checkout f08b9cc63fa1a4602fb665257633c2dae6e5651b</code></pre>
+
+      <h2>Step 8: README.md File Dobara Read Karein</h2>
+      <pre><code class="language-bash">cat README.md</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text"># Bandit Notes
+Some notes for level29 of bandit.
+## credentials
+username: bandit29
+password: tQKvmcwNYcFS6vmPHIUSI3ShmsrQZKBS</code></pre>
+
+      <h2>Step 9: Password Copy Karein</h2>
+      <pre><code class="language-text">tQKvmcwNYcFS6vmPHIUSI3ShmsrQZKBS</code></pre>
+
+      <h2>Step 10: <code>bandit29</code> Par Login Karein</h2>
+      <pre><code class="language-bash">ssh bandit29@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password:</p>
+      <pre><code class="language-text">tQKvmcwNYcFS6vmPHIUSI3ShmsrQZKBS</code></pre>
+
+      <h1>Actual Terminal Workflow</h1>
+      <pre><code class="language-text">bandit28@bandit:~$ mkdir /tmp/git28
+bandit28@bandit:~$ cd /tmp/git28
+bandit28@bandit:/tmp/git28$ git clone ssh://bandit28-git@localhost:2220/home/bandit28-git/repo
+Cloning into 'repo'...
+...
+bandit28-git@localhost's password:
+remote: Enumerating objects: 9, done.
+...
+bandit28@bandit:/tmp/git28$ cd repo
+bandit28@bandit:/tmp/git28/repo$ cat README.md
+# Bandit Notes
+Some notes for level29 of bandit.
+## credentials
+username: bandit29
+password: XXXXXXXXXX
+bandit28@bandit:/tmp/git28/repo$ git log
+commit 14f754b3ba6531a2b89df6ccae6446e8969a41f3 (HEAD -> master, origin/master, origin/HEAD)
+Author: Morla Porla &lt;morla@overthewire.org&gt;
+Date:   Thu Oct 5 06:19:41 2023 +0000
+
+    fix info leak
+
+commit f08b9cc63fa1a4602fb665257633c2dae6e5651b
+Author: Morla Porla &lt;morla@overthewire.org&gt;
+Date:   Thu Oct 5 06:19:41 2023 +0000
+
+    add missing data
+
+commit a645bcc508c63f081234911d2f631f87cf469258
+Author: Ben Dover &lt;noone@overthewire.org&gt;
+Date:   Thu Oct 5 06:19:41 2023 +0000
+
+    initial commit of README.md
+
+bandit28@bandit:/tmp/git28/repo$ git checkout f08b9cc63fa1a4602fb665257633c2dae6e5651b
+Note: switching to 'f08b9cc...'.
+You are in 'detached HEAD' state...
+bandit28@bandit:/tmp/git28/repo$ cat README.md
+# Bandit Notes
+Some notes for level29 of bandit.
+## credentials
+username: bandit29
+password: tQKvmcwNYcFS6vmPHIUSI3ShmsrQZKBS</code></pre>
+
+      <h1>Alternative Methods</h1>
+
+      <h2>Git Show</h2>
+      <p>Specific commit mein changes dekhne ke liye:</p>
+      <pre><code class="language-bash">git show f08b9cc63fa1a4602fb665257633c2dae6e5651b</code></pre>
+
+      <h2>Git Diff</h2>
+      <p>Do commits ke beech difference dekhne ke liye:</p>
+      <pre><code class="language-bash">git diff 14f754b3ba6531a2b89df6ccae6446e8969a41f3 f08b9cc63fa1a4602fb665257633c2dae6e5651b</code></pre>
+
+      <h2>Git Log with File</h2>
+      <p>Specific file ki commit history dekhne ke liye:</p>
+      <pre><code class="language-bash">git log README.md</code></pre>
+
+      <h1>Common Errors</h1>
+
+      <h2>Wrong Port</h2>
+      <p>Port <code>2220</code> use karein, <code>22</code> nahi.</p>
+      <pre><code class="language-bash">git clone ssh://bandit28-git@localhost:2220/home/bandit28-git/repo</code></pre>
+
+      <h2>Wrong Username</h2>
+      <p>Git username <code>bandit28-git</code> hai, <code>bandit28</code> nahi.</p>
+
+      <h2>Wrong Password</h2>
+      <p>Git password <code>bandit28</code> ka password hai (same as current user).</p>
+
+      <h2>Wrong Commit Hash</h2>
+      <p>Commit hash carefully copy karein. Ek character bhi wrong hua to checkout fail hoga.</p>
+      <p>Correct:</p>
+      <pre><code class="language-bash">git checkout f08b9cc63fa1a4602fb665257633c2dae6e5651b</code></pre>
+
+      <h2>Detached HEAD Confusion</h2>
+      <p>Detached HEAD state mein ghabrayein nahi. Ye normal hai jab hum specific commit par checkout karte hain.</p>
+      <p>Wapas master branch par jaane ke liye:</p>
+      <pre><code class="language-bash">git checkout master</code></pre>
+
+      <h2>Password Copy Error</h2>
+      <p>Password:</p>
+      <pre><code class="language-text">tQKvmcwNYcFS6vmPHIUSI3ShmsrQZKBS</code></pre>
+      <p>Check karein:</p>
+      <ul>
+        <li>Uppercase aur lowercase characters same hain.</li>
+        <li><code>0</code> aur <code>O</code> ko carefully distinguish karein.</li>
+        <li>Password ke start ya end mein extra space nahi hai.</li>
+      </ul>
+
+      <h2>SSH Permission Denied</h2>
+      <p>Next level par login karte waqt check karein:</p>
+      <ul>
+        <li>Username <code>bandit29</code> hai.</li>
+        <li>Port <code>2220</code> use ho raha hai.</li>
+        <li><code>README.md</code> se exact password copy hua hai.</li>
+      </ul>
+      <pre><code class="language-bash">ssh bandit29@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Security Lessons</h1>
+      <p>Is level se humein ye important lessons milte hain:</p>
+      <ul>
+        <li>Git commit history mein sensitive data permanently store ho sakta hai.</li>
+        <li>Password censored karne se purane commits mein data recover ho sakta hai.</li>
+        <li>Git repositories mein secrets commit nahi karne chahiye.</li>
+        <li>Commit history sanitize karna important hai before making repository public.</li>
+        <li><code>git filter-branch</code> ya <code>git filter-repo</code> se history sanitize ki ja sakti hai.</li>
+        <li>Version control systems mein data deletion permanent nahi hota.</li>
+        <li>Git hooks aur pre-commit checks sensitive data leaks prevent kar sakte hain.</li>
+        <li>Environment variables aur secrets management tools use karne chahiye.</li>
+      </ul>
+
+      <h1>Commands Summary</h1>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>ssh user@host -p 2220</code></td>
+              <td>Remote server par SSH login karta hai</td>
+            </tr>
+            <tr>
+              <td><code>mkdir /tmp/git28</code></td>
+              <td>Temporary directory create karta hai</td>
+            </tr>
+            <tr>
+              <td><code>git clone ssh://user@host:port/path</code></td>
+              <td>Git repository clone karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cd repo</code></td>
+              <td>Repository directory mein enter karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cat README.md</code></td>
+              <td>File content read karta hai</td>
+            </tr>
+            <tr>
+              <td><code>git log</code></td>
+              <td>Commit history display karta hai</td>
+            </tr>
+            <tr>
+              <td><code>git checkout &lt;commit-hash&gt;</code></td>
+              <td>Specific commit par switch karta hai</td>
+            </tr>
+            <tr>
+              <td><code>git show &lt;commit-hash&gt;</code></td>
+              <td>Commit details display karta hai</td>
+            </tr>
+            <tr>
+              <td><code>exit</code></td>
+              <td>SSH session close karta hai</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h1>Final Solution</h1>
+      <p><code>bandit28</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit28@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Temporary directory create karein:</p>
+      <pre><code class="language-bash">mkdir /tmp/git28
+cd /tmp/git28</code></pre>
+      <p>Git repository clone karein:</p>
+      <pre><code class="language-bash">git clone ssh://bandit28-git@localhost:2220/home/bandit28-git/repo</code></pre>
+      <p>Repository directory mein enter karein:</p>
+      <pre><code class="language-bash">cd repo</code></pre>
+      <p><code>README.md</code> file read karein:</p>
+      <pre><code class="language-bash">cat README.md</code></pre>
+      <p>Commit history check karein:</p>
+      <pre><code class="language-bash">git log</code></pre>
+      <p>Purana commit checkout karein:</p>
+      <pre><code class="language-bash">git checkout f08b9cc63fa1a4602fb665257633c2dae6e5651b</code></pre>
+      <p>Password read karein:</p>
+      <pre><code class="language-bash">cat README.md</code></pre>
+      <p>Password:</p>
+      <pre><code class="language-text">tQKvmcwNYcFS6vmPHIUSI3ShmsrQZKBS</code></pre>
+      <p>Ab <code>bandit29</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit29@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Conclusion</h1>
+      <p>Bandit Level 28 → Level 29 mein humne Git commit history inspect karke censored password recover kiya.</p>
+      <p>Complete workflow:</p>
+      <pre><code class="language-text">SSH Login as bandit28
+        ↓
+mkdir /tmp/git28
+        ↓
+git clone (port 2220)
+        ↓
+cd repo
+        ↓
+cat README.md (password censored)
+        ↓
+git log (commit history)
+        ↓
+git checkout f08b9cc... (purana commit)
+        ↓
+cat README.md (password visible)
+        ↓
+Password: tQKvmcwNYcFS6vmPHIUSI3ShmsrQZKBS
+        ↓
+SSH Login as bandit29</code></pre>
+      <p>Is level ke most important commands hain:</p>
+      <pre><code class="language-bash">git log</code></pre>
+      <pre><code class="language-bash">git checkout f08b9cc63fa1a4602fb665257633c2dae6e5651b</code></pre>
+      <blockquote>
+        <p><strong>Security Note:</strong> Git repositories mein sensitive information (passwords, API keys, credentials) kabhi bhi commit na karein. Agar accidentally commit ho jaye, to <code>git filter-repo</code> ya <code>BFG Repo-Cleaner</code> se history sanitize karein. Production environments mein secrets management tools (HashiCorp Vault, AWS Secrets Manager) use karein. OverTheWire Bandit ek authorized cybersecurity learning environment hai.</p>
+      </blockquote>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <span> © 2026 SSSWriteups </span>
+      
+    </div>
+  </footer>
+</body>
+</html>
+```
