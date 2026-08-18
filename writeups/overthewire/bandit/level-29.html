@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OverTheWire Bandit - Level 29 to Level 30 | SSSWriteups</title>
+  <link rel="stylesheet" href="../../../style.css">
+</head>
+<body>
+  <header class="hero page-header">
+    <nav class="nav container">
+      <a class="logo" href="../../../../index.html">
+        SSS<span>Writeups</span>
+      </a>
+      <div class="nav-links">
+    <a href="../../../index.html">Home</a>
+    <a href="../../../categories/overthewire.html">OverTheWire</a>
+</div>
+    </nav>
+  </header>
+
+  <main class="writeup-page section container">
+    <article class="writeup-content">
+      <h1>OverTheWire Bandit — Level 29 to Level 30</h1>
+
+      <h2>Introduction</h2>
+      <p>Is writeup ka heading <strong>Level 29 → Level 30</strong> hai.</p>
+      <p>Is level mein bhi humein ek Git repository clone karni hai, lekin is baar <code>README.md</code> file mein password ki jagah message hai: <code>&lt;no passwords in production!&gt;</code></p>
+      <p>Ye hint hai ki password production branch mein nahi, balki development ya testing branches mein accidentally commit ho sakta hai.</p>
+      <p>Humein:</p>
+      <ul>
+        <li>Git repository clone karni hai.</li>
+        <li>Available branches inspect karni hain.</li>
+        <li>Har branch mein <code>README.md</code> check karni hai.</li>
+        <li>Password find karna hai.</li>
+      </ul>
+
+      <h2>Objective</h2>
+      <p>Is level mein humein:</p>
+      <ul>
+        <li><code>bandit29</code> user se SSH login karna hai.</li>
+        <li>Git repository ka URL note karna hai.</li>
+        <li>Correct port (<code>2220</code>) specify karna hai.</li>
+        <li><code>git clone</code> command use karna hai.</li>
+        <li>Repository directory mein enter karna hai.</li>
+        <li><code>README.md</code> file read karni hai.</li>
+        <li>Git branches list karni hain.</li>
+        <li>Different branches checkout karni hain.</li>
+        <li>Password extract karna hai.</li>
+        <li><code>bandit30</code> user se next SSH login karna hai.</li>
+      </ul>
+
+      <h2>Given Information</h2>
+      <p>Current level:</p>
+      <pre><code class="language-text">Username: bandit29
+Password: Previous level se mila password</code></pre>
+      <p>Git repository:</p>
+      <pre><code class="language-text">URL: ssh://bandit29-git@localhost/home/bandit29-git/repo
+Port: 2220</code></pre>
+      <p>Git user:</p>
+      <pre><code class="language-text">Username: bandit29-git
+Password: Same as bandit29</code></pre>
+      <p>Next username:</p>
+      <pre><code class="language-text">bandit30</code></pre>
+      <p>Found password:</p>
+      <pre><code class="language-text">xbhV3HpNGLTIdnjUrdAlPzc2L6y9E0nS</code></pre>
+
+      <h1>Git Branches</h1>
+
+      <h2>Branches Kya Hote Hain?</h2>
+      <p>Git branches parallel development lines hote hain. Different features, fixes, ya experiments ke liye alag branches use kiye jate hain.</p>
+      <p>Common branches:</p>
+      <ul>
+        <li><code>master</code> / <code>main</code> → Production/stable code</li>
+        <li><code>dev</code> / <code>develop</code> → Development code</li>
+        <li><code>feature/*</code> → New features</li>
+        <li><code>bugfix/*</code> → Bug fixes</li>
+      </ul>
+
+      <h2>Branches List Karna</h2>
+      <p>Saare branches (local aur remote) list karne ke liye:</p>
+      <pre><code class="language-bash">git branch -a</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">* master
+remotes/origin/HEAD -> origin/master
+remotes/origin/dev
+remotes/origin/master
+remotes/origin/sploits-dev</code></pre>
+
+      <h2>Branch Checkout</h2>
+      <p>Kisi specific branch par switch karne ke liye:</p>
+      <pre><code class="language-bash">git checkout &lt;branch-name&gt;</code></pre>
+      <p>Remote branch checkout:</p>
+      <pre><code class="language-bash">git checkout remotes/origin/dev</code></pre>
+
+      <h1>Complete Walkthrough</h1>
+
+      <h2>Step 1: <code>bandit29</code> Par Login Karein</h2>
+      <pre><code class="language-bash">ssh bandit29@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h2>Step 2: Temporary Directory Create Karein</h2>
+      <pre><code class="language-bash">mkdir /tmp/git29
+cd /tmp/git29</code></pre>
+
+      <h2>Step 3: Git Repository Clone Karein</h2>
+      <pre><code class="language-bash">git clone ssh://bandit29-git@localhost:2220/home/bandit29-git/repo</code></pre>
+      <p>Password prompt par <code>bandit29</code> ka password enter karein.</p>
+
+      <h2>Step 4: Repository Directory Mein Enter Karein</h2>
+      <pre><code class="language-bash">cd repo</code></pre>
+
+      <h2>Step 5: README.md File Read Karein</h2>
+      <pre><code class="language-bash">cat README.md</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text"># Bandit Notes
+Some notes for bandit30 of bandit.
+## credentials
+username: bandit30
+password: &lt;no passwords in production!&gt;</code></pre>
+      <p>Password ki jagah message hai!</p>
+
+      <h2>Step 6: Branches List Karein</h2>
+      <pre><code class="language-bash">git branch -a</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">* master
+remotes/origin/HEAD -> origin/master
+remotes/origin/dev
+remotes/origin/master
+remotes/origin/sploits-dev</code></pre>
+
+      <h2>Step 7: Dev Branch Checkout Karein</h2>
+      <pre><code class="language-bash">git checkout remotes/origin/dev</code></pre>
+
+      <h2>Step 8: README.md File Dobara Read Karein</h2>
+      <pre><code class="language-bash">cat README.md</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text"># Bandit Notes
+Some notes for bandit30 of bandit.
+## credentials
+username: bandit30
+password: xbhV3HpNGLTIdnjUrdAlPzc2L6y9E0nS</code></pre>
+
+      <h2>Step 9: Password Copy Karein</h2>
+      <pre><code class="language-text">xbhV3HpNGLTIdnjUrdAlPzc2L6y9E0nS</code></pre>
+
+      <h2>Step 10: <code>bandit30</code> Par Login Karein</h2>
+      <pre><code class="language-bash">ssh bandit30@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password:</p>
+      <pre><code class="language-text">xbhV3HpNGLTIdnjUrdAlPzc2L6y9E0nS</code></pre>
+
+      <h1>Actual Terminal Workflow</h1>
+      <pre><code class="language-text">bandit29@bandit:~$ mkdir /tmp/git29
+bandit29@bandit:~$ cd /tmp/git29
+bandit29@bandit:/tmp/git29$ git clone ssh://bandit29-git@localhost:2220/home/bandit29-git/repo
+Cloning into 'repo'...
+...
+bandit29-git@localhost's password:
+remote: Enumerating objects: 16, done.
+...
+bandit29@bandit:/tmp/git29$ cd repo
+bandit29@bandit:/tmp/git29/repo$ cat README.md
+# Bandit Notes
+Some notes for bandit30 of bandit.
+## credentials
+username: bandit30
+password: &lt;no passwords in production!&gt;
+bandit29@bandit:/tmp/git29/repo$ git branch -a
+* master
+remotes/origin/HEAD -> origin/master
+remotes/origin/dev
+remotes/origin/master
+remotes/origin/sploits-dev
+bandit29@bandit:/tmp/git29/repo$ git checkout remotes/origin/dev
+Note: switching to 'remotes/origin/dev'.
+You are in 'detached HEAD' state...
+bandit29@bandit:/tmp/git29/repo$ cat README.md
+# Bandit Notes
+Some notes for bandit30 of bandit.
+## credentials
+username: bandit30
+password: xbhV3HpNGLTIdnjUrdAlPzc2L6y9E0nS</code></pre>
+
+      <h1>Alternative Methods</h1>
+
+      <h2>Sploits-dev Branch Check</h2>
+      <p>Agar <code>dev</code> branch mein password na milta, to <code>sploits-dev</code> branch bhi check kar sakte the:</p>
+      <pre><code class="language-bash">git checkout remotes/origin/sploits-dev
+cat README.md</code></pre>
+
+      <h2>Git Show</h2>
+      <p>Directly kisi branch se file read karne ke liye:</p>
+      <pre><code class="language-bash">git show remotes/origin/dev:README.md</code></pre>
+
+      <h2>Git Log with Branch</h2>
+      <p>Specific branch ki commit history dekhne ke liye:</p>
+      <pre><code class="language-bash">git log remotes/origin/dev</code></pre>
+
+      <h1>Common Errors</h1>
+
+      <h2>Wrong Port</h2>
+      <p>Port <code>2220</code> use karein, <code>2226</code> nahi (query mein typo hai).</p>
+      <pre><code class="language-bash">git clone ssh://bandit29-git@localhost:2220/home/bandit29-git/repo</code></pre>
+
+      <h2>Wrong Username</h2>
+      <p>Git username <code>bandit29-git</code> hai, <code>bandit29</code> nahi.</p>
+
+      <h2>Wrong Password</h2>
+      <p>Git password <code>bandit29</code> ka password hai (same as current user).</p>
+
+      <h2>Branch Name Typo</h2>
+      <p>Branch name exactly same honi chahiye:</p>
+      <pre><code class="language-bash">git checkout remotes/origin/dev</code></pre>
+      <p>Incorrect:</p>
+      <pre><code class="language-bash">git checkout dev  # Local branch nahi hai
+git checkout origin/dev  # Also works, but be consistent</code></pre>
+
+      <h2>Detached HEAD Confusion</h2>
+      <p>Remote branch checkout karne par detached HEAD state normal hai. Wapas master par jaane ke liye:</p>
+      <pre><code class="language-bash">git checkout master</code></pre>
+
+      <h2>Production Message Ignore</h2>
+      <p><code>&lt;no passwords in production!&gt;</code> message ko hint ki tarah lein. Password production branch mein nahi, development branches mein hoga.</p>
+
+      <h2>Password Copy Error</h2>
+      <p>Password:</p>
+      <pre><code class="language-text">xbhV3HpNGLTIdnjUrdAlPzc2L6y9E0nS</code></pre>
+      <p>Check karein:</p>
+      <ul>
+        <li>Uppercase aur lowercase characters same hain.</li>
+        <li><code>0</code> aur <code>O</code> ko carefully distinguish karein.</li>
+        <li>Password ke start ya end mein extra space nahi hai.</li>
+      </ul>
+
+      <h2>SSH Permission Denied</h2>
+      <p>Next level par login karte waqt check karein:</p>
+      <ul>
+        <li>Username <code>bandit30</code> hai.</li>
+        <li>Port <code>2220</code> use ho raha hai.</li>
+        <li><code>README.md</code> se exact password copy hua hai.</li>
+      </ul>
+      <pre><code class="language-bash">ssh bandit30@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Security Lessons</h1>
+      <p>Is level se humein ye important lessons milte hain:</p>
+      <ul>
+        <li>Development branches mein sensitive data accidentally commit ho sakta hai.</li>
+        <li>Production code sanitize hone ke baad bhi dev branches mein data leak ho sakta hai.</li>
+        <li>Git repositories mein secrets management critical hai.</li>
+        <li>Branch-based access control important hai.</li>
+        <li>Code review processes sensitive data leaks prevent kar sakte hain.</li>
+        <li>Pre-commit hooks secrets detection mein help kar sakte hain.</li>
+        <li>Environment-specific configuration files <code>.gitignore</code> mein hone chahiye.</li>
+        <li>Secrets management tools (Vault, AWS Secrets Manager) use karne chahiye.</li>
+      </ul>
+
+      <h1>Commands Summary</h1>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>ssh user@host -p 2220</code></td>
+              <td>Remote server par SSH login karta hai</td>
+            </tr>
+            <tr>
+              <td><code>mkdir /tmp/git29</code></td>
+              <td>Temporary directory create karta hai</td>
+            </tr>
+            <tr>
+              <td><code>git clone ssh://user@host:port/path</code></td>
+              <td>Git repository clone karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cd repo</code></td>
+              <td>Repository directory mein enter karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cat README.md</code></td>
+              <td>File content read karta hai</td>
+            </tr>
+            <tr>
+              <td><code>git branch -a</code></td>
+              <td>Saare branches list karta hai</td>
+            </tr>
+            <tr>
+              <td><code>git checkout remotes/origin/dev</code></td>
+              <td>Remote branch checkout karta hai</td>
+            </tr>
+            <tr>
+              <td><code>git show &lt;branch&gt;:&lt;file&gt;</code></td>
+              <td>Specific branch se file read karta hai</td>
+            </tr>
+            <tr>
+              <td><code>exit</code></td>
+              <td>SSH session close karta hai</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h1>Final Solution</h1>
+      <p><code>bandit29</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit29@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Temporary directory create karein:</p>
+      <pre><code class="language-bash">mkdir /tmp/git29
+cd /tmp/git29</code></pre>
+      <p>Git repository clone karein:</p>
+      <pre><code class="language-bash">git clone ssh://bandit29-git@localhost:2220/home/bandit29-git/repo</code></pre>
+      <p>Repository directory mein enter karein:</p>
+      <pre><code class="language-bash">cd repo</code></pre>
+      <p><code>README.md</code> file read karein:</p>
+      <pre><code class="language-bash">cat README.md</code></pre>
+      <p>Branches list karein:</p>
+      <pre><code class="language-bash">git branch -a</code></pre>
+      <p>Dev branch checkout karein:</p>
+      <pre><code class="language-bash">git checkout remotes/origin/dev</code></pre>
+      <p>Password read karein:</p>
+      <pre><code class="language-bash">cat README.md</code></pre>
+      <p>Password:</p>
+      <pre><code class="language-text">xbhV3HpNGLTIdnjUrdAlPzc2L6y9E0nS</code></pre>
+      <p>Ab <code>bandit30</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit30@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Conclusion</h1>
+      <p>Bandit Level 29 → Level 30 mein humne Git branches inspect karke development branch mein accidentally committed password find kiya.</p>
+      <p>Complete workflow:</p>
+      <pre><code class="language-text">SSH Login as bandit29
+        ↓
+mkdir /tmp/git29
+        ↓
+git clone (port 2220)
+        ↓
+cd repo
+        ↓
+cat README.md (password: &lt;no passwords in production!&gt;)
+        ↓
+git branch -a (branches list)
+        ↓
+git checkout remotes/origin/dev
+        ↓
+cat README.md (password visible)
+        ↓
+Password: xbhV3HpNGLTIdnjUrdAlPzc2L6y9E0nS
+        ↓
+SSH Login as bandit30</code></pre>
+      <p>Is level ke most important commands hain:</p>
+      <pre><code class="language-bash">git branch -a</code></pre>
+      <pre><code class="language-bash">git checkout remotes/origin/dev</code></pre>
+      <blockquote>
+        <p><strong>Security Note:</strong> Git repositories mein sensitive information (passwords, API keys, credentials) kabhi bhi commit na karein, chahe wo kisi bhi branch mein ho. Development branches bhi accidentally public ho sakte hain. Production environments mein secrets management tools (HashiCorp Vault, AWS Secrets Manager, Azure Key Vault) use karein aur environment variables se secrets inject karein. OverTheWire Bandit ek authorized cybersecurity learning environment hai.</p>
+      </blockquote>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <span> © 2026 SSSWriteups </span>
+      
+    </div>
+  </footer>
+</body>
+</html>
