@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OverTheWire Bandit - Level 26 to Level 27 | SSSWriteups</title>
+  <link rel="stylesheet" href="../../../style.css">
+</head>
+<body>
+  <header class="hero page-header">
+    <nav class="nav container">
+      <a class="logo" href="../../../../index.html">
+        SSS<span>Writeups</span>
+      </a>
+      <div class="nav-links">
+    <a href="../../../index.html">Home</a>
+    <a href="../../../categories/overthewire.html">OverTheWire</a>
+</div>
+    </nav>
+  </header>
+
+  <main class="writeup-page section container">
+    <article class="writeup-content">
+      <h1>OverTheWire Bandit — Level 26 to Level 27</h1>
+
+      <h2>Introduction</h2>
+      <p>Is writeup ka heading <strong>Level 26 → Level 27</strong> hai.</p>
+      <p>Previous level (25 → 26) mein humne <code>more</code> command ke interactive mode se escape karke shell access obtain kiya tha. Is level mein humein usi shell session ka use karke <code>bandit27</code> ka password find karna hai.</p>
+      <p>Home directory mein ek binary file <code>bandit27-do</code> present hai jo <code>setuid</code> bit ke saath configured hai. Ye binary humein <code>bandit27</code> user ke privileges mein commands execute karne ki permission deti hai.</p>
+      <p>Humein:</p>
+      <ul>
+        <li><code>bandit27-do</code> binary ko identify karna hai.</li>
+        <li>Binary ka usage samajhna hai.</li>
+        <li>Binary ka use karke <code>/etc/bandit_pass/bandit27</code> read karna hai.</li>
+        <li>Password extract karna hai.</li>
+      </ul>
+
+      <h2>Objective</h2>
+      <p>Is level mein humein:</p>
+      <ul>
+        <li><code>bandit26</code> user ke shell session mein rehna hai (previous level se continue).</li>
+        <li>Home directory mein files inspect karni hain.</li>
+        <li><code>bandit27-do</code> binary ko identify karna hai.</li>
+        <li>Binary ka use karke password file read karni hai.</li>
+        <li><code>bandit27</code> ka password obtain karna hai.</li>
+        <li><code>bandit27</code> user se next SSH login karna hai.</li>
+      </ul>
+
+      <h2>Given Information</h2>
+      <p>Current level:</p>
+      <pre><code class="language-text">Username: bandit26
+Password: Previous level se mila password</code></pre>
+      <p>Available files:</p>
+      <pre><code class="language-text">bandit27-do (binary)
+text.txt</code></pre>
+      <p>Next username:</p>
+      <pre><code class="language-text">bandit27</code></pre>
+      <p>Found password:</p>
+      <pre><code class="language-text">YnQpBuifNMas1hcUFk70ZmqkhUU2EuaS</code></pre>
+
+      <h1>Setuid Binary Concept</h1>
+
+      <h2>Setuid Kya Hota Hai?</h2>
+      <p>Setuid (Set User ID) ek permission bit hai jo executable files par set kiya jata hai.</p>
+      <p>Jab koi binary setuid bit ke saath execute hoti hai, to wo file owner ke privileges mein run hoti hai, chahe user ka permissions kuch bhi ho.</p>
+      <p>Example:</p>
+      <ul>
+        <li>Binary owner: <code>bandit27</code></li>
+        <li>Setuid bit: Set hai</li>
+        <li>Execute karne wala: <code>bandit26</code></li>
+        <li>Result: Binary <code>bandit27</code> ke privileges mein run hogi</li>
+      </ul>
+
+      <h2>Setuid Permission Check</h2>
+      <p>Binary ki permissions check karein:</p>
+      <pre><code class="language-bash">ls -l bandit27-do</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">-rwsr-xr-x 1 bandit27 bandit27 ... bandit27-do</code></pre>
+      <p><code>s</code> character setuid bit indicate karta hai.</p>
+
+      <h1>Binary Usage</h1>
+
+      <h2>Binary Execution</h2>
+      <p><code>bandit27-do</code> binary commands accept karti hai aur unhe <code>bandit27</code> user ke privileges mein execute karti hai.</p>
+      <p>Basic syntax:</p>
+      <pre><code class="language-bash">./bandit27-do &lt;command&gt;</code></pre>
+
+      <h2>Password File Read</h2>
+      <p>Password file read karne ke liye:</p>
+      <pre><code class="language-bash">./bandit27-do cat /etc/bandit_pass/bandit27</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">YnQpBuifNMas1hcUFk70ZmqkhUU2EuaS</code></pre>
+
+      <h1>Complete Walkthrough</h1>
+
+      <h2>Step 1: Previous Level Se Continue</h2>
+      <p>Level 25 → 26 se shell session abhi bhi active hai.</p>
+
+      <h2>Step 2: Home Directory Mein Files List Karein</h2>
+      <pre><code class="language-bash">ls</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">bandit27-do
+text.txt</code></pre>
+
+      <h2>Step 3: Binary Permissions Check Karein</h2>
+      <pre><code class="language-bash">ls -l bandit27-do</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">-rwsr-xr-x 1 bandit27 bandit27 ... bandit27-do</code></pre>
+
+      <h2>Step 4: Password File Read Karein</h2>
+      <pre><code class="language-bash">./bandit27-do cat /etc/bandit_pass/bandit27</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">YnQpBuifNMas1hcUFk70ZmqkhUU2EuaS</code></pre>
+
+      <h2>Step 5: Password Copy Karein</h2>
+      <pre><code class="language-text">YnQpBuifNMas1hcUFk70ZmqkhUU2EuaS</code></pre>
+
+      <h2>Step 6: <code>bandit27</code> Par Login Karein</h2>
+      <pre><code class="language-bash">ssh bandit27@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password:</p>
+      <pre><code class="language-text">YnQpBuifNMas1hcUFk70ZmqkhUU2EuaS</code></pre>
+
+      <h1>Actual Terminal Workflow</h1>
+      <pre><code class="language-text">bandit26@bandit:~$ ls
+bandit27-do
+text.txt
+bandit26@bandit:~$ ls -l bandit27-do
+-rwsr-xr-x 1 bandit27 bandit27 ... bandit27-do
+bandit26@bandit:~$ ./bandit27-do cat /etc/bandit_pass/bandit27
+YnQpBuifNMas1hcUFk70ZmqkhUU2EuaS</code></pre>
+
+      <h1>Common Errors</h1>
+
+      <h2>Wrong Binary Name</h2>
+      <p>Binary ka exact naam use karein:</p>
+      <pre><code class="language-bash">./bandit27-do</code></pre>
+      <p>Incorrect:</p>
+      <pre><code class="language-bash">./bandit27  # Wrong name</code></pre>
+
+      <h2>Missing Execute Permission</h2>
+      <p>Agar binary execute nahi ho rahi, to check karein:</p>
+      <pre><code class="language-bash">ls -l bandit27-do</code></pre>
+      <p><code>x</code> (execute) permission honi chahiye.</p>
+
+      <h2>Wrong Path</h2>
+      <p>Password file ka correct path hai:</p>
+      <pre><code class="language-bash">/etc/bandit_pass/bandit27</code></pre>
+      <p>Incorrect paths:</p>
+      <pre><code class="language-bash">/etc/bandit_pass/bandit26  # Wrong level
+/etc/passwd/bandit27       # Wrong directory</code></pre>
+
+      <h2>Command Syntax Error</h2>
+      <p>Binary ke baad command directly specify karein:</p>
+      <pre><code class="language-bash">./bandit27-do cat /etc/bandit_pass/bandit27</code></pre>
+      <p>Incorrect:</p>
+      <pre><code class="language-bash">./bandit27-do "cat /etc/bandit_pass/bandit27"  # Quotes unnecessary</code></pre>
+
+      <h2>Shell Session Closed</h2>
+      <p>Agar previous level ka shell session close ho gaya hai, to Level 25 → 26 ka process repeat karein:</p>
+      <ul>
+        <li><code>ssh -i bandit26.sshkey bandit26@localhost -p 2220</code></li>
+        <li>Terminal size chhota karein.</li>
+        <li><code>more</code> interactive mode mein <code>v</code> press karein.</li>
+        <li><code>:shell</code> command enter karein.</li>
+      </ul>
+
+      <h2>Password Copy Error</h2>
+      <p>Password:</p>
+      <pre><code class="language-text">YnQpBuifNMas1hcUFk70ZmqkhUU2EuaS</code></pre>
+      <p>Check karein:</p>
+      <ul>
+        <li>Uppercase aur lowercase characters same hain.</li>
+        <li><code>0</code> aur <code>O</code> ko carefully distinguish karein.</li>
+        <li>Password ke start ya end mein extra space nahi hai.</li>
+      </ul>
+
+      <h2>SSH Permission Denied</h2>
+      <p>Next level par login karte waqt check karein:</p>
+      <ul>
+        <li>Username <code>bandit27</code> hai.</li>
+        <li>Port <code>2220</code> use ho raha hai.</li>
+        <li>Binary se mila exact password copy hua hai.</li>
+      </ul>
+      <pre><code class="language-bash">ssh bandit27@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Security Lessons</h1>
+      <p>Is level se humein ye important lessons milte hain:</p>
+      <ul>
+        <li>Setuid binaries privilege escalation enable kar sakti hain.</li>
+        <li>Setuid binaries carefully audit karni chahiye.</li>
+        <li>Binary jo commands accept karti hai, wo arbitrary command execution allow kar sakti hai.</li>
+        <li>Password files (<code>/etc/bandit_pass/</code>) readable hone se sensitive data expose hota hai.</li>
+        <li>Shell escape techniques (vim <code>:shell</code>) restricted environments se bahar nikalne mein help karti hain.</li>
+        <li>Setuid permission <code>ls -l</code> se identify hoti hai (<code>s</code> character).</li>
+        <li>Binary execution se pehle permissions verify karna important hai.</li>
+      </ul>
+
+      <h1>Commands Summary</h1>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>ssh user@host -p 2220</code></td>
+              <td>Remote server par SSH login karta hai</td>
+            </tr>
+            <tr>
+              <td><code>ls</code></td>
+              <td>Directory contents list karta hai</td>
+            </tr>
+            <tr>
+              <td><code>ls -l file</code></td>
+              <td>File permissions check karta hai</td>
+            </tr>
+            <tr>
+              <td><code>./bandit27-do command</code></td>
+              <td>Setuid binary ke through command execute karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cat /etc/bandit_pass/bandit27</code></td>
+              <td>Password file read karta hai</td>
+            </tr>
+            <tr>
+              <td><code>exit</code></td>
+              <td>SSH session close karta hai</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h1>Final Solution</h1>
+      <p>Previous level se shell session continue karein:</p>
+      <pre><code class="language-bash"># bandit26@bandit:~$ prompt par</code></pre>
+      <p>Files list karein:</p>
+      <pre><code class="language-bash">ls</code></pre>
+      <p>Binary permissions check karein:</p>
+      <pre><code class="language-bash">ls -l bandit27-do</code></pre>
+      <p>Password file read karein:</p>
+      <pre><code class="language-bash">./bandit27-do cat /etc/bandit_pass/bandit27</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">YnQpBuifNMas1hcUFk70ZmqkhUU2EuaS</code></pre>
+      <p>Ab <code>bandit27</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit27@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Conclusion</h1>
+      <p>Bandit Level 26 → Level 27 mein humne setuid binary <code>bandit27-do</code> ka use karke <code>bandit27</code> ka password obtain kiya.</p>
+      <p>Complete workflow:</p>
+      <pre><code class="language-text">Shell Session (from Level 25→26)
+        ↓
+ls (files inspect)
+        ↓
+bandit27-do identified
+        ↓
+./bandit27-do cat /etc/bandit_pass/bandit27
+        ↓
+Password: YnQpBuifNMas1hcUFk70ZmqkhUU2EuaS
+        ↓
+SSH Login as bandit27</code></pre>
+      <p>Is level ke most important commands hain:</p>
+      <pre><code class="language-bash">./bandit27-do cat /etc/bandit_pass/bandit27</code></pre>
+      <blockquote>
+        <p><strong>Security Note:</strong> Setuid binaries powerful privilege escalation vectors hain. Production environments mein setuid binaries ko carefully audit karein aur minimal set maintain karein. OverTheWire Bandit ek authorized cybersecurity learning environment hai.</p>
+      </blockquote>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <span> © 2026 SSSWriteups </span>
+      
+    </div>
+  </footer>
+</body>
+</html>
+```
