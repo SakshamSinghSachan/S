@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OverTheWire Bandit - Level 30 to Level 31 | SSSWriteups</title>
+  <link rel="stylesheet" href="../../../style.css">
+</head>
+<body>
+  <header class="hero page-header">
+    <nav class="nav container">
+      <a class="logo" href="../../../../index.html">
+        SSS<span>Writeups</span>
+      </a>
+      <div class="nav-links">
+    <a href="../../../index.html">Home</a>
+    <a href="../../../categories/overthewire.html">OverTheWire</a>
+</div>
+    </nav>
+  </header>
+
+  <main class="writeup-page section container">
+    <article class="writeup-content">
+      <h1>OverTheWire Bandit — Level 30 to Level 31</h1>
+
+      <h2>Introduction</h2>
+      <p>Is writeup ka heading <strong>Level 30 → Level 31</strong> hai.</p>
+      <p>Is level mein bhi humein ek Git repository clone karni hai, lekin is baar <code>README.md</code> file mein sirf message hai: <code>just an epmty file... muahaha</code></p>
+      <p>Previous levels mein humne commit history aur branches check kiye, lekin yahan password kahin visible nahi hai.</p>
+      <p>Is level mein humein Git <strong>tags</strong> feature ka use karke password find karna hai. Tags special commits ko mark karne ke liye use hote hain (jaise releases, versions, ya important milestones).</p>
+      <p>Humein:</p>
+      <ul>
+        <li>Git repository clone karni hai.</li>
+        <li><code>README.md</code> file inspect karni hai (jo empty hai).</li>
+        <li>Git tags list karne hain.</li>
+        <li>Tag content inspect karna hai.</li>
+        <li>Password extract karna hai.</li>
+      </ul>
+
+      <h2>Objective</h2>
+      <p>Is level mein humein:</p>
+      <ul>
+        <li><code>bandit30</code> user se SSH login karna hai.</li>
+        <li>Git repository ka URL note karna hai.</li>
+        <li>Correct port (<code>2220</code>) specify karna hai.</li>
+        <li><code>git clone</code> command use karna hai.</li>
+        <li>Repository directory mein enter karna hai.</li>
+        <li><code>README.md</code> file read karni hai.</li>
+        <li>Git tags list karne hain.</li>
+        <li>Tag content inspect karna hai.</li>
+        <li>Password extract karna hai.</li>
+        <li><code>bandit31</code> user se next SSH login karna hai.</li>
+      </ul>
+
+      <h2>Given Information</h2>
+      <p>Current level:</p>
+      <pre><code class="language-text">Username: bandit30
+Password: Previous level se mila password</code></pre>
+      <p>Git repository:</p>
+      <pre><code class="language-text">URL: ssh://bandit30-git@localhost/home/bandit30-git/repo
+Port: 2220</code></pre>
+      <p>Git user:</p>
+      <pre><code class="language-text">Username: bandit30-git
+Password: Same as bandit30</code></pre>
+      <p>Next username:</p>
+      <pre><code class="language-text">bandit31</code></pre>
+      <p>Found password:</p>
+      <pre><code class="language-text">OoffzGDlzhAlerFJ2cAiz1D41JW1Mhmt</code></pre>
+
+      <h1>Git Tags</h1>
+
+      <h2>Tags Kya Hote Hain?</h2>
+      <p>Git tags specific commits ko mark karne ke liye use hote hain. Ye mostly releases, versions, ya important milestones ko label karne ke liye use kiye jate hain.</p>
+      <p>Example:</p>
+      <ul>
+        <li><code>v1.0.0</code> → First release</li>
+        <li><code>v2.1.3</code> → Bug fix release</li>
+        <li><code>secret</code> → Hidden information (is level mein)</li>
+      </ul>
+
+      <h2>Tags List Karna</h2>
+      <p>Saare tags list karne ke liye:</p>
+      <pre><code class="language-bash">git tag</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">secret</code></pre>
+
+      <h2>Tag Content Show Karna</h2>
+      <p>Tag ka content dekhne ke liye:</p>
+      <pre><code class="language-bash">git show &lt;tag-name&gt;</code></pre>
+      <p>Example:</p>
+      <pre><code class="language-bash">git show secret</code></pre>
+
+      <h1>Complete Walkthrough</h1>
+
+      <h2>Step 1: <code>bandit30</code> Par Login Karein</h2>
+      <pre><code class="language-bash">ssh bandit30@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h2>Step 2: Temporary Directory Create Karein</h2>
+      <pre><code class="language-bash">mkdir /tmp/git30
+cd /tmp/git30</code></pre>
+
+      <h2>Step 3: Git Repository Clone Karein</h2>
+      <pre><code class="language-bash">git clone ssh://bandit30-git@localhost:2220/home/bandit30-git/repo</code></pre>
+      <p>Password prompt par <code>bandit30</code> ka password enter karein.</p>
+
+      <h2>Step 4: Repository Directory Mein Enter Karein</h2>
+      <pre><code class="language-bash">cd repo</code></pre>
+
+      <h2>Step 5: README.md File Read Karein</h2>
+      <pre><code class="language-bash">cat README.md</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">just an epmty file... muahaha</code></pre>
+      <p>File mein koi useful information nahi hai!</p>
+
+      <h2>Step 6: Git Tags List Karein</h2>
+      <pre><code class="language-bash">git tag</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">secret</code></pre>
+
+      <h2>Step 7: Tag Content Show Karein</h2>
+      <pre><code class="language-bash">git show secret</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">OoffzGDlzhAlerFJ2cAiz1D41JW1Mhmt</code></pre>
+
+      <h2>Step 8: Password Copy Karein</h2>
+      <pre><code class="language-text">OoffzGDlzhAlerFJ2cAiz1D41JW1Mhmt</code></pre>
+
+      <h2>Step 9: <code>bandit31</code> Par Login Karein</h2>
+      <pre><code class="language-bash">ssh bandit31@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password:</p>
+      <pre><code class="language-text">OoffzGDlzhAlerFJ2cAiz1D41JW1Mhmt</code></pre>
+
+      <h1>Actual Terminal Workflow</h1>
+      <pre><code class="language-text">bandit30@bandit:~$ mkdir /tmp/git30
+bandit30@bandit:~$ cd /tmp/git30
+bandit30@bandit:/tmp/git30$ git clone ssh://bandit30-git@localhost:2220/home/bandit30-git/repo
+Cloning into 'repo'...
+...
+bandit30-git@localhost's password:
+remote: Enumerating objects: ..., done.
+...
+bandit30@bandit:/tmp/git30$ cd repo
+bandit30@bandit:/tmp/git30/repo$ cat README.md
+just an epmty file... muahaha
+bandit30@bandit:/tmp/git30/repo$ git tag
+secret
+bandit30@bandit:/tmp/git30/repo$ git show secret
+OoffzGDlzhAlerFJ2cAiz1D41JW1Mhmt</code></pre>
+
+      <h1>Alternative Methods</h1>
+
+      <h2>Git Log with Tags</h2>
+      <p>Tags ke saath commit history dekhne ke liye:</p>
+      <pre><code class="language-bash">git log --decorate --oneline</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">abc1234 (HEAD -> master, tag: secret, origin/master, origin/HEAD) initial commit</code></pre>
+
+      <h2>Git Tag with Verbose</h2>
+      <p>Tag details dekhne ke liye:</p>
+      <pre><code class="language-bash">git tag -n</code></pre>
+
+      <h1>Common Errors</h1>
+
+      <h2>Wrong Port</h2>
+      <p>Port <code>2220</code> use karein, <code>22</code> nahi.</p>
+      <pre><code class="language-bash">git clone ssh://bandit30-git@localhost:2220/home/bandit30-git/repo</code></pre>
+
+      <h2>Wrong Username</h2>
+      <p>Git username <code>bandit30-git</code> hai, <code>bandit30</code> nahi.</p>
+
+      <h2>Wrong Password</h2>
+      <p>Git password <code>bandit30</code> ka password hai (same as current user).</p>
+
+      <h2>Tags Feature Unknown</h2>
+      <p>Agar aapko Git tags ke baare mein pata nahi hai, to ye level difficult lag sakta hai. Git documentation ya tutorials se tags feature seekh lein.</p>
+
+      <h2>Tag Name Typo</h2>
+      <p>Tag name exactly same hona chahiye:</p>
+      <pre><code class="language-bash">git show secret</code></pre>
+      <p>Incorrect:</p>
+      <pre><code class="language-bash">git show Secret  # Case-sensitive
+git show secrets  # Extra 's'</code></pre>
+
+      <h2>README.md Par Depend</h2>
+      <p><code>README.md</code> mein koi useful information nahi hai. Tags check karna zaroori hai.</p>
+
+      <h2>Password Copy Error</h2>
+      <p>Password:</p>
+      <pre><code class="language-text">OoffzGDlzhAlerFJ2cAiz1D41JW1Mhmt</code></pre>
+      <p>Check karein:</p>
+      <ul>
+        <li>Uppercase aur lowercase characters same hain.</li>
+        <li><code>0</code> aur <code>O</code> ko carefully distinguish karein.</li>
+        <li>Password ke start ya end mein extra space nahi hai.</li>
+      </ul>
+
+      <h2>SSH Permission Denied</h2>
+      <p>Next level par login karte waqt check karein:</p>
+      <ul>
+        <li>Username <code>bandit31</code> hai.</li>
+        <li>Port <code>2220</code> use ho raha hai.</li>
+        <li><code>git show secret</code> se exact password copy hua hai.</li>
+      </ul>
+      <pre><code class="language-bash">ssh bandit31@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Security Lessons</h1>
+      <p>Is level se humein ye important lessons milte hain:</p>
+      <ul>
+        <li>Git tags mein bhi sensitive information store ho sakta hai.</li>
+        <li>Tags ko lightly ignore nahi karna chahiye.</li>
+        <li>Git repositories ke saare features (commits, branches, tags) audit karne chahiye.</li>
+        <li>Release tags mein version information ke saath changelogs bhi hote hain jo sensitive data contain kar sakte hain.</li>
+        <li>Tags delete karne se bhi purane tags remote repositories mein exist kar sakte hain.</li>
+        <li>Git repositories comprehensively inspect karna important hai.</li>
+      </ul>
+
+      <h1>Commands Summary</h1>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>ssh user@host -p 2220</code></td>
+              <td>Remote server par SSH login karta hai</td>
+            </tr>
+            <tr>
+              <td><code>mkdir /tmp/git30</code></td>
+              <td>Temporary directory create karta hai</td>
+            </tr>
+            <tr>
+              <td><code>git clone ssh://user@host:port/path</code></td>
+              <td>Git repository clone karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cd repo</code></td>
+              <td>Repository directory mein enter karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cat README.md</code></td>
+              <td>File content read karta hai</td>
+            </tr>
+            <tr>
+              <td><code>git tag</code></td>
+              <td>Saare tags list karta hai</td>
+            </tr>
+            <tr>
+              <td><code>git show &lt;tag-name&gt;</code></td>
+              <td>Tag content display karta hai</td>
+            </tr>
+            <tr>
+              <td><code>git log --decorate --oneline</code></td>
+              <td>Tags ke saath commit history display karta hai</td>
+            </tr>
+            <tr>
+              <td><code>exit</code></td>
+              <td>SSH session close karta hai</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h1>Final Solution</h1>
+      <p><code>bandit30</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit30@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Temporary directory create karein:</p>
+      <pre><code class="language-bash">mkdir /tmp/git30
+cd /tmp/git30</code></pre>
+      <p>Git repository clone karein:</p>
+      <pre><code class="language-bash">git clone ssh://bandit30-git@localhost:2220/home/bandit30-git/repo</code></pre>
+      <p>Repository directory mein enter karein:</p>
+      <pre><code class="language-bash">cd repo</code></pre>
+      <p><code>README.md</code> file read karein:</p>
+      <pre><code class="language-bash">cat README.md</code></pre>
+      <p>Tags list karein:</p>
+      <pre><code class="language-bash">git tag</code></pre>
+      <p>Tag content show karein:</p>
+      <pre><code class="language-bash">git show secret</code></pre>
+      <p>Password:</p>
+      <pre><code class="language-text">OoffzGDlzhAlerFJ2cAiz1D41JW1Mhmt</code></pre>
+      <p>Ab <code>bandit31</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit31@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Conclusion</h1>
+      <p>Bandit Level 30 → Level 31 mein humne Git tags feature ka use karke password find kiya jo <code>secret</code> tag mein store tha.</p>
+      <p>Complete workflow:</p>
+      <pre><code class="language-text">SSH Login as bandit30
+        ↓
+mkdir /tmp/git30
+        ↓
+git clone (port 2220)
+        ↓
+cd repo
+        ↓
+cat README.md (just an epmty file... muahaha)
+        ↓
+git tag (secret)
+        ↓
+git show secret
+        ↓
+Password: OoffzGDlzhAlerFJ2cAiz1D41JW1Mhmt
+        ↓
+SSH Login as bandit31</code></pre>
+      <p>Is level ke most important commands hain:</p>
+      <pre><code class="language-bash">git tag</code></pre>
+      <pre><code class="language-bash">git show secret</code></pre>
+      <blockquote>
+        <p><strong>Security Note:</strong> Git tags mein bhi sensitive information accidentally commit ho sakti hai. Release tags, version tags, aur special milestone tags ko bhi audit karna zaroori hai. Production environments mein tags ko carefully manage karein aur sensitive data kabhi bhi tags mein store na karein. OverTheWire Bandit ek authorized cybersecurity learning environment hai.</p>
+      </blockquote>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <span> © 2026 SSSWriteups </span>
+      
+    </div>
+  </footer>
+</body>
+</html>
+```
