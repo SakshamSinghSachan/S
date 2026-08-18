@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OverTheWire Bandit - Level 23 to Level 24 | SSSWriteups</title>
+  <link rel="stylesheet" href="../../../style.css">
+</head>
+<body>
+  <header class="hero page-header">
+    <nav class="nav container">
+      <a class="logo" href="../../../../index.html">
+        SSS<span>Writeups</span>
+      </a>
+      <div class="nav-links">
+    <a href="../../../index.html">Home</a>
+    <a href="../../../categories/overthewire.html">OverTheWire</a>
+</div>
+    </nav>
+  </header>
+
+  <main class="writeup-page section container">
+    <article class="writeup-content">
+      <h1>OverTheWire Bandit — Level 23 to Level 24</h1>
+
+      <h2>Introduction</h2>
+      <p>Is writeup ka heading <strong>Level 23 → Level 24</strong> hai.</p>
+      <p>Is level mein bhi ek program cron ke through automatically run ho raha hai, lekin previous levels se difference ye hai ki humein apna pehla shell script create karna hai.</p>
+      <p>Cron job ek aisi script execute karti hai jo <code>/var/spool/bandit24/foo/</code> directory mein present saare scripts ko run karti hai aur phir delete kar deti hai.</p>
+      <p>Humein:</p>
+      <ol>
+        <li><code>/etc/cron.d/</code> directory inspect karni hai.</li>
+        <li><code>cronjob_bandit24</code> file read karni hai.</li>
+        <li><code>/usr/bin/cronjob_bandit24.sh</code> script ko understand karna hai.</li>
+        <li>Ek payload script create karna hai jo <code>bandit24</code> ka password copy kare.</li>
+        <li>Script ko <code>/var/spool/bandit24/foo/</code> mein place karna hai.</li>
+        <li>Cron job ke execute hone ka wait karna hai.</li>
+        <li>Output file se password read karna hai.</li>
+      </ol>
+
+      <h2>Objective</h2>
+      <p>Is level mein humein:</p>
+      <ul>
+        <li><code>bandit23</code> user se SSH login karna hai.</li>
+        <li>Cron configuration files inspect karni hain.</li>
+        <li>Script ka behavior samajhna hai.</li>
+        <li>Apna pehla shell script create karna hai.</li>
+        <li>Script ko executable permissions deni hain.</li>
+        <li>Script ko correct directory mein place karna hai.</li>
+        <li>Cron execution ke baad password file read karni hai.</li>
+        <li><code>bandit24</code> user se next SSH login karna hai.</li>
+      </ul>
+
+      <h2>Given Information</h2>
+      <p>Current level:</p>
+      <pre><code class="language-text">Username: bandit23
+Password: Previous level se mila password</code></pre>
+      <p>Cron file:</p>
+      <pre><code class="language-text">/etc/cron.d/cronjob_bandit24</code></pre>
+      <p>Script:</p>
+      <pre><code class="language-text">/usr/bin/cronjob_bandit24.sh</code></pre>
+      <p>Target directory:</p>
+      <pre><code class="language-text">/var/spool/bandit24/foo/</code></pre>
+      <p>Next username:</p>
+      <pre><code class="language-text">bandit24</code></pre>
+      <p>Found password:</p>
+      <pre><code class="language-text">VAFGXJ1PBSsPSnvsjI8p759leLZ9GGar</code></pre>
+
+      <h1>Cron Job Configuration</h1>
+
+      <h2>Directory Inspect Karna</h2>
+      <p>Pehle cron directory mein jaayein:</p>
+      <pre><code class="language-bash">cd /etc/cron.d</code></pre>
+      <p>Files list karein:</p>
+      <pre><code class="language-bash">ls</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">cronjob_bandit15_root
+cronjob_bandit17_root
+cronjob_bandit22
+cronjob_bandit23
+cronjob_bandit24
+cronjob_bandit25_root
+e2scrub_all
+sysstat
+ots-tmp-dir</code></pre>
+      <p>Humein <code>bandit24</code> ka password chahiye, isliye relevant file hai:</p>
+      <pre><code class="language-text">cronjob_bandit24</code></pre>
+
+      <h2>Cron File Read Karna</h2>
+      <pre><code class="language-bash">cat cronjob_bandit24</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">@reboot bandit24 /usr/bin/cronjob_bandit24.sh &>/dev/null
+* * * * * bandit24 /usr/bin/cronjob_bandit24.sh &>/dev/null</code></pre>
+      <p>Iska meaning:</p>
+      <ul>
+        <li><code>@reboot</code> → System reboot hone par script run hogi.</li>
+        <li><code>* * * * *</code> → Har minute script run hogi.</li>
+        <li><code>bandit24</code> → Script <code>bandit24</code> user ke privileges mein execute hogi.</li>
+        <li><code>/usr/bin/cronjob_bandit24.sh</code> → Execute hone wali script ka path.</li>
+        <li><code>&>/dev/null</code> → Output aur errors discard ho jayenge.</li>
+      </ul>
+
+      <h1>Script Explanation</h1>
+
+      <h2>Script Read Karna</h2>
+      <pre><code class="language-bash">cat /usr/bin/cronjob_bandit24.sh</code></pre>
+      <p>Script content:</p>
+      <pre><code class="language-bash">#!/bin/bash
+myname=$(whoami)
+cd /var/spool/$myname/foo
+echo "Executing and deleting all scripts in /var/spool/$myname/foo:"
+for i in * ; do
+if [ "$i" != "." -a "$i" != ".." ];
+then
+echo "Handling $i"
+owner="$(stat --format "%U" ./$i)"
+if [ "${owner}" = "bandit23" ]; then
+timeout -s 9 60 ./$i
+fi
+rm -f ./$i
+done
+fi</code></pre>
+
+      <h2>Script Logic Breakdown</h2>
+      <ol>
+        <li><strong>Shebang:</strong> <code>#!/bin/bash</code> → Bash interpreter use hoga.</li>
+        <li><strong>Variable:</strong> <code>myname=$(whoami)</code> → Current user ka naam store karega.</li>
+        <li><strong>Directory Change:</strong> <code>cd /var/spool/$myname/foo</code> → Target directory mein jaayega.</li>
+        <li><strong>Loop:</strong> <code>for i in *</code> → Directory ke saare files iterate karega.</li>
+        <li><strong>Condition:</strong> <code>if [ "$i" != "." -a "$i" != ".." ]</code> → Current aur parent directory ko skip karega.</li>
+        <li><strong>Owner Check:</strong> <code>if [ "${owner}" = "bandit23" ]</code> → Sirf <code>bandit23</code> ke owned scripts execute karega.</li>
+        <li><strong>Execute:</strong> <code>timeout -s 9 60 ./$i</code> → Script ko 60 seconds timeout ke saath run karega.</li>
+        <li><strong>Delete:</strong> <code>rm -f ./$i</code> → Execute hone ke baad script delete kar dega.</li>
+      </ol>
+
+      <h2>Key Observations</h2>
+      <ul>
+        <li>Script <code>bandit24</code> user ke roop mein run hoti hai.</li>
+        <li>Directory hai: <code>/var/spool/bandit24/foo/</code></li>
+        <li>Sirf <code>bandit23</code> ke owned scripts execute honge.</li>
+        <li>Execute hone ke baad scripts delete ho jayengi.</li>
+        <li>Isliye humein apna script <code>bandit23</code> ke ownership mein create karna hoga.</li>
+      </ul>
+
+      <h1>Payload Script Create Karna</h1>
+
+      <h2>Script Ka Purpose</h2>
+      <p>Humein ek aisa script create karna hai jo:</p>
+      <ul>
+        <li><code>bandit24</code> ka password read kare.</li>
+        <li>Password ko ek accessible location mein copy kare.</li>
+        <li>Hum baad mein us location se password read kar sakein.</li>
+      </ul>
+
+      <h2>Script Content</h2>
+      <p>Simple script jo password copy kare:</p>
+      <pre><code class="language-bash">#!/bin/bash
+cat /etc/bandit_pass/bandit24 > /tmp/dollarboysushil</code></pre>
+      <p>Is script ka meaning:</p>
+      <ul>
+        <li><code>/etc/bandit_pass/bandit24</code> se password read karo.</li>
+        <li><code>/tmp/dollarboysushil</code> file mein write karo.</li>
+        <li><code>/tmp</code> directory sabke liye accessible hai.</li>
+      </ul>
+
+      <h2>Script Create Karna</h2>
+      <p>Target directory mein script create karein:</p>
+      <pre><code class="language-bash">vim /var/spool/bandit24/foo/payload.sh</code></pre>
+      <p>Ya <code>nano</code> use karein:</p>
+      <pre><code class="language-bash">nano /var/spool/bandit24/foo/payload.sh</code></pre>
+      <p>Script content paste karein aur save karein.</p>
+
+      <h2>Executable Permissions Dena</h2>
+      <p>Script ko executable banayein:</p>
+      <pre><code class="language-bash">chmod +x /var/spool/bandit24/foo/payload.sh</code></pre>
+      <p>Permissions verify karein:</p>
+      <pre><code class="language-bash">ls -l /var/spool/bandit24/foo/payload.sh</code></pre>
+      <p>Expected output:</p>
+      <pre><code class="language-text">-rwxr-xr-x 1 bandit23 bandit23 ... payload.sh</code></pre>
+
+      <h1>Execution Wait Karna</h1>
+
+      <h2>Cron Timing</h2>
+      <p>Cron job har minute execute hoti hai. Script ko execute hone ke liye thoda wait karein (approximately 1 minute).</p>
+
+      <h2>Script Auto-Delete</h2>
+      <p>Important note: Cron job execute hone ke baad script ko delete kar degi. Isliye:</p>
+      <ul>
+        <li>Script ka backup apne paas rakhein.</li>
+        <li>Execute hone ke baad script <code>/var/spool/bandit24/foo/</code> mein nahi dikhegi.</li>
+      </ul>
+
+      <h1>Password Read Karna</h1>
+
+      <h2>Output File Check</h2>
+      <p>Cron execution ke baad <code>/tmp</code> directory mein output file check karein:</p>
+      <pre><code class="language-bash">cat /tmp/dollarboysushil</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">VAFGXJ1PBSsPSnvsjI8p759leLZ9GGar</code></pre>
+
+      <h2>Password Copy</h2>
+      <pre><code class="language-text">VAFGXJ1PBSsPSnvsjI8p759leLZ9GGar</code></pre>
+      <p>Password ke start ya end mein extra space copy na karein.</p>
+
+      <h1>Complete Walkthrough</h1>
+
+      <h2>Step 1: <code>bandit23</code> Par Login Karein</h2>
+      <pre><code class="language-bash">ssh bandit23@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h2>Step 2: Cron Directory Inspect Karein</h2>
+      <pre><code class="language-bash">cd /etc/cron.d
+cat cronjob_bandit24</code></pre>
+
+      <h2>Step 3: Script Understand Karein</h2>
+      <pre><code class="language-bash">cat /usr/bin/cronjob_bandit24.sh</code></pre>
+
+      <h2>Step 4: Payload Script Create Karein</h2>
+      <pre><code class="language-bash">vim /var/spool/bandit24/foo/payload.sh</code></pre>
+      <p>Content:</p>
+      <pre><code class="language-bash">#!/bin/bash
+cat /etc/bandit_pass/bandit24 > /tmp/dollarboysushil</code></pre>
+
+      <h2>Step 5: Executable Permissions Dein</h2>
+      <pre><code class="language-bash">chmod +x /var/spool/bandit24/foo/payload.sh</code></pre>
+
+      <h2>Step 6: Cron Execution Ka Wait Karein</h2>
+      <p>Approximately 1 minute wait karein.</p>
+
+      <h2>Step 7: Password File Read Karein</h2>
+      <pre><code class="language-bash">cat /tmp/dollarboysushil</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">VAFGXJ1PBSsPSnvsjI8p759leLZ9GGar</code></pre>
+
+      <h2>Step 8: <code>bandit24</code> Par Login Karein</h2>
+      <pre><code class="language-bash">ssh bandit24@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password:</p>
+      <pre><code class="language-text">VAFGXJ1PBSsPSnvsjI8p759leLZ9GGar</code></pre>
+
+      <h1>Actual Terminal Workflow</h1>
+      <pre><code class="language-text">bandit23@bandit:~$ cd /etc/cron.d
+bandit23@bandit:/etc/cron.d$ cat cronjob_bandit24
+@reboot bandit24 /usr/bin/cronjob_bandit24.sh &>/dev/null
+* * * * * bandit24 /usr/bin/cronjob_bandit24.sh &>/dev/null
+bandit23@bandit:/etc/cron.d$ cat /usr/bin/cronjob_bandit24.sh
+#!/bin/bash
+myname=$(whoami)
+cd /var/spool/$myname/foo
+echo "Executing and deleting all scripts in /var/spool/$myname/foo:"
+for i in * ; do
+if [ "$i" != "." -a "$i" != ".." ];
+then
+echo "Handling $i"
+owner="$(stat --format "%U" ./$i)"
+if [ "${owner}" = "bandit23" ]; then
+timeout -s 9 60 ./$i
+fi
+rm -f ./$i
+done
+fi
+bandit23@bandit:/etc/cron.d$ vim /var/spool/bandit24/foo/payload.sh
+bandit23@bandit:/etc/cron.d$ chmod +x /var/spool/bandit24/foo/payload.sh
+# Wait approximately 1 minute
+bandit23@bandit:/etc/cron.d$ cat /tmp/dollarboysushil
+VAFGXJ1PBSsPSnvsjI8p759leLZ9GGar</code></pre>
+
+      <h1>Common Errors</h1>
+
+      <h2>Wrong Directory</h2>
+      <p>Script ko <code>/var/spool/bandit24/foo/</code> mein hi create karna hai. Other directories mein script execute nahi hogi.</p>
+
+      <h2>Missing Executable Permission</h2>
+      <p>Agar <code>chmod +x</code> nahi kiya, to script execute nahi hogi.</p>
+      <pre><code class="language-bash">chmod +x /var/spool/bandit24/foo/payload.sh</code></pre>
+
+      <h2>Wrong Owner</h2>
+      <p>Script <code>bandit23</code> ke ownership mein honi chahiye. Agar aap <code>bandit23</code> user se login hain aur script create kar rahe hain, to automatically sahi owner set ho jayega.</p>
+
+      <h2>Script Jaldi Check Karna</h2>
+      <p>Cron ko execute hone mein thoda time lagta hai. Kam se kam 1 minute wait karein.</p>
+
+      <h2>Output File Empty Hai</h2>
+      <p>Agar <code>/tmp/dollarboysushil</code> empty hai, to:</p>
+      <ul>
+        <li>Script correctly create hui hai check karein.</li>
+        <li>Executable permissions verify karein.</li>
+        <li>Thoda aur wait karein.</li>
+        <li>Script dobara create karein.</li>
+      </ul>
+
+      <h2>Password Copy Error</h2>
+      <p>Password:</p>
+      <pre><code class="language-text">VAFGXJ1PBSsPSnvsjI8p759leLZ9GGar</code></pre>
+      <p>Check karein:</p>
+      <ul>
+        <li>Uppercase aur lowercase characters same hain.</li>
+        <li><code>0</code> aur <code>O</code> ko carefully distinguish karein.</li>
+        <li>Password ke start ya end mein extra space nahi hai.</li>
+      </ul>
+
+      <h2>SSH Permission Denied</h2>
+      <p>Next level par login karte waqt check karein:</p>
+      <ul>
+        <li>Username <code>bandit24</code> hai.</li>
+        <li>Port <code>2220</code> use ho raha hai.</li>
+        <li><code>/tmp/dollarboysushil</code> se exact password copy hua hai.</li>
+      </ul>
+      <pre><code class="language-bash">ssh bandit24@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Security Lessons</h1>
+      <p>Is level se humein ye important lessons milte hain:</p>
+      <ul>
+        <li>Cron jobs arbitrary scripts execute kar sakti hain.</li>
+        <li>World-writable directories mein malicious scripts place kiye ja sakte hain.</li>
+        <li>Script execution se pehle owner verification important hai.</li>
+        <li>Auto-delete mechanism forensic analysis ko difficult bana sakta hai.</li>
+        <li>Shell scripts create karna automation ka powerful tool hai.</li>
+        <li><code>/tmp</code> directory temporary data storage ke liye useful hai.</li>
+        <li>Executable permissions <code>chmod +x</code> se set hoti hain.</li>
+        <li>Cron misconfiguration privilege escalation enable kar sakta hai.</li>
+        <li>First shell script create karna beginner ke liye important milestone hai.</li>
+      </ul>
+
+      <h1>Commands Summary</h1>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>ssh user@host -p 2220</code></td>
+              <td>Remote server par SSH login karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cd /etc/cron.d</code></td>
+              <td>Cron configuration directory mein enter karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cat cronjob_bandit24</code></td>
+              <td>Cron job configuration read karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cat /usr/bin/cronjob_bandit24.sh</code></td>
+              <td>Cron script read karta hai</td>
+            </tr>
+            <tr>
+              <td><code>vim /var/spool/bandit24/foo/payload.sh</code></td>
+              <td>Payload script create/edit karta hai</td>
+            </tr>
+            <tr>
+              <td><code>chmod +x payload.sh</code></td>
+              <td>Script ko executable banata hai</td>
+            </tr>
+            <tr>
+              <td><code>cat /tmp/dollarboysushil</code></td>
+              <td>Password output file read karta hai</td>
+            </tr>
+            <tr>
+              <td><code>ls -l payload.sh</code></td>
+              <td>Script permissions verify karta hai</td>
+            </tr>
+            <tr>
+              <td><code>exit</code></td>
+              <td>SSH session close karta hai</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h1>Final Solution</h1>
+      <p><code>bandit23</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit23@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Cron directory inspect karein:</p>
+      <pre><code class="language-bash">cd /etc/cron.d
+cat cronjob_bandit24</code></pre>
+      <p>Script logic samjhein:</p>
+      <pre><code class="language-bash">cat /usr/bin/cronjob_bandit24.sh</code></pre>
+      <p>Payload script create karein:</p>
+      <pre><code class="language-bash">vim /var/spool/bandit24/foo/payload.sh</code></pre>
+      <p>Content:</p>
+      <pre><code class="language-bash">#!/bin/bash
+cat /etc/bandit_pass/bandit24 > /tmp/dollarboysushil</code></pre>
+      <p>Executable permissions dein:</p>
+      <pre><code class="language-bash">chmod +x /var/spool/bandit24/foo/payload.sh</code></pre>
+      <p>1 minute wait karein, phir password read karein:</p>
+      <pre><code class="language-bash">cat /tmp/dollarboysushil</code></pre>
+      <p>Password:</p>
+      <pre><code class="language-text">VAFGXJ1PBSsPSnvsjI8p759leLZ9GGar</code></pre>
+      <p>Ab <code>bandit24</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit24@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Conclusion</h1>
+      <p>Bandit Level 23 → Level 24 mein humne apna pehla shell script create kiya aur cron job ke through automatically execute karwaya.</p>
+      <p>Complete workflow:</p>
+      <pre><code class="language-text">SSH Login as bandit23
+        ↓
+/etc/cron.d Inspect
+        ↓
+cronjob_bandit24 Read
+        ↓
+Script Logic Understand
+        ↓
+Payload Script Create
+        ↓
+Executable Permissions Set
+        ↓
+/var/spool/bandit24/foo/ Mein Place
+        ↓
+Cron Execution Wait
+        ↓
+/tmp Se Password Read
+        ↓
+SSH Login as bandit24</code></pre>
+      <p>Is level ke most important commands hain:</p>
+      <pre><code class="language-bash">vim /var/spool/bandit24/foo/payload.sh</code></pre>
+      <pre><code class="language-bash">chmod +x /var/spool/bandit24/foo/payload.sh</code></pre>
+      <pre><code class="language-bash">cat /tmp/dollarboysushil</code></pre>
+      <blockquote>
+        <p><strong>Security Note:</strong> Shell scripts aur cron jobs ka use sirf authorized learning environments mein karein. OverTheWire Bandit ek authorized cybersecurity learning environment hai.</p>
+      </blockquote>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <span> © 2026 SSSWriteups </span>
+      
+    </div>
+  </footer>
+</body>
+</html>
