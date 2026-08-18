@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OverTheWire Bandit - Level 31 to Level 32 | SSSWriteups</title>
+  <link rel="stylesheet" href="../../../style.css">
+</head>
+<body>
+  <header class="hero page-header">
+    <nav class="nav container">
+      <a class="logo" href="../../../../index.html">
+        SSS<span>Writeups</span>
+      </a>
+      <div class="nav-links">
+    <a href="../../../index.html">Home</a>
+    <a href="../../../categories/overthewire.html">OverTheWire</a>
+</div>
+    </nav>
+  </header>
+
+  <main class="writeup-page section container">
+    <article class="writeup-content">
+      <h1>OverTheWire Bandit — Level 31 to Level 32</h1>
+
+      <h2>Introduction</h2>
+      <p>Is writeup ka heading <strong>Level 31 → Level 32</strong> hai.</p>
+      <p>Is level mein humein ek Git repository clone karni hai aur remote repository mein ek file push karni hai. Ye level Git ke push/pull workflow aur <code>.gitignore</code> file ke concept ko test karta hai.</p>
+      <p>Task hai:</p>
+      <ul>
+        <li>File name: <code>key.txt</code></li>
+        <li>Content: <code>May I come in?</code></li>
+        <li>Branch: <code>master</code></li>
+      </ul>
+      <p>Lekin ek problem hai: <code>.gitignore</code> file <code>*.txt</code> files ko ignore kar rahi hai. Humein pehle <code>.gitignore</code> remove karna hoga, phir file add, commit, aur push karna hoga.</p>
+
+      <h2>Objective</h2>
+      <p>Is level mein humein:</p>
+      <ul>
+        <li><code>bandit31</code> user se SSH login karna hai.</li>
+        <li>Git repository clone karni hai.</li>
+        <li><code>README.md</code> file read karni hai.</li>
+        <li><code>key.txt</code> file create karni hai.</li>
+        <li><code>.gitignore</code> file ko understand karna hai.</li>
+        <li><code>.gitignore</code> remove karna hai.</li>
+        <li>File ko <code>git add</code> karna hai.</li>
+        <li>Commit create karna hai.</li>
+        <li>Remote repository mein push karna hai.</li>
+        <li>Password receive karna hai.</li>
+        <li><code>bandit32</code> user se next SSH login karna hai.</li>
+      </ul>
+
+      <h2>Given Information</h2>
+      <p>Current level:</p>
+      <pre><code class="language-text">Username: bandit31
+Password: Previous level se mila password</code></pre>
+      <p>Git repository:</p>
+      <pre><code class="language-text">URL: ssh://bandit31-git@localhost/home/bandit31-git/repo
+Port: 2220</code></pre>
+      <p>Git user:</p>
+      <pre><code class="language-text">Username: bandit31-git
+Password: Same as bandit31</code></pre>
+      <p>Task details:</p>
+      <pre><code class="language-text">File name: key.txt
+Content: May I come in?
+Branch: master</code></pre>
+      <p>Next username:</p>
+      <pre><code class="language-text">bandit32</code></pre>
+      <p>Found password:</p>
+      <pre><code class="language-text">rmCBvG56y58BXzv98yZGd07ATVL5dW8y</code></pre>
+
+      <h1>Git Ignore Concept</h1>
+
+      <h2>.gitignore Kya Hota Hai?</h2>
+      <p><code>.gitignore</code> ek special file hai jo Git ko batati hai ki kaunse files aur directories ko track nahi karna hai.</p>
+      <p>Common patterns:</p>
+      <ul>
+        <li><code>*.txt</code> → Saare <code>.txt</code> files ignore honge</li>
+        <li><code>node_modules/</code> → <code>node_modules</code> directory ignore hogi</li>
+        <li><code>.log</code> → Saare <code>.log</code> files ignore honge</li>
+      </ul>
+
+      <h2>Is Level Mein Problem</h2>
+      <p><code>.gitignore</code> file mein hai:</p>
+      <pre><code class="language-text">*.txt</code></pre>
+      <p>Iska matlab saare <code>.txt</code> files (including <code>key.txt</code>) ignore ho jayenge aur Git unhe track nahi karega.</p>
+      <p>Solution: <code>.gitignore</code> file ko remove karna hai.</p>
+
+      <h1>Git Push Workflow</h1>
+
+      <h2>Basic Steps</h2>
+      <ol>
+        <li><strong>Create file:</strong> <code>key.txt</code> with content <code>May I come in?</code></li>
+        <li><strong>Remove .gitignore:</strong> <code>rm .gitignore</code></li>
+        <li><strong>Add file:</strong> <code>git add .</code></li>
+        <li><strong>Commit:</strong> <code>git commit -m "message"</code></li>
+        <li><strong>Push:</strong> <code>git push origin master</code></li>
+      </ol>
+
+      <h2>Push Success</h2>
+      <p>Jab aap successfully push karenge, to remote server validation karega aur password return karega.</p>
+
+      <h1>Complete Walkthrough</h1>
+
+      <h2>Step 1: <code>bandit31</code> Par Login Karein</h2>
+      <pre><code class="language-bash">ssh bandit31@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h2>Step 2: Temporary Directory Create Karein</h2>
+      <pre><code class="language-bash">mkdir /tmp/git31
+cd /tmp/git31</code></pre>
+
+      <h2>Step 3: Git Repository Clone Karein</h2>
+      <pre><code class="language-bash">git clone ssh://bandit31-git@localhost:2220/home/bandit31-git/repo</code></pre>
+      <p>Password prompt par <code>bandit31</code> ka password enter karein.</p>
+
+      <h2>Step 4: Repository Directory Mein Enter Karein</h2>
+      <pre><code class="language-bash">cd repo</code></pre>
+
+      <h2>Step 5: README.md File Read Karein</h2>
+      <pre><code class="language-bash">cat README.md</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">This time your task is to push a file to the remote repository.
+Details:
+File name: key.txt
+Content: 'May I come in?'
+Branch: master</code></pre>
+
+      <h2>Step 6: key.txt File Create Karein</h2>
+      <p>File create karein aur content add karein:</p>
+      <pre><code class="language-bash">echo "May I come in?" > key.txt</code></pre>
+      <p>Ya <code>nano</code>/<code>vim</code> use karein:</p>
+      <pre><code class="language-bash">nano key.txt</code></pre>
+      <p>Content:</p>
+      <pre><code class="language-text">May I come in?</code></pre>
+
+      <h2>Step 7: .gitignore File Check Karein</h2>
+      <pre><code class="language-bash">cat .gitignore</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">*.txt</code></pre>
+
+      <h2>Step 8: .gitignore Remove Karein</h2>
+      <pre><code class="language-bash">rm .gitignore</code></pre>
+
+      <h2>Step 9: Files Verify Karein</h2>
+      <pre><code class="language-bash">ls -la</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">.git/
+key.txt
+README.md</code></pre>
+
+      <h2>Step 10: Git Add</h2>
+      <pre><code class="language-bash">git add .</code></pre>
+
+      <h2>Step 11: Git Commit</h2>
+      <pre><code class="language-bash">git commit -m "key.txt added"</code></pre>
+      <p>Output:</p>
+      <pre><code class="language-text">[master 8ff7aal] key.txt added
+2 files changed, 1 insertion(+), 1 deletion(-)
+delete mode 100644 .gitignore
+create mode 100644 key.txt</code></pre>
+
+      <h2>Step 12: Git Push</h2>
+      <pre><code class="language-bash">git push origin master</code></pre>
+      <p>Password prompt par <code>bandit31</code> ka password enter karein.</p>
+      <p>Output:</p>
+      <pre><code class="language-text">Enumerating objects: 4, done.
+Counting objects: 100% (4/4), done.
+...
+remote: ### Attempting to validate files... ####
+remote:
+remote: Well done! Here is the password for the next level:
+remote: rmCBvG56y58BXzv98yZGd07ATVL5dW8y
+remote:</code></pre>
+
+      <h2>Step 13: Password Copy Karein</h2>
+      <pre><code class="language-text">rmCBvG56y58BXzv98yZGd07ATVL5dW8y</code></pre>
+
+      <h2>Step 14: <code>bandit32</code> Par Login Karein</h2>
+      <pre><code class="language-bash">ssh bandit32@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password:</p>
+      <pre><code class="language-text">rmCBvG56y58BXzv98yZGd07ATVL5dW8y</code></pre>
+
+      <h1>Actual Terminal Workflow</h1>
+      <pre><code class="language-text">bandit31@bandit:~$ mkdir /tmp/git31
+bandit31@bandit:~$ cd /tmp/git31
+bandit31@bandit:/tmp/git31$ git clone ssh://bandit31-git@localhost:2220/home/bandit31-git/repo
+Cloning into 'repo'...
+...
+bandit31-git@localhost's password:
+...
+bandit31@bandit:/tmp/git31$ cd repo
+bandit31@bandit:/tmp/git31/repo$ cat README.md
+This time your task is to push a file to the remote repository.
+Details:
+File name: key.txt
+Content: 'May I come in?'
+Branch: master
+
+bandit31@bandit:/tmp/git31/repo$ echo "May I come in?" > key.txt
+bandit31@bandit:/tmp/git31/repo$ cat .gitignore
+*.txt
+bandit31@bandit:/tmp/git31/repo$ rm .gitignore
+bandit31@bandit:/tmp/git31/repo$ git add .
+bandit31@bandit:/tmp/git31/repo$ git commit -m "key.txt added"
+[master 8ff7aal] key.txt added
+2 files changed, 1 insertion(+), 1 deletion(-)
+delete mode 100644 .gitignore
+create mode 100644 key.txt
+
+bandit31@bandit:/tmp/git31/repo$ git push origin master
+...
+bandit31-git@localhost's password:
+...
+remote: ### Attempting to validate files... ####
+remote:
+remote: Well done! Here is the password for the next level:
+remote: rmCBvG56y58BXzv98yZGd07ATVL5dW8y
+remote:</code></pre>
+
+      <h1>Common Errors</h1>
+
+      <h2>Wrong Port</h2>
+      <p>Port <code>2220</code> use karein, <code>22</code> nahi.</p>
+      <pre><code class="language-bash">git clone ssh://bandit31-git@localhost:2220/home/bandit31-git/repo</code></pre>
+
+      <h2>Wrong Username</h2>
+      <p>Git username <code>bandit31-git</code> hai, <code>bandit31</code> nahi.</p>
+
+      <h2>Wrong Password</h2>
+      <p>Git password <code>bandit31</code> ka password hai (same as current user).</p>
+
+      <h2>Wrong File Content</h2>
+      <p>File content exactly same hona chahiye:</p>
+      <pre><code class="language-bash">echo "May I come in?" > key.txt</code></pre>
+      <p>Incorrect:</p>
+      <pre><code class="language-bash">echo "May i come in?" > key.txt  # Lowercase 'i'
+echo "May I come in" > key.txt   # Missing '?'</code></pre>
+
+      <h2>.gitignore Not Removed</h2>
+      <p>Agar <code>.gitignore</code> remove nahi kiya, to <code>key.txt</code> track nahi hoga:</p>
+      <pre><code class="language-bash">git status</code></pre>
+      <p>Output will show <code>key.txt</code> as untracked.</p>
+
+      <h2>Wrong Branch</h2>
+      <p>Task specifies <code>master</code> branch. Default branch par hi push karein.</p>
+
+      <h2>Push Authentication Failed</h2>
+      <p>Push karte waqt <code>bandit31</code> ka password enter karein (same as current user).</p>
+
+      <h2>Password Copy Error</h2>
+      <p>Password:</p>
+      <pre><code class="language-text">rmCBvG56y58BXzv98yZGd07ATVL5dW8y</code></pre>
+      <p>Check karein:</p>
+      <ul>
+        <li>Uppercase aur lowercase characters same hain.</li>
+        <li><code>0</code> aur <code>O</code> ko carefully distinguish karein.</li>
+        <li>Password ke start ya end mein extra space nahi hai.</li>
+      </ul>
+
+      <h2>SSH Permission Denied</h2>
+      <p>Next level par login karte waqt check karein:</p>
+      <ul>
+        <li>Username <code>bandit32</code> hai.</li>
+        <li>Port <code>2220</code> use ho raha hai.</li>
+        <li>Remote server se mila exact password copy hua hai.</li>
+      </ul>
+      <pre><code class="language-bash">ssh bandit32@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Security Lessons</h1>
+      <p>Is level se humein ye important lessons milte hain:</p>
+      <ul>
+        <li><code>.gitignore</code> files sensitive data leaks prevent kar sakti hain.</li>
+        <li><code>.gitignore</code> bypass karke sensitive files accidentally commit ho sakti hain.</li>
+        <li>Remote repositories push hooks ke through validation kar sakti hain.</li>
+        <li>Git push workflows mein authentication important hai.</li>
+        <li>File content validation server-side bhi ho sakta hai.</li>
+        <li>Development workflows mein <code>.gitignore</code> carefully configure karna chahiye.</li>
+        <li>Git hooks automated checks aur validations ke liye use ho sakte hain.</li>
+      </ul>
+
+      <h1>Commands Summary</h1>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>ssh user@host -p 2220</code></td>
+              <td>Remote server par SSH login karta hai</td>
+            </tr>
+            <tr>
+              <td><code>mkdir /tmp/git31</code></td>
+              <td>Temporary directory create karta hai</td>
+            </tr>
+            <tr>
+              <td><code>git clone ssh://user@host:port/path</code></td>
+              <td>Git repository clone karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cd repo</code></td>
+              <td>Repository directory mein enter karta hai</td>
+            </tr>
+            <tr>
+              <td><code>cat README.md</code></td>
+              <td>Task instructions read karta hai</td>
+            </tr>
+            <tr>
+              <td><code>echo "content" > file.txt</code></td>
+              <td>File create karta hai with content</td>
+            </tr>
+            <tr>
+              <td><code>cat .gitignore</code></td>
+              <td>Ignore patterns check karta hai</td>
+            </tr>
+            <tr>
+              <td><code>rm .gitignore</code></td>
+              <td>Ignore file remove karta hai</td>
+            </tr>
+            <tr>
+              <td><code>git add .</code></td>
+              <td>Saare changes stage karta hai</td>
+            </tr>
+            <tr>
+              <td><code>git commit -m "message"</code></td>
+              <td>Commit create karta hai</td>
+            </tr>
+            <tr>
+              <td><code>git push origin master</code></td>
+              <td>Remote repository mein push karta hai</td>
+            </tr>
+            <tr>
+              <td><code>exit</code></td>
+              <td>SSH session close karta hai</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h1>Final Solution</h1>
+      <p><code>bandit31</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit31@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Temporary directory create karein:</p>
+      <pre><code class="language-bash">mkdir /tmp/git31
+cd /tmp/git31</code></pre>
+      <p>Git repository clone karein:</p>
+      <pre><code class="language-bash">git clone ssh://bandit31-git@localhost:2220/home/bandit31-git/repo</code></pre>
+      <p>Repository directory mein enter karein:</p>
+      <pre><code class="language-bash">cd repo</code></pre>
+      <p><code>README.md</code> file read karein:</p>
+      <pre><code class="language-bash">cat README.md</code></pre>
+      <p><code>key.txt</code> file create karein:</p>
+      <pre><code class="language-bash">echo "May I come in?" > key.txt</code></pre>
+      <p><code>.gitignore</code> check karein:</p>
+      <pre><code class="language-bash">cat .gitignore</code></pre>
+      <p><code>.gitignore</code> remove karein:</p>
+      <pre><code class="language-bash">rm .gitignore</code></pre>
+      <p>Changes stage karein:</p>
+      <pre><code class="language-bash">git add .</code></pre>
+      <p>Commit create karein:</p>
+      <pre><code class="language-bash">git commit -m "key.txt added"</code></pre>
+      <p>Remote repository mein push karein:</p>
+      <pre><code class="language-bash">git push origin master</code></pre>
+      <p>Password receive hoga:</p>
+      <pre><code class="language-text">rmCBvG56y58BXzv98yZGd07ATVL5dW8y</code></pre>
+      <p>Ab <code>bandit32</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit32@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Conclusion</h1>
+      <p>Bandit Level 31 → Level 32 mein humne Git push workflow complete kiya aur <code>.gitignore</code> bypass karke file successfully push ki.</p>
+      <p>Complete workflow:</p>
+      <pre><code class="language-text">SSH Login as bandit31
+        ↓
+mkdir /tmp/git31
+        ↓
+git clone (port 2220)
+        ↓
+cd repo
+        ↓
+cat README.md (task instructions)
+        ↓
+echo "May I come in?" > key.txt
+        ↓
+cat .gitignore (*.txt)
+        ↓
+rm .gitignore
+        ↓
+git add .
+        ↓
+git commit -m "key.txt added"
+        ↓
+git push origin master
+        ↓
+Password: rmCBvG56y58BXzv98yZGd07ATVL5dW8y
+        ↓
+SSH Login as bandit32</code></pre>
+      <p>Is level ke most important commands hain:</p>
+      <pre><code class="language-bash">rm .gitignore</code></pre>
+      <pre><code class="language-bash">git push origin master</code></pre>
+      <blockquote>
+        <p><strong>Security Note:</strong> <code>.gitignore</code> files sensitive data leaks prevent karne ke liye important hain. Production environments mein <code>.gitignore</code> ko carefully configure karein aur sensitive files (passwords, API keys, credentials) ko kabhi bhi commit na karein. Git hooks aur pre-commit checks use karke automated validation implement karein. OverTheWire Bandit ek authorized cybersecurity learning environment hai.</p>
+      </blockquote>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <span> © 2026 SSSWriteups </span>
+      
+    </div>
+  </footer>
+</body>
+</html>
+```
