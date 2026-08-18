@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OverTheWire Bandit - Level 32 to Level 33 | SSSWriteups</title>
+  <link rel="stylesheet" href="../../../style.css">
+</head>
+<body>
+  <header class="hero page-header">
+    <nav class="nav container">
+      <a class="logo" href="../../../../index.html">
+        SSS<span>Writeups</span>
+      </a>
+      <div class="nav-links">
+    <a href="../../../index.html">Home</a>
+    <a href="../../../categories/overthewire.html">OverTheWire</a>
+</div>
+    </nav>
+  </header>
+
+  <main class="writeup-page section container">
+    <article class="writeup-content">
+      <h1>OverTheWire Bandit — Level 32 to Level 33</h1>
+
+      <h2>Introduction</h2>
+      <p>Is writeup ka heading <strong>Level 32 → Level 33</strong> hai.</p>
+      <p>Is level mein humein ek "uppercase shell" se escape karna hai. Ye shell har input ko automatically uppercase mein convert kar deta hai, jisse normal commands (jaise <code>ls</code>, <code>cat</code>, <code>cd</code>) work nahi karti kyunki Linux commands case-sensitive hote hain.</p>
+      <p>Solution hai: Shell ke <strong>positional parameters</strong> ka use karna. Positional parameters (<code>$0</code>, <code>$1</code>, <code>$2</code>, etc.) shell variables hote hain jo arguments represent karte hain.</p>
+      <p>Humein:</p>
+      <ul>
+        <li>Shell environment ko understand karna hai.</li>
+        <li>Positional parameters ka concept samajhna hai.</li>
+        <li><code>$0</code> variable ka use karke shell escape karna hai.</li>
+        <li>Password file read karna hai.</li>
+      </ul>
+
+      <h2>Objective</h2>
+      <p>Is level mein humein:</p>
+      <ul>
+        <li><code>bandit32</code> user se SSH login karna hai.</li>
+        <li>Uppercase shell environment ko identify karna hai.</li>
+        <li>Normal commands ka failure observe karna hai.</li>
+        <li>Positional parameters ka concept apply karna hai.</li>
+        <li><code>$0</code> variable use karke shell access karna hai.</li>
+        <li>Password file read karna hai.</li>
+        <li><code>bandit33</code> user se next SSH login karna hai.</li>
+      </ul>
+
+      <h2>Given Information</h2>
+      <p>Current level:</p>
+      <pre><code class="language-text">Username: bandit32
+Password: Previous level se mila password</code></pre>
+      <p>Shell environment:</p>
+      <pre><code class="language-text">WELCOME TO THE UPPERCASE SHELL
+All input converted to UPPERCASE</code></pre>
+      <p>Next username:</p>
+      <pre><code class="language-text">bandit33</code></pre>
+      <p>Found password:</p>
+      <pre><code class="language-text">odHo63fHiFqcWWJG9rLiLDtPm45KzUKy</code></pre>
+
+      <h1>Positional Parameters</h1>
+
+      <h2>Positional Parameters Kya Hote Hain?</h2>
+      <p>Shell scripts aur command-line mein positional parameters arguments ko represent karte hain:</p>
+      <ul>
+        <li><code>$0</code> → Script/program ka naam</li>
+        <li><code>$1</code> → Pehla argument</li>
+        <li><code>$2</code> → Dusra argument</li>
+        <li><code>$3</code> → Teesra argument</li>
+        <li>... aur aise hi aage</li>
+      </ul>
+
+      <h2>Example</h2>
+      <p>Agar aap run karte hain:</p>
+      <pre><code class="language-bash">./myscript.sh arg1 arg2 arg3</code></pre>
+      <p>To:</p>
+      <ul>
+        <li><code>$0</code> = <code>./myscript.sh</code></li>
+        <li><code>$1</code> = <code>arg1</code></li>
+        <li><code>$2</code> = <code>arg2</code></li>
+        <li><code>$3</code> = <code>arg3</code></li>
+      </ul>
+
+      <h2>Is Level Mein</h2>
+      <p>Is uppercase shell mein:</p>
+      <ul>
+        <li><code>$0</code> = <code>sh</code> (shell program ka naam)</li>
+        <li>Aap <code>$0</code> type karenge, to uppercase ban jayega: <code>$0</code></li>
+        <li>Lekin <code>$</code> aur <code>0</code> special characters hain, to wo uppercase nahi honge!</li>
+      </ul>
+
+      <h1>Shell Escape Technique</h1>
+
+      <h2>Problem</h2>
+      <p>Normal commands uppercase ban jaate hain:</p>
+      <pre><code class="language-text">>> ls
+sh: 1: LS: Permission denied
+
+>> cat /etc/bandit_pass/bandit33
+sh: 1: CAT: Permission denied</code></pre>
+
+      <h2>Solution</h2>
+      <p><code>$0</code> variable use karein:</p>
+      <pre><code class="language-text">>> $0
+$</code></pre>
+      <p>Ye aapko ek normal shell prompt dega jahan aap regular commands chala sakte hain!</p>
+
+      <h2>Why It Works</h2>
+      <ul>
+        <li><code>$0</code> shell ka current program name hai (<code>sh</code>).</li>
+        <li>Jab aap <code>$0</code> execute karte hain, to wo ek naya shell start karta hai.</li>
+        <li>Naya shell uppercase conversion nahi karta.</li>
+        <li>Ab aap normal commands use kar sakte hain!</li>
+      </ul>
+
+      <h1>Complete Walkthrough</h1>
+
+      <h2>Step 1: <code>bandit32</code> Par Login Karein</h2>
+      <pre><code class="language-bash">ssh bandit32@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h2>Step 2: Uppercase Shell Prompt</h2>
+      <p>Login ke baad aapko ye prompt dikhega:</p>
+      <pre><code class="language-text">WELCOME TO THE UPPERCASE SHELL
+>></code></pre>
+
+      <h2>Step 3: Normal Commands Try Karein (Fail Honge)</h2>
+      <pre><code class="language-text">>> ls
+sh: 1: LS: Permission denied
+
+>> cat /etc/bandit_pass/bandit33
+sh: 1: CAT: Permission denied</code></pre>
+
+      <h2>Step 4: Positional Parameter Use Karein</h2>
+      <pre><code class="language-text">>> $0
+$</code></pre>
+
+      <h2>Step 5: Normal Shell Prompt</h2>
+      <p>Ab aapko normal shell prompt dikhega (<code>$</code>).</p>
+
+      <h2>Step 6: Password File Read Karein</h2>
+      <pre><code class="language-bash">$ cat /etc/bandit_pass/bandit33
+odHo63fHiFqcWWJG9rLiLDtPm45KzUKy</code></pre>
+
+      <h2>Step 7: Password Copy Karein</h2>
+      <pre><code class="language-text">odHo63fHiFqcWWJG9rLiLDtPm45KzUKy</code></pre>
+
+      <h2>Step 8: <code>bandit33</code> Par Login Karein</h2>
+      <pre><code class="language-bash">ssh bandit33@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Password:</p>
+      <pre><code class="language-text">odHo63fHiFqcWWJG9rLiLDtPm45KzUKy</code></pre>
+
+      <h1>Actual Terminal Workflow</h1>
+      <pre><code class="language-text">bandit32@bandit.labs.overthewire.org's password:
+...
+WELCOME TO THE UPPERCASE SHELL
+>> ls
+sh: 1: LS: Permission denied
+
+>> cat /etc/bandit_pass/bandit33
+sh: 1: CAT: Permission denied
+
+>> $0
+$ cat /etc/bandit_pass/bandit33
+odHo63fHiFqcWWJG9rLiLDtPm45KzUKy
+
+$ exit
+Connection to bandit.labs.overthewire.org closed.</code></pre>
+
+      <h1>Alternative Methods</h1>
+
+      <h2>Multiple <code>$0</code> Usage</h2>
+      <p>Agar pehla <code>$0</code> kaam na kare, to multiple times try karein:</p>
+      <pre><code class="language-text">>> $0
+$ $0
+$$</code></pre>
+
+      <h2>Other Positional Parameters</h2>
+      <p>Aap <code>$1</code>, <code>$2</code>, etc. bhi try kar sakte hain, lekin <code>$0</code> most reliable hai.</p>
+
+      <h1>Common Errors</h1>
+
+      <h2>Normal Commands Try Karna</h2>
+      <p>Uppercase shell mein normal commands work nahi karenge:</p>
+      <pre><code class="language-text">>> ls
+sh: 1: LS: Permission denied</code></pre>
+      <p>Solution: <code>$0</code> use karein.</p>
+
+      <h2>Wrong Variable</h2>
+      <p><code>$0</code> use karein, <code>$1</code> ya <code>$HOME</code> nahi.</p>
+      <pre><code class="language-text">>> $0  # Correct
+>> $1  # May not work
+>> $HOME  # Will be converted to uppercase</code></pre>
+
+      <h2>Case Sensitivity</h2>
+      <p>Linux commands case-sensitive hote hain:</p>
+      <ul>
+        <li><code>ls</code> ≠ <code>LS</code></li>
+        <li><code>cat</code> ≠ <code>CAT</code></li>
+        <li><code>Cd</code> ≠ <code>cd</code></li>
+      </ul>
+
+      <h2>Shell Exit</h2>
+      <p>Password copy karne ke baad shell se exit karein:</p>
+      <pre><code class="language-bash">$ exit</code></pre>
+
+      <h2>Password Copy Error</h2>
+      <p>Password:</p>
+      <pre><code class="language-text">odHo63fHiFqcWWJG9rLiLDtPm45KzUKy</code></pre>
+      <p>Check karein:</p>
+      <ul>
+        <li>Uppercase aur lowercase characters same hain.</li>
+        <li><code>0</code> aur <code>O</code> ko carefully distinguish karein.</li>
+        <li>Password ke start ya end mein extra space nahi hai.</li>
+      </ul>
+
+      <h2>SSH Permission Denied</h2>
+      <p>Next level par login karte waqt check karein:</p>
+      <ul>
+        <li>Username <code>bandit33</code> hai.</li>
+        <li>Port <code>2220</code> use ho raha hai.</li>
+        <li>Shell se mila exact password copy hua hai.</li>
+      </ul>
+      <pre><code class="language-bash">ssh bandit33@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Security Lessons</h1>
+      <p>Is level se humein ye important lessons milte hain:</p>
+      <ul>
+        <li>Restricted shells (jaise uppercase shell) bypass kiye ja sakte hain.</li>
+        <li>Shell variables aur positional parameters powerful escape vectors hain.</li>
+        <li>Input validation (jaise uppercase conversion) properly implement karna important hai.</li>
+        <li>Shell environments ko carefully configure karna chahiye.</li>
+        <li>Special characters (<code>$</code>, <code>0</code>) case conversion se bach sakte hain.</li>
+        <li>Defense-in-depth approach use karna chahiye (multiple layers of security).</li>
+        <li>Restricted shells ko test karna important hai before deployment.</li>
+      </ul>
+
+      <h1>Commands Summary</h1>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>ssh user@host -p 2220</code></td>
+              <td>Remote server par SSH login karta hai</td>
+            </tr>
+            <tr>
+              <td><code>$0</code></td>
+              <td>Positional parameter (shell program name)</td>
+            </tr>
+            <tr>
+              <td><code>cat /etc/bandit_pass/bandit33</code></td>
+              <td>Password file read karta hai</td>
+            </tr>
+            <tr>
+              <td><code>exit</code></td>
+              <td>Shell session close karta hai</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h1>Final Solution</h1>
+      <p><code>bandit32</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit32@bandit.labs.overthewire.org -p 2220</code></pre>
+      <p>Uppercase shell prompt par:</p>
+      <pre><code class="language-text">WELCOME TO THE UPPERCASE SHELL
+>></code></pre>
+      <p>Normal commands try karein (fail honge):</p>
+      <pre><code class="language-text">>> ls
+sh: 1: LS: Permission denied</code></pre>
+      <p>Positional parameter use karein:</p>
+      <pre><code class="language-text">>> $0
+$</code></pre>
+      <p>Normal shell prompt par password read karein:</p>
+      <pre><code class="language-bash">$ cat /etc/bandit_pass/bandit33
+odHo63fHiFqcWWJG9rLiLDtPm45KzUKy</code></pre>
+      <p>Password:</p>
+      <pre><code class="language-text">odHo63fHiFqcWWJG9rLiLDtPm45KzUKy</code></pre>
+      <p>Ab <code>bandit33</code> par login karein:</p>
+      <pre><code class="language-bash">ssh bandit33@bandit.labs.overthewire.org -p 2220</code></pre>
+
+      <h1>Conclusion</h1>
+      <p>Bandit Level 32 → Level 33 mein humne uppercase shell se escape karne ke liye positional parameters (<code>$0</code>) ka use kiya.</p>
+      <p>Complete workflow:</p>
+      <pre><code class="language-text">SSH Login as bandit32
+        ↓
+Uppercase Shell Prompt (>>)
+        ↓
+Normal Commands Fail (LS, CAT)
+        ↓
+$0 Execute
+        ↓
+Normal Shell Prompt ($)
+        ↓
+cat /etc/bandit_pass/bandit33
+        ↓
+Password: odHo63fHiFqcWWJG9rLiLDtPm45KzUKy
+        ↓
+SSH Login as bandit33</code></pre>
+      <p>Is level ke most important command hai:</p>
+      <pre><code class="language-text">>> $0</code></pre>
+      <blockquote>
+        <p><strong>Security Note:</strong> Restricted shells (jaise uppercase shell, rbash, rsh) ko carefully implement karna chahiye. Multiple layers of validation aur restrictions use karein. Shell variables, special characters, aur escape vectors ko properly handle karein. OverTheWire Bandit ek authorized cybersecurity learning environment hai.</p>
+      </blockquote>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <span> © 2026 SSSWriteups </span>
+      
+    </div>
+  </footer>
+</body>
+</html>
+```
